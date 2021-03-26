@@ -1,5 +1,7 @@
 package arsi.dev.kriptofoni.Fragments;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -30,6 +32,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import arsi.dev.kriptofoni.CurrencyChooseActivity;
 import arsi.dev.kriptofoni.Fragments.MainFragments.CoinsFragment;
 import arsi.dev.kriptofoni.Fragments.MainFragments.MostDecIn24Fragment;
 import arsi.dev.kriptofoni.Fragments.MainFragments.MostDecIn7Fragment;
@@ -56,6 +59,8 @@ public class MainFragment extends Fragment {
     private RelativeLayout header, searchTab;
     private EditText searchBar;
     private final int TOTAL_COIN_NUMBER = 6543, COIN_PER_GROUP = 250;
+    private String currencyText;
+    private SharedPreferences sharedPreferences;
 
     @Nullable
     @Override
@@ -75,6 +80,9 @@ public class MainFragment extends Fragment {
         searchTab = view.findViewById(R.id.main_seach_tab);
         back = view.findViewById(R.id.main_seach_back_button);
         searchBar = view.findViewById(R.id.main_search_bar);
+
+        sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
+        currencyText = sharedPreferences.getString("currency", "usd");
 
         coinModelsForSearch = new ArrayList<>();
         myApi = RetrofitClient.getInstance().getMyApi();
@@ -105,7 +113,8 @@ public class MainFragment extends Fragment {
         currency.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent intent = new Intent(getActivity(), CurrencyChooseActivity.class);
+                startActivityForResult(intent, 0);
             }
         });
 
@@ -129,6 +138,12 @@ public class MainFragment extends Fragment {
         getAllCoins();
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
     }
 
     private void filter(String text) {
@@ -235,7 +250,7 @@ public class MainFragment extends Fragment {
         protected List<CoinMarket> doInBackground(Integer... integers) {
             // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
             // We create a simple HTTP Request via Retrofit
-            Call<List<CoinMarket>> call = myApi.getCoinMarkets(Currency.USD, null, 250, integers[0], false, "24h,7d");
+            Call<List<CoinMarket>> call = myApi.getCoinMarkets(currencyText, null, 250, integers[0], false, "24h,7d");
             call.enqueue(new Callback<List<CoinMarket>>() {
                 @Override
                 public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
@@ -269,6 +284,16 @@ public class MainFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 0) {
+            currencyText = sharedPreferences.getString("currency", "usd");
+            totalMarketValue = 0;
+            getAllCoins();
+            coinsFragment.setCurrency(currencyText);
+        }
+    }
 }
 
 

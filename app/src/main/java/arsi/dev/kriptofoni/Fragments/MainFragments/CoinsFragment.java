@@ -1,5 +1,7 @@
 package arsi.dev.kriptofoni.Fragments.MainFragments;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,9 +20,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.litesoftwares.coingecko.CoinGeckoApiClient;
 import com.litesoftwares.coingecko.constant.Currency;
 import com.litesoftwares.coingecko.domain.Coins.CoinMarkets;
+import com.litesoftwares.coingecko.exception.CoinGeckoApiException;
 import com.litesoftwares.coingecko.impl.CoinGeckoApiClientImpl;
 
 import java.util.ArrayList;
@@ -46,6 +52,7 @@ public class CoinsFragment extends Fragment {
     private int currentPage = 1, max = 6543 / 100 + 1;
     private Api myApi;
     private CoinGeckoApiClient client;
+    private String currency;
 
     @Nullable
     @Override
@@ -58,43 +65,28 @@ public class CoinsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.main_coins_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        previous = view.findViewById(R.id.main_coins_previous_page);
-        next = view.findViewById(R.id.main_coins_next_page);
-        page = view.findViewById(R.id.main_coins_page);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("preferences", 0);
+        currency = sharedPreferences.getString("currency" ,"usd");
 
         myApi = RetrofitClient.getInstance().getMyApi();
 
         client = new CoinGeckoApiClientImpl();
 
-        previous.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (currentPage - 1 > 0) {
-                    currentPage--;
-                    getCoinsAsync();
-                    mainCoinsRecyclerAdapter.notifyDataSetChanged();
-                    String text = currentPage + " / " + max;
-                    page.setText(text);
-                }
-            }
-        });
-
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (currentPage + 1 < max) {
-                    currentPage++;
-                    getCoinsAsync();
-                    mainCoinsRecyclerAdapter.notifyDataSetChanged();
-                    String text = currentPage + " / " + max;
-                    page.setText(text);
-                }
-            }
-        });
-
         getCoinsAsync();
 
         return view;
+    }
+
+    public void nextPage() {
+        currentPage++;
+        getCoinsAsync();
+        mainCoinsRecyclerAdapter.notifyDataSetChanged();
+    }
+
+    public void previousPage() {
+        currentPage--;
+        getCoinsAsync();
+        mainCoinsRecyclerAdapter.notifyDataSetChanged();
     }
 
     public void setCoinsList(ArrayList<CoinModel> coins, boolean contains) {
@@ -122,7 +114,7 @@ public class CoinsFragment extends Fragment {
         getCoins.execute();
         try {
             if (getCoins.get()) {
-                mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels);
+                mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, this);
                 recyclerView.setAdapter(mainCoinsRecyclerAdapter);
             }
         } catch (Exception e) {
@@ -130,10 +122,23 @@ public class CoinsFragment extends Fragment {
         }
     }
 
+    public int getCurrentPage() {
+        return this.currentPage;
+    }
+
+    public int getMax() {
+        return this.max;
+    }
+    
+    public void setCurrency(String currency) {
+        this.currency = currency;
+        getCoinsAsync();
+    }
+
     private void getCoins() {
         // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
         // We create a simple HTTP Request via Retrofit
-        Call<List<CoinMarket>> call = myApi.getCoinMarkets(Currency.USD, null, 100, currentPage, false, "24h,7d");
+        Call<List<CoinMarket>> call = myApi.getCoinMarkets(currency, null, 100, currentPage, false, "24h,7d");
         call.enqueue(new Callback<List<CoinMarket>>() {
             @Override
             public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
@@ -164,25 +169,28 @@ public class CoinsFragment extends Fragment {
         });
     }
 
-    private class GetCoins extends AsyncTask<Void, Void, Boolean> {
+    private class GetCoins extends AsyncTask<Void, Void, Boolean>  {
 
         @Override
         protected Boolean doInBackground(Void... voids) {
             coinModels.clear();
-            List<CoinMarkets> coins = client.getCoinMarkets(Currency.USD, null, null, 100, currentPage, false, null);
-            for (int i = 0; i < coins.size(); i++) {
-                CoinMarkets coin = coins.get(i);
-                String imgUrl = coin.getImage();
-                String name = coin.getName();
-                String shortCut = coin.getSymbol();
-                double changeIn24Hours = coin.getPriceChangePercentage24h();
-                double priceChange = coin.getPriceChange24h();
-                double currentPrice = coin.getCurrentPrice();
-                CoinModel model = new CoinModel((currentPage - 1) * 100 + (i + 1), imgUrl, name, shortCut, changeIn24Hours, priceChange, currentPrice);
-                coinModels.add(model);
+            try {
+                List<CoinMarkets> coins = client.getCoinMarkets(currency, null, null, 100, currentPage, false, null);
+                for (int i = 0; i < coins.size(); i++) {
+                    CoinMarkets coin = coins.get(i);
+                    String imgUrl = coin.getImage();
+                    String name = coin.getName();
+                    String shortCut = coin.getSymbol();
+                    double changeIn24Hours = coin.getPriceChangePercentage24h();
+                    double priceChange = coin.getPriceChange24h();
+                    double currentPrice = coin.getCurrentPrice();
+                    CoinModel model = new CoinModel((currentPage - 1) * 100 + (i + 1), imgUrl, name, shortCut, changeIn24Hours, priceChange, currentPrice);
+                    coinModels.add(model);
+                }
+                return true;
+            } catch (CoinGeckoApiException ex) {
+                return false;
             }
-            return true;
         }
     }
-
 }
