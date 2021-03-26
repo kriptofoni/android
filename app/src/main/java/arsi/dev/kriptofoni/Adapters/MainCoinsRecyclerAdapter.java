@@ -11,11 +11,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.litesoftwares.coingecko.domain.Coins.CoinMarkets;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Random;
 
 import arsi.dev.kriptofoni.Models.CoinModel;
 import arsi.dev.kriptofoni.R;
@@ -43,13 +43,18 @@ public class MainCoinsRecyclerAdapter extends RecyclerView.Adapter<MainCoinsRecy
         CoinModel coin = coins.get(position);
         holder.number.setText(String.valueOf(coin.getNumber()));
         Picasso.get().load(coin.getImageUri()).into(holder.icon);
-        holder.name.setText(coin.getName());
-        holder.shortCut.setText(coin.getShortCut().toUpperCase(new Locale("en","US")));
-        holder.changeIn24Hours.setText(String.valueOf(coin.getChangeIn24Hours()));
+        String name = coin.getName() + " (" + coin.getShortCut().toUpperCase(Locale.ENGLISH) + ")";
+        holder.name.setText(name);
+        holder.changeIn24Hours.setText(String.format("%%%.2f", coin.getChangeIn24Hours()));
         holder.changeIn24Hours.setTextColor(coin.getChangeIn24Hours() > 0 ? Color.GREEN : Color.RED);
-        holder.changeIn7Days.setText(String.valueOf(coin.getChangeIn7Days()));
-        holder.changeIn24Hours.setTextColor(coin.getChangeIn7Days() > 0 ? Color.GREEN : Color.RED);
-        holder.currentPrice.setText(String.valueOf(coin.getCurrentPrice()));
+        holder.priceChangeIn24Hours.setText(String.format("%.2f", coin.getPriceChangeIn24Hours()));
+        holder.priceChangeIn24Hours.setTextColor(coin.getChangeIn24Hours() > 0 ? Color.GREEN : Color.RED);
+        holder.currentPrice.setText(String.format("$%.2f", coin.getCurrentPrice()));
+
+        // Testing buy button...
+        Random random = new Random();
+        if (random.nextBoolean()) holder.buy.setVisibility(View.VISIBLE);
+        else holder.buy.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -59,7 +64,7 @@ public class MainCoinsRecyclerAdapter extends RecyclerView.Adapter<MainCoinsRecy
 
     public class Holder extends RecyclerView.ViewHolder {
 
-        TextView number, name, shortCut, changeIn24Hours, changeIn7Days, currentPrice;
+        TextView number, name, changeIn24Hours, priceChangeIn24Hours, currentPrice;
         ImageView icon;
         Button buy;
 
@@ -67,12 +72,16 @@ public class MainCoinsRecyclerAdapter extends RecyclerView.Adapter<MainCoinsRecy
             super(itemView);
             number = itemView.findViewById(R.id.main_coins_number);
             name = itemView.findViewById(R.id.main_coins_coin_name);
-            shortCut = itemView.findViewById(R.id.main_coins_coin_shortcut);
-            changeIn24Hours = itemView.findViewById(R.id.main_coins_change_in_24_hours);
-            changeIn7Days = itemView.findViewById(R.id.main_coins_change_in_7_days);
+            changeIn24Hours = itemView.findViewById(R.id.main_coins_change_percent_in_24_hours);
+            priceChangeIn24Hours = itemView.findViewById(R.id.main_coins_change_in_24_hours);
             currentPrice = itemView.findViewById(R.id.main_coins_current_price);
             icon = itemView.findViewById(R.id.main_coins_icon);
             buy = itemView.findViewById(R.id.main_coins_buy);
         }
+    }
+
+    public void setCoins(ArrayList<CoinModel> coins) {
+        this.coins = coins;
+        notifyDataSetChanged();
     }
 }

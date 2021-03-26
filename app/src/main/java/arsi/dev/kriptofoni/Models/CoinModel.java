@@ -4,15 +4,26 @@ public class CoinModel {
 
     private String name, imageUri, shortCut;
     private int number;
-    private double changeIn24Hours, changeIn7Days, currentPrice;
+    private double changeIn24Hours, priceChangeIn24Hours, changeIn7Days, currentPrice, marketCap;
 
-    public CoinModel(int number, String imageUri, String name, String shortCut, double changeIn24Hours, double changeIn7Days, double currentPrice) {
+    public CoinModel(int number, String imageUri, String name, String shortCut, double changeIn24Hours, double priceChangeIn24Hours, double currentPrice, double marketCap) {
         this.number = number;
         this.imageUri = imageUri;
         this.name = name;
         this.shortCut = shortCut;
         this.changeIn24Hours = changeIn24Hours;
-        this.changeIn7Days = changeIn7Days;
+        this.priceChangeIn24Hours = priceChangeIn24Hours;
+        this.currentPrice = currentPrice;
+        this.marketCap = marketCap;
+    }
+
+    public CoinModel(int number, String imageUri, String name, String shortCut, double changeIn24Hours, double priceChangeIn24Hours, double currentPrice) {
+        this.name = name;
+        this.imageUri = imageUri;
+        this.shortCut = shortCut;
+        this.number = number;
+        this.changeIn24Hours = changeIn24Hours;
+        this.priceChangeIn24Hours = priceChangeIn24Hours;
         this.currentPrice = currentPrice;
     }
 
@@ -56,12 +67,12 @@ public class CoinModel {
         this.changeIn24Hours = changeIn24Hours;
     }
 
-    public double getChangeIn7Days() {
-        return changeIn7Days;
+    public double getPriceChangeIn24Hours() {
+        return priceChangeIn24Hours;
     }
 
-    public void setChangeIn7Days(double changeIn7Days) {
-        this.changeIn7Days = changeIn7Days;
+    public void setPriceChangeIn24Hours(double priceChangeIn24Hours) {
+        this.priceChangeIn24Hours = priceChangeIn24Hours;
     }
 
     public double getCurrentPrice() {
@@ -70,5 +81,21 @@ public class CoinModel {
 
     public void setCurrentPrice(double currentPrice) {
         this.currentPrice = currentPrice;
+    }
+
+    public double getMarketCap() {
+        return marketCap;
+    }
+
+    public void setMarketCap(double marketCap) {
+        this.marketCap = marketCap;
+    }
+
+    public double getChangeIn7Days() {
+        return changeIn7Days;
+    }
+
+    public void setChangeIn7Days(double changeIn7Days) {
+        this.changeIn7Days = changeIn7Days;
     }
 }

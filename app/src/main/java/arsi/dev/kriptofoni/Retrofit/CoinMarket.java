@@ -2,9 +2,7 @@ package arsi.dev.kriptofoni.Retrofit;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.Date;
-
-public class Results {
+public class CoinMarket {
     @SerializedName("id")
     private String id;
     @SerializedName("symbol")
