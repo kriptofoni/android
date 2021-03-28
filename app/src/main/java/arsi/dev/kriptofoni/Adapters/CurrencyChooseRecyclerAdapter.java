@@ -11,9 +11,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 import java.util.Locale;
 
+import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
 import arsi.dev.kriptofoni.R;
 
 public class CurrencyChooseRecyclerAdapter extends RecyclerView.Adapter<CurrencyChooseRecyclerAdapter.Holder> {
@@ -21,11 +24,13 @@ public class CurrencyChooseRecyclerAdapter extends RecyclerView.Adapter<Currency
     private ArrayList<String> currencies;
     private SharedPreferences sharedPreferences;
     private String currency;
+    private CountryCodePicker countryCodePicker;
 
     public CurrencyChooseRecyclerAdapter(ArrayList<String> currencies, SharedPreferences sharedPreferences) {
         this.currencies = currencies;
         this.sharedPreferences = sharedPreferences;
         this.currency = sharedPreferences.getString("currency", "usd");
+        countryCodePicker = new CountryCodePicker();
     }
 
     @NonNull
@@ -39,7 +44,21 @@ public class CurrencyChooseRecyclerAdapter extends RecyclerView.Adapter<Currency
     @Override
     public void onBindViewHolder(@NonNull Holder holder, int position) {
         String text = currencies.get(position);
-        holder.text.setText(text.toUpperCase(Locale.ENGLISH));
+        String[] arr = countryCodePicker.getCountryCode(text);
+        String countryCode = arr[0];
+        if (!arr[0].isEmpty()) {
+            Picasso.get().load(String.format("https://www.countryflags.io/%s/flat/64.png", countryCode)).into(holder.icon);
+        } else {
+            Picasso.get().load(String.format("https://cryptoicons.org/api/icon/%s/200", text)).into(holder.icon);
+        }
+        String s = "";
+        if (!arr[1].isEmpty()) {
+            s = text.toUpperCase(Locale.ENGLISH) + "/" + arr[1];
+        } else {
+            s = text.toUpperCase(Locale.ENGLISH);
+        }
+        holder.text.setText(s);
+
         if (text.equals(currency)) {
             holder.check.setVisibility(View.VISIBLE);
         } else {

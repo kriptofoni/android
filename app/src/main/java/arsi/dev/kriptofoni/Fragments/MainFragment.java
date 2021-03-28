@@ -1,5 +1,6 @@
 package arsi.dev.kriptofoni.Fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -11,6 +12,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -24,7 +26,8 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
-import com.litesoftwares.coingecko.constant.Currency;
+import com.litesoftwares.coingecko.CoinGeckoApiClient;
+import com.litesoftwares.coingecko.impl.CoinGeckoApiClientImpl;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -38,29 +41,41 @@ import arsi.dev.kriptofoni.Fragments.MainFragments.MostDecIn24Fragment;
 import arsi.dev.kriptofoni.Fragments.MainFragments.MostDecIn7Fragment;
 import arsi.dev.kriptofoni.Fragments.MainFragments.MostIncIn24Fragment;
 import arsi.dev.kriptofoni.Fragments.MainFragments.MostIncIn7Fragment;
-import arsi.dev.kriptofoni.Models.CoinModel;
+import arsi.dev.kriptofoni.HomeActivity;
+import arsi.dev.kriptofoni.Models.CoinSearchModel;
+import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
 import arsi.dev.kriptofoni.R;
-import arsi.dev.kriptofoni.Retrofit.Api;
+import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
+import arsi.dev.kriptofoni.Retrofit.Coin;
 import arsi.dev.kriptofoni.Retrofit.CoinMarket;
-import arsi.dev.kriptofoni.Retrofit.RetrofitClient;
+import arsi.dev.kriptofoni.Retrofit.CryptoIconsApi;
+import arsi.dev.kriptofoni.Retrofit.CryptoIconsRetrofitClient;
+import arsi.dev.kriptofoni.Retrofit.Global;
+import arsi.dev.kriptofoni.Retrofit.Icons;
+import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainFragment extends Fragment {
 
+    private final HomeActivity homeActivity;
     private TabLayout tabs;
     private ImageView search, back;
     private TextView totalMarketVal, currency;
-    private double totalMarketValue;
-    private ArrayList<CoinModel> coinModelsForSearch;
+    private ArrayList<CoinSearchModel> coinModelsForSearch;
     private CoinsFragment coinsFragment;
-    private Api myApi;
+    private CoinGeckoApi myCoinGeckoApi;
+    private CryptoIconsApi myCryptoIconsApi;
     private RelativeLayout header, searchTab;
     private EditText searchBar;
-    private final int TOTAL_COIN_NUMBER = 6543, COIN_PER_GROUP = 250;
     private String currencyText;
     private SharedPreferences sharedPreferences;
+    private CoinGeckoApiClient client;
+
+    public MainFragment(HomeActivity homeActivity) {
+        this.homeActivity = homeActivity;
+    }
 
     @Nullable
     @Override
@@ -84,8 +99,11 @@ public class MainFragment extends Fragment {
         sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
         currencyText = sharedPreferences.getString("currency", "usd");
 
+        client = new CoinGeckoApiClientImpl();
+
         coinModelsForSearch = new ArrayList<>();
-        myApi = RetrofitClient.getInstance().getMyApi();
+        myCoinGeckoApi = CoinGeckoRetrofitClient.getInstance().getMyCoinGeckoApi();
+        myCryptoIconsApi = CryptoIconsRetrofitClient.getInstance().getMyCryptoIconsApi();
 
         search.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,6 +120,13 @@ public class MainFragment extends Fragment {
             public void onClick(View view) {
                 // Making search tab invisible and
                 // making header which holds total market cap etc. visible
+                searchBar.setText("");
+                searchBar.clearFocus();
+                View focusView = getActivity().getCurrentFocus();
+                if (focusView != null) {
+                    InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
                 searchTab.setVisibility(View.INVISIBLE);
                 header.setVisibility(View.VISIBLE);
                 // When we close the search bar we need to reset our coinsFragment's
@@ -135,7 +160,7 @@ public class MainFragment extends Fragment {
             }
         });
 
-        getAllCoins();
+//        getTotalMarketCap();
 
         return view;
     }
@@ -148,22 +173,12 @@ public class MainFragment extends Fragment {
 
     private void filter(String text) {
         boolean contains = false;
-        ArrayList<CoinModel> filteredList = new ArrayList<>();
+        ArrayList<CoinSearchModel> filteredList = new ArrayList<>();
         if (!text.isEmpty()) {
-            for (CoinModel coin : coinModelsForSearch) {
+            for (CoinSearchModel coin : coinModelsForSearch) {
                 if (coin.getName().toLowerCase(Locale.ENGLISH).contains(text.toLowerCase(Locale.ENGLISH))) {
                     filteredList.add(coin);
                     contains = true;
-                    // When we filter coins their order breaks down somehow.
-                    // To avoid this issue we sort back coinModels by their market caps.
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        filteredList.sort(new Comparator<CoinModel>() {
-                            @Override
-                            public int compare(CoinModel lhs, CoinModel rhs) {
-                                return lhs.getMarketCap() > rhs.getMarketCap() ? -1 : lhs.getMarketCap() < rhs.getMarketCap() ? 1 : 0;
-                            }
-                        });
-                    }
                 }
             }
             // Passing coinsFragment filteredList to render searched items.
@@ -175,16 +190,8 @@ public class MainFragment extends Fragment {
         }
     }
 
-    private void getAllCoins() {
-        coinModelsForSearch.clear();
-        // We can't get all of the coins' market information at once. We have to do this
-        // process with seperated groups. First we calculate how many groups it will take
-        // to fetch all of the coins. Then we start a for loop to fetch all groups.
-        int max = TOTAL_COIN_NUMBER / COIN_PER_GROUP + 1;
-        for (int i = 1; i <= max; i++) {
-            // In order to make fetching process more optimized, we prefer to use AsyncTask.
-            new GetAllCoins().execute(i);
-        }
+    private void getTotalMarketCap() {
+//        new GetTotalMarketCap().execute();
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -232,55 +239,29 @@ public class MainFragment extends Fragment {
     }
 
     public void setTotalMarketValue(double totalMarketValue) {
-        this.totalMarketValue = totalMarketValue;
         try {
+            CountryCodePicker countryCodePicker = new CountryCodePicker();
+            String[] arr = countryCodePicker.getCountryCode(currencyText);
+            coinsFragment.setCurrencySymbol(arr[1]);
             // Formatting number with decimal points
             // Ex. 123456 -> 123.456
             NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
-            String text = "$ " + nf.format(totalMarketValue);
+            String text = !arr[1].isEmpty() ? arr[1] + " " + nf.format(totalMarketValue) : nf.format(totalMarketValue);
             totalMarketVal.setText(text);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private class GetAllCoins extends AsyncTask<Integer, Void, List<CoinMarket>> {
-
-        @Override
-        protected List<CoinMarket> doInBackground(Integer... integers) {
-            // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
-            // We create a simple HTTP Request via Retrofit
-            Call<List<CoinMarket>> call = myApi.getCoinMarkets(currencyText, null, 250, integers[0], false, "24h,7d");
-            call.enqueue(new Callback<List<CoinMarket>>() {
+    public void setCoinModelsForSearch(ArrayList<CoinSearchModel> coinModelsForSearch) {
+        this.coinModelsForSearch = coinModelsForSearch;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            this.coinModelsForSearch.sort(new Comparator<CoinSearchModel>() {
                 @Override
-                public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
-                    // Creating a list of Result objects using our response data.
-                    List<CoinMarket> coins = response.body();
-                    if (coins != null) {
-                        for (int j = 0; j < coins.size(); j++) {
-                            // Creating a coin model for each coin in our response data.
-                            CoinMarket result = coins.get(j);
-                            String imageUrl = result.getImage();
-                            String name = result.getName();
-                            String shortCut = result.getSymbol();
-                            double changeIn24Hours = result.getPrice_change_percentage_24h_in_currency();
-                            double priceChangeIn24Hours = result.getPrice_change_24h();
-                            double currentPrice = result.getCurrent_price();
-                            double marketCap = result.getMarket_cap();
-                            totalMarketValue += marketCap;
-                            CoinModel model = new CoinModel((integers[0] - 1) * 250 + (j + 1), imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap);
-                            coinModelsForSearch.add(model);
-                        }
-                        setTotalMarketValue(totalMarketValue);
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
-                    System.out.println(t.getMessage());
+                public int compare(CoinSearchModel lhs, CoinSearchModel rhs) {
+                    return lhs.getNumber() > rhs.getNumber() ? 1 : lhs.getNumber() < rhs.getNumber() ? -1 : 0;
                 }
             });
-            return null;
         }
     }
 
@@ -289,9 +270,10 @@ public class MainFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 0) {
             currencyText = sharedPreferences.getString("currency", "usd");
-            totalMarketValue = 0;
-            getAllCoins();
+            homeActivity.getTotalMarketCap();
             coinsFragment.setCurrency(currencyText);
+            coinsFragment.setCurrentPage(1);
+            coinsFragment.emptyAllCoinModels();
         }
     }
 }
