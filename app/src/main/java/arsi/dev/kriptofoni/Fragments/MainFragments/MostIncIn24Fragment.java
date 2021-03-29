@@ -57,7 +57,7 @@ public class MostIncIn24Fragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.main_most_inc_24_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels);
+        mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, "24");
         recyclerView.setAdapter(mainCoinsRecyclerAdapter);
 
         return view;
@@ -73,7 +73,6 @@ public class MostIncIn24Fragment extends Fragment {
     private void getCoins(String ids) {
         coinModels.clear();
         coinModels.addAll(allCoins);
-        System.out.println(ids);
         // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
         // We create a simple HTTP Request via Retrofit
         Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, ids, null, 100, 1, false, "24h,7d");
@@ -94,7 +93,8 @@ public class MostIncIn24Fragment extends Fragment {
                         double priceChangeIn24Hours = result.getPrice_change_24h();
                         double currentPrice = result.getCurrent_price();
                         double marketCap = result.getMarket_cap();
-                        CoinModel model = new CoinModel(coinNumbers.get(id), imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap);
+                        double changeIn7Days = result.getPrice_change_percentage_7d_in_currency();
+                        CoinModel model = new CoinModel(coinNumbers.get(id), imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days);
                         coinModels.add(model);
                         allCoins.add(model);
                     }

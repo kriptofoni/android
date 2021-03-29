@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -25,22 +24,14 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.fasterxml.jackson.databind.ser.std.ObjectArraySerializer;
 import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
 import com.litesoftwares.coingecko.CoinGeckoApiClient;
 import com.litesoftwares.coingecko.impl.CoinGeckoApiClientImpl;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Locale;
 
 import arsi.dev.kriptofoni.CurrencyChooseActivity;
@@ -51,20 +42,10 @@ import arsi.dev.kriptofoni.Fragments.MainFragments.MostIncIn24Fragment;
 import arsi.dev.kriptofoni.Fragments.MainFragments.MostIncIn7Fragment;
 import arsi.dev.kriptofoni.HomeActivity;
 import arsi.dev.kriptofoni.Models.CoinSearchModel;
-import arsi.dev.kriptofoni.ObjectSerializer;
 import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
 import arsi.dev.kriptofoni.R;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
-import arsi.dev.kriptofoni.Retrofit.Coin;
-import arsi.dev.kriptofoni.Retrofit.CoinMarket;
-import arsi.dev.kriptofoni.Retrofit.CryptoIconsApi;
-import arsi.dev.kriptofoni.Retrofit.CryptoIconsRetrofitClient;
-import arsi.dev.kriptofoni.Retrofit.Global;
-import arsi.dev.kriptofoni.Retrofit.Icons;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MainFragment extends Fragment {
 
@@ -73,16 +54,16 @@ public class MainFragment extends Fragment {
     private ImageView search, back;
     private TextView totalMarketVal, currency;
     private ArrayList<CoinSearchModel> coinModelsForSearch;
-    private CoinGeckoApi myCoinGeckoApi;
-    private CryptoIconsApi myCryptoIconsApi;
     private RelativeLayout header, searchTab;
     private EditText searchBar;
     private String currencyText;
     private SharedPreferences sharedPreferences;
-    private CoinGeckoApiClient client;
 
     private CoinsFragment coinsFragment;
     private MostIncIn24Fragment mostIncIn24Fragment;
+    private MostDecIn24Fragment mostDecIn24Fragment;
+    private MostIncIn7Fragment mostIncIn7Fragment;
+    private MostDecIn7Fragment mostDecIn7Fragment;
 
     public MainFragment(HomeActivity homeActivity) {
         this.homeActivity = homeActivity;
@@ -110,11 +91,7 @@ public class MainFragment extends Fragment {
         sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
         currencyText = sharedPreferences.getString("currency", "usd");
 
-        client = new CoinGeckoApiClientImpl();
-
         coinModelsForSearch = new ArrayList<>();
-        myCoinGeckoApi = CoinGeckoRetrofitClient.getInstance().getMyCoinGeckoApi();
-        myCryptoIconsApi = CryptoIconsRetrofitClient.getInstance().getMyCryptoIconsApi();
 
         search.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -203,11 +180,15 @@ public class MainFragment extends Fragment {
         Adapter adapter = new Adapter(getChildFragmentManager());
         coinsFragment = new CoinsFragment();
         mostIncIn24Fragment = new MostIncIn24Fragment();
+        mostDecIn24Fragment = new MostDecIn24Fragment();
+        mostIncIn7Fragment = new MostIncIn7Fragment();
+        mostDecIn7Fragment = new MostDecIn7Fragment();
         adapter.addFragment(coinsFragment, "Coins");
         adapter.addFragment(mostIncIn24Fragment, "Most Inc In 24 Hours");
-        adapter.addFragment(new MostDecIn24Fragment(), "Most Dec In 24 Hours");
-        adapter.addFragment(new MostIncIn7Fragment(), "Most Inc In 7 Days");
-        adapter.addFragment(new MostDecIn7Fragment(), "Most Dec In 7 Days");
+        adapter.addFragment(mostDecIn24Fragment, "Most Dec In 24 Hours");
+        adapter.addFragment(mostIncIn7Fragment, "Most Inc In 7 Days");
+        adapter.addFragment(mostDecIn7Fragment, "Most Dec In 7 Days");
+        viewPager.setOffscreenPageLimit(5);
         viewPager.setAdapter(adapter);
     }
 
@@ -281,6 +262,42 @@ public class MainFragment extends Fragment {
             });
         }
         mostIncIn24Fragment.setCoins(mostIncIn24List);
+    }
+
+    public void setMostDecIn24List(ArrayList<CoinSearchModel> mostDecIn24List) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            mostDecIn24List.sort(new Comparator<CoinSearchModel>() {
+                @Override
+                public int compare(CoinSearchModel lhs, CoinSearchModel rhs) {
+                    return Double.compare(lhs.getPriceChangeIn24(), rhs.getPriceChangeIn24());
+                }
+            });
+        }
+        mostDecIn24Fragment.setCoins(mostDecIn24List);
+    }
+
+    public void setMostIncIn7List(ArrayList<CoinSearchModel> mostIncIn7List) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            mostIncIn7List.sort(new Comparator<CoinSearchModel>() {
+                @Override
+                public int compare(CoinSearchModel lhs, CoinSearchModel rhs) {
+                    return Double.compare(rhs.getPriceChangeIn7(), lhs.getPriceChangeIn7());
+                }
+            });
+        }
+        mostIncIn7Fragment.setCoins(mostIncIn7List);
+    }
+
+    public void setMostDecIn7List(ArrayList<CoinSearchModel> mostDecIn7List) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            mostDecIn7List.sort(new Comparator<CoinSearchModel>() {
+                @Override
+                public int compare(CoinSearchModel lhs, CoinSearchModel rhs) {
+                    return Double.compare(lhs.getPriceChangeIn7(), rhs.getPriceChangeIn7());
+                }
+            });
+        }
+        mostDecIn7Fragment.setCoins(mostDecIn7List);
     }
 
     public void writeToMem(String id, ArrayList<CoinSearchModel> list) {

@@ -27,14 +27,17 @@ public class MainCoinsRecyclerAdapter extends RecyclerView.Adapter<MainCoinsRecy
     private ViewGroup parent;
     private CoinsFragment coinsFragment;
     private String currencySymbol = "";
+    private String type;
 
-    public MainCoinsRecyclerAdapter(ArrayList<CoinModel> coins, CoinsFragment coinsFragment) {
+    public MainCoinsRecyclerAdapter(ArrayList<CoinModel> coins, CoinsFragment coinsFragment, String type) {
         this.coins = coins;
         this.coinsFragment = coinsFragment;
+        this.type = type;
     }
 
-    public MainCoinsRecyclerAdapter(ArrayList<CoinModel> coins) {
+    public MainCoinsRecyclerAdapter(ArrayList<CoinModel> coins, String type) {
         this.coins = coins;
+        this.type = type;
     }
 
     @NonNull
@@ -53,11 +56,19 @@ public class MainCoinsRecyclerAdapter extends RecyclerView.Adapter<MainCoinsRecy
         Picasso.get().load(coin.getImageUri()).into(holder.icon);
         String name = coin.getName() + " (" + coin.getShortCut().toUpperCase(Locale.ENGLISH) + ")";
         holder.name.setText(name);
-        holder.changeIn24Hours.setText(String.format("%%%.2f", coin.getChangeIn24Hours()));
-        holder.changeIn24Hours.setTextColor(coin.getChangeIn24Hours() > 0 ? Color.GREEN : Color.RED);
-        holder.priceChangeIn24Hours.setText(String.format("%.2f", coin.getPriceChangeIn24Hours()));
-        holder.priceChangeIn24Hours.setTextColor(coin.getChangeIn24Hours() > 0 ? Color.GREEN : Color.RED);
+        if (type.equals("24")) {
+            holder.changeIn24Hours.setText(String.format("%%%.2f", coin.getChangeIn24Hours()));
+            holder.changeIn24Hours.setTextColor(coin.getChangeIn24Hours() > 0 ? Color.GREEN : Color.RED);
+            holder.priceChangeIn24Hours.setText(String.format("%s%.2f", currencySymbol, coin.getPriceChangeIn24Hours()));
+            holder.priceChangeIn24Hours.setTextColor(coin.getChangeIn24Hours() > 0 ? Color.GREEN : Color.RED);
+        } else {
+            holder.changeIn24Hours.setText(String.format("%%%.2f", coin.getChangeIn7Days()));
+            holder.changeIn24Hours.setTextColor(coin.getChangeIn7Days() > 0 ? Color.GREEN : Color.RED);
+            holder.priceChangeIn24Hours.setText(String.format("%s%.2f", currencySymbol, coin.getChangeIn7Days()));
+            holder.priceChangeIn24Hours.setTextColor(coin.getChangeIn7Days() > 0 ? Color.GREEN : Color.RED);
+        }
         holder.currentPrice.setText(String.format("%s%.2f", currencySymbol, coin.getCurrentPrice()));
+
 
         // Testing buy button...
         Random random = new Random();

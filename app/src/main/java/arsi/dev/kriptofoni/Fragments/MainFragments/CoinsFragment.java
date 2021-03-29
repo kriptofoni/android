@@ -42,7 +42,6 @@ public class CoinsFragment extends Fragment {
     private MainCoinsSearchRecyclerAdapter mainCoinsSearchRecyclerAdapter;
     private CoinGeckoApi myCoinGeckoApi;
     private int currentPage = 1;
-    private CoinGeckoApiClient client;
     private String currency;
     private boolean reached = false;
 
@@ -57,7 +56,7 @@ public class CoinsFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.main_coins_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, this);
+        mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, this, "24");
         recyclerView.setAdapter(mainCoinsRecyclerAdapter);
         mainCoinsSearchRecyclerAdapter = new MainCoinsSearchRecyclerAdapter(coinModelsForSearch);
 
@@ -65,8 +64,6 @@ public class CoinsFragment extends Fragment {
         currency = sharedPreferences.getString("currency" ,"usd");
 
         myCoinGeckoApi = CoinGeckoRetrofitClient.getInstance().getMyCoinGeckoApi();
-
-        client = new CoinGeckoApiClientImpl();
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -76,14 +73,14 @@ public class CoinsFragment extends Fragment {
                     if (!recyclerView.canScrollVertically(1) && recyclerView.getAdapter() instanceof MainCoinsRecyclerAdapter) {
                         reached = true;
                         currentPage++;
-                        getCoinsAsync();
+                        getCoins();
                         recyclerView.scrollToPosition((currentPage - 1) * 100 - 4);
                     }
                 }
             }
         });
 
-        getCoinsAsync();
+        getCoins();
 
         return view;
     }
@@ -112,21 +109,6 @@ public class CoinsFragment extends Fragment {
                 recyclerView.setAdapter(mainCoinsRecyclerAdapter);
             }
         }
-    }
-
-    public void getCoinsAsync() {
-        // CoinGeckoApiClient requests can't be made in main thread.
-        // In order to make api request, we create an AsyncTask.
-//        final GetCoins getCoins = new GetCoins();
-//        getCoins.execute();
-//        try {
-//            if (getCoins.get()) {
-//                mainCoinsRecyclerAdapter.setCoins(coinModels);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-        getCoins();
     }
     
     public void setCurrency(String currency) {
@@ -171,7 +153,8 @@ public class CoinsFragment extends Fragment {
                         double priceChangeIn24Hours = result.getPrice_change_24h();
                         double currentPrice = result.getCurrent_price();
                         double marketCap = result.getMarket_cap();
-                        CoinModel model = new CoinModel((currentPage - 1) * 100 + (i + 1), imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap);
+                        double changeIn7Days = result.getPrice_change_percentage_7d_in_currency();
+                        CoinModel model = new CoinModel((currentPage - 1) * 100 + (i + 1), imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days);
                         coinModels.add(model);
                         allCoinModels.add(model);
                     }
@@ -187,34 +170,4 @@ public class CoinsFragment extends Fragment {
         });
     }
 
-    private class GetCoins extends AsyncTask<Void, Void, Boolean>  {
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            try {
-                List<CoinMarkets> coins = client.getCoinMarkets(currency, null, null, 100, currentPage, false, null);
-                for (int i = 0; i < coins.size(); i++) {
-                    CoinMarkets coin = coins.get(i);
-                    String imgUrl = coin.getImage();
-                    String name = coin.getName();
-                    String shortCut = coin.getSymbol();
-                    double changeIn24Hours = coin.getPriceChangePercentage24h();
-                    double priceChange = coin.getPriceChange24h();
-                    double currentPrice = coin.getCurrentPrice();
-                    CoinModel model = new CoinModel((currentPage - 1) * 100 + (i + 1), imgUrl, name, shortCut, changeIn24Hours, priceChange, currentPrice);
-                    coinModels.add(model);
-                    allCoinModels.add(model);
-                }
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mainCoinsRecyclerAdapter.notifyDataSetChanged();
-                    }
-                });
-                return true;
-            } catch (CoinGeckoApiException ex) {
-                return false;
-            }
-        }
-    }
 }

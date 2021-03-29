@@ -59,7 +59,8 @@ public class HomeActivity extends AppCompatActivity {
     private CoinGeckoApi myCoinGeckoApi;
     private CoinGeckoApiClient client;
 
-    private ArrayList<CoinSearchModel> coinSearchModels, mostInc24Hours, coinSearchModelsFromMem, mostInc24HoursFromMem;
+    private ArrayList<CoinSearchModel> coinSearchModels, mostInc24Hours, mostInc7Days,
+            coinSearchModelsFromMem, mostInc24HoursFromMem, mostInc7DaysFromMem;
     private ArrayList<String> names;
 
     private String currency;
@@ -76,6 +77,8 @@ public class HomeActivity extends AppCompatActivity {
         mostInc24Hours = new ArrayList<>();
         coinSearchModelsFromMem = new ArrayList<>();
         mostInc24HoursFromMem = new ArrayList<>();
+        mostInc7Days = new ArrayList<>();
+        mostInc7DaysFromMem = new ArrayList<>();
         names = new ArrayList<>();
 
         myCoinGeckoApi = CoinGeckoRetrofitClient.getInstance().getMyCoinGeckoApi();
@@ -84,9 +87,11 @@ public class HomeActivity extends AppCompatActivity {
 
         String coinSearchModelsJson = sharedPreferences.getString("coinModelsForSearch", "");
         String mostInc24HoursJson = sharedPreferences.getString("mostIncIn24List", "");
+        String mostInc7DaysJson = sharedPreferences.getString("mostIncIn7List", "");
         Type type = new TypeToken<List<CoinSearchModel>>() {}.getType();
         if (!coinSearchModelsJson.isEmpty()) coinSearchModelsFromMem = gson.fromJson(coinSearchModelsJson, type);
         if (!mostInc24HoursJson.isEmpty()) mostInc24HoursFromMem = gson.fromJson(mostInc24HoursJson, type);
+        if (!mostInc7DaysJson.isEmpty()) mostInc7DaysFromMem = gson.fromJson(mostInc7DaysJson, type);
 
         client = new CoinGeckoApiClientImpl();
 
@@ -165,8 +170,13 @@ public class HomeActivity extends AppCompatActivity {
                 if (coinSearchModels.size() == max) {
                     mainFragment.setCoinModelsForSearch(coinSearchModels);
                     mainFragment.setMostIncIn24List(mostInc24Hours);
+                    mainFragment.setMostDecIn24List(mostInc24Hours);
+                    mainFragment.setMostIncIn7List(mostInc7Days);
+                    mainFragment.setMostDecIn7List(mostInc7Days);
+
                     mainFragment.writeToMem("coinModelsForSearch", coinSearchModels);
                     mainFragment.writeToMem("mostIncIn24List", mostInc24Hours);
+                    mainFragment.writeToMem("mostIncIn7List", mostInc7Days);
                     return;
                 }
                 handler.postDelayed(this, 250);
@@ -201,8 +211,10 @@ public class HomeActivity extends AppCompatActivity {
                             double marketCap = coin.getMarket_cap();
                             CoinSearchModel model = new CoinSearchModel(marketCapRank, id, name, symbol, marketCap, image);
                             CoinSearchModel model24H = new CoinSearchModel((integers[0] - 1) * 100 + i + 1, id, name, symbol, image, priceChangeIn24h);
+                            CoinSearchModel model7D = new CoinSearchModel(id, name, symbol, image, priceChangeIn7d, (integers[0] - 1) * 100 + i + 1);
                             coinSearchModels.add(model);
                             mostInc24Hours.add(model24H);
+                            mostInc7Days.add(model7D);
                         }
                     }
                 }
@@ -222,11 +234,15 @@ public class HomeActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             if (!coinSearchModelsFromMem.isEmpty())
-                System.out.println(coinSearchModelsFromMem.size());
                 mainFragment.setCoinModelsForSearch(coinSearchModelsFromMem);
-            if (!mostInc24HoursFromMem.isEmpty())
-                System.out.println(mostInc24HoursFromMem.size());
+            if (!mostInc24HoursFromMem.isEmpty()) {
                 mainFragment.setMostIncIn24List(mostInc24HoursFromMem);
+                mainFragment.setMostDecIn24List(mostInc24HoursFromMem);
+            }
+            if (!mostInc7DaysFromMem.isEmpty()) {
+                mainFragment.setMostIncIn7List(mostInc7DaysFromMem);
+                mainFragment.setMostDecIn7List(mostInc7DaysFromMem);
+            }
             getAllCoins();
         }
 

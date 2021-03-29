@@ -6,7 +6,7 @@ public class CoinModel {
     private int number;
     private double changeIn24Hours, priceChangeIn24Hours, changeIn7Days, currentPrice, marketCap;
 
-    public CoinModel(int number, String imageUri, String name, String shortCut, double changeIn24Hours, double priceChangeIn24Hours, double currentPrice, double marketCap) {
+    public CoinModel(int number, String imageUri, String name, String shortCut, double changeIn24Hours, double priceChangeIn24Hours, double currentPrice, double marketCap, double changeIn7Days) {
         this.number = number;
         this.imageUri = imageUri;
         this.name = name;
@@ -15,6 +15,7 @@ public class CoinModel {
         this.priceChangeIn24Hours = priceChangeIn24Hours;
         this.currentPrice = currentPrice;
         this.marketCap = marketCap;
+        this.changeIn7Days = changeIn7Days;
     }
 
     public CoinModel(int number, String imageUri, String name, String shortCut, double changeIn24Hours, double priceChangeIn24Hours, double currentPrice) {

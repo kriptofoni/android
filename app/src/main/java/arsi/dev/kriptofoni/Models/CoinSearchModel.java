@@ -4,7 +4,7 @@ public class CoinSearchModel {
 
     private String id, name, symbol, image;
     private int number;
-    private double priceChangeIn24, getPriceChangeIn7, marketCap, marketCapRank;
+    private double priceChangeIn24, priceChangeIn7, marketCap, marketCapRank;
 
     public CoinSearchModel(double marketCapRank, String id, String name, String symbol, double marketCap, String image) {
         this.marketCapRank = marketCapRank == 0 ? 10000 : marketCapRank;
@@ -24,13 +24,13 @@ public class CoinSearchModel {
         this.priceChangeIn24 = priceChangeIn24;
     }
 
-    public CoinSearchModel(String id, String name, String symbol, String image, double priceChangeIn24, int number) {
+    public CoinSearchModel(String id, String name, String symbol, String image, double priceChangeIn7, int number) {
         this.id = id;
         this.name = name;
         this.symbol = symbol;
         this.image = image;
         this.number = number;
-        this.priceChangeIn24 = priceChangeIn24;
+        this.priceChangeIn7 = priceChangeIn7;
     }
 
     public String getId() {
@@ -77,12 +77,12 @@ public class CoinSearchModel {
         this.marketCap = marketCap;
     }
 
-    public double getGetPriceChangeIn7() {
-        return getPriceChangeIn7;
+    public double getPriceChangeIn7() {
+        return priceChangeIn7;
     }
 
-    public void setGetPriceChangeIn7(double getPriceChangeIn7) {
-        this.getPriceChangeIn7 = getPriceChangeIn7;
+    public void setPriceChangeIn7(double priceChangeIn7) {
+        this.priceChangeIn7 = priceChangeIn7;
     }
 
     public void setImage(String image) {
