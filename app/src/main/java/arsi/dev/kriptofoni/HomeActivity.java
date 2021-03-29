@@ -40,11 +40,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class HomeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<String>> {
+public class HomeActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNavigationView;
-    private CoinGeckoApi myCoinGeckoApi;
-    private ArrayList<CoinSearchModel> coinSearchModels, mostInc24Hours;
     private final MainFragment mainFragment = new MainFragment(this);
     private final PortfolioFragment portfolioFragment = new PortfolioFragment();
     private final AlertsFragment alertsFragment = new AlertsFragment();
@@ -52,11 +50,14 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     private final MoreFragment moreFragment = new MoreFragment();
     private Fragment active = mainFragment;
     private FragmentManager fragmentManager;
+
+    private CoinGeckoApi myCoinGeckoApi;
     private CoinGeckoApiClient client;
+
+    private ArrayList<CoinSearchModel> coinSearchModels, mostInc24Hours;
+
     private String currency;
-    private int max, remainder;
-    private ArrayList<String> names;
-    private LoaderManager loaderManager;
+    private int max, totalPageNumber, total = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,18 +68,10 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         
         coinSearchModels = new ArrayList<>();
         mostInc24Hours = new ArrayList<>();
-        names = new ArrayList<>();
-
-        this.loaderManager = LoaderManager.getInstance(this);
-        LoaderManager.LoaderCallbacks<List<String>> loaderCallbacks = this;
-        Bundle args = new Bundle();
-        Loader<List<String>> loader = this.loaderManager.initLoader(0, args, loaderCallbacks);
-        loader.forceLoad();
 
         client = new CoinGeckoApiClientImpl();
 
         getTotalMarketCap();
-//        getAllCoins();
         
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(navigationItemSelectedListener);
@@ -103,7 +96,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                    int selectedId = 0;
 
                     switch (menuItem.getItemId()) {
                         case R.id.nav_main:
@@ -144,16 +136,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     
     private void getAllCoins() {
         coinSearchModels.clear();
-        max = 6548 / 250 + 1;
-        for (int i = 1; i <= max; i++) {
-            final int index = i;
-            Thread thread = new Thread() {
-                @Override
-                public void run() {
-                    super.run();
-                    new GetAllCoins().execute(index);
-                }
-            };
+        for (int i = 1; i <= totalPageNumber; i++) {
+            Thread thread = new MyThread(i);
             thread.start();
         }
     }
@@ -162,44 +146,10 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         new GetTotalMarketCap().execute();
     }
 
-    @NonNull
-    @Override
-    public Loader<List<String>> onCreateLoader(int id, @Nullable Bundle args) {
-        return new GetAllCoinss(this, currency, myCoinGeckoApi, mainFragment);
-    }
-
-    @Override
-    public void onLoadFinished(@NonNull Loader<List<String>> loader, List<String> data) {
-        loaderManager.destroyLoader(0);
-    }
-
-    @Override
-    public void onLoaderReset(@NonNull Loader<List<String>> loader) {
-
-    }
-
     private class GetAllCoins extends AsyncTask<Integer, Void, Boolean> {
 
         @Override
         protected Boolean doInBackground(Integer... integers) {
-
-//            List<CoinMarkets> coins = client.getCoinMarkets(currency, null, "id_asc", 250, integers[0], false, null);
-//            for (int i = 0; i < coins.size(); i++) {
-//                CoinMarkets coin = coins.get(i);
-//                String name = coin.getName();
-//                String id = coin.getId();
-//                String symbol = coin.getSymbol();
-//                String image = coin.getImage();
-//                double priceChangeIn24h = coin.getPriceChangePercentage24h();
-//                CoinSearchModel model = new CoinSearchModel((integers[0] - 1) * 100 + i + 1, id, name, symbol, image);
-//                CoinSearchModel model24H = new CoinSearchModel((integers[0] - 1) * 100 + i + 1, id, name, symbol, image, priceChangeIn24h);
-//                coinSearchModels.add(model);
-//                mostInc24Hours.add(model24H);
-//            }
-//
-//            mainFragment.setCoinModelsForSearch(coinSearchModels);
-//            mainFragment.setMostIncIn24List(mostInc24Hours);
-
             Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, null,"id_asc", 250, integers[0], false, "24h,7d");
             call.enqueue(new Callback<List<CoinMarket>>() {
                 @Override
@@ -220,11 +170,11 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                             CoinSearchModel model24H = new CoinSearchModel((integers[0] - 1) * 100 + i + 1, id, name, symbol, image, priceChangeIn24h);
                             coinSearchModels.add(model);
                             mostInc24Hours.add(model24H);
-                            if (!names.contains(name)) names.add(name);
                         }
-                        mainFragment.setCoinModelsForSearch(coinSearchModels);
-                        mainFragment.setMostIncIn24List(mostInc24Hours);
-                        System.out.println(names.size());
+                        if (integers[0] == totalPageNumber) {
+                            mainFragment.setCoinModelsForSearch(coinSearchModels);
+                            mainFragment.setMostIncIn24List(mostInc24Hours);
+                        }
                     }
                 }
 
@@ -240,6 +190,12 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     private class GetTotalMarketCap extends AsyncTask<Void, Void, Void> {
 
         @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            getAllCoins();
+        }
+
+        @Override
         protected Void doInBackground(Void... voids) {
 
             try {
@@ -249,35 +205,30 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                         @Override
                         public void run() {
                             mainFragment.setTotalMarketValue(global.getData().getTotalMarketCap().get(currency));
+                            max = (int) global.getData().getActiveCryptocurrencies();
+                            totalPageNumber = max / 250 + 1;
                         }
                     });
                 }
             } catch (CoinGeckoApiException ex) {
-
+                System.out.println(ex.getMessage());
             }
-
-
-//            Call<Global> call = myCoinGeckoApi.getGlobal();
-//            call.enqueue(new Callback<Global>() {
-//                @Override
-//                public void onResponse(Call<Global> call, Response<Global> response) {
-//                    if (response.isSuccessful()) {
-//                        Global global = response.body();
-//                        runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                mainFragment.setTotalMarketValue(Double.parseDouble(global.getData().getAsJsonObject("total_market_cap").get(currency).toString()));
-//                            }
-//                        });
-//                    }
-//                }
-//
-//                @Override
-//                public void onFailure(Call<Global> call, Throwable t) {
-//
-//                }
-//            });
             return null;
+        }
+    }
+
+    private class MyThread extends Thread {
+
+        private int index;
+
+        public MyThread(int index) {
+            this.index = index;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            new GetAllCoins().execute(index);
         }
     }
 }

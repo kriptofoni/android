@@ -120,17 +120,15 @@ public class MostIncIn24Fragment extends Fragment {
 
     public void setCoins(ArrayList<CoinSearchModel> coins) {
         this.allCoinSearchModels = coins;
-        if (coins.size() > 6500) {
-            StringBuilder stringBuilder = new StringBuilder();
-            String s = "";
-            for (int i = (currentPage - 1) * 50; i < (currentPage - 1) * 100 + 50; i++) {
-                stringBuilder.append(this.allCoinSearchModels.get(i).getId() + ",");
-                allCoinSearchModels.get(i).setNumber(i + 1);
-                coinNumbers.put(allCoinSearchModels.get(i).getId(), allCoinSearchModels.get(i).getNumber());
-            }
-
-            s = stringBuilder.toString();
-            getCoins(s);
+        StringBuilder stringBuilder = new StringBuilder();
+        String s = "";
+        for (int i = (currentPage - 1) * 50; i < (currentPage - 1) * 100 + 50; i++) {
+            stringBuilder.append(this.allCoinSearchModels.get(i).getId() + ",");
+            allCoinSearchModels.get(i).setNumber(i + 1);
+            coinNumbers.put(allCoinSearchModels.get(i).getId(), allCoinSearchModels.get(i).getNumber());
         }
+
+        s = stringBuilder.toString();
+        getCoins(s);
     }
 }

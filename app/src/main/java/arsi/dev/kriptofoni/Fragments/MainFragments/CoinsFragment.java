@@ -142,7 +142,6 @@ public class CoinsFragment extends Fragment {
     }
 
     public void emptyAllCoinModels() {
-        System.out.println("run");
         allCoinModels = new ArrayList<>();
         coinModels = new ArrayList<>();
         mainCoinsRecyclerAdapter.setCoins(coinModels);
@@ -176,7 +175,6 @@ public class CoinsFragment extends Fragment {
                         coinModels.add(model);
                         allCoinModels.add(model);
                     }
-                    System.out.println("178 " + allCoinModels.size() + " , " + coinModels.size());
                     mainCoinsRecyclerAdapter.notifyDataSetChanged();
                     reached = false;
                 }
