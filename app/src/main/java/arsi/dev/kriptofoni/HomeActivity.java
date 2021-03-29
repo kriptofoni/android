@@ -14,15 +14,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MenuItem;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.litesoftwares.coingecko.CoinGeckoApiClient;
 import com.litesoftwares.coingecko.domain.Coins.CoinMarkets;
 import com.litesoftwares.coingecko.domain.Global.Global;
 import com.litesoftwares.coingecko.exception.CoinGeckoApiException;
 import com.litesoftwares.coingecko.impl.CoinGeckoApiClientImpl;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -54,20 +59,34 @@ public class HomeActivity extends AppCompatActivity {
     private CoinGeckoApi myCoinGeckoApi;
     private CoinGeckoApiClient client;
 
-    private ArrayList<CoinSearchModel> coinSearchModels, mostInc24Hours;
+    private ArrayList<CoinSearchModel> coinSearchModels, mostInc24Hours, coinSearchModelsFromMem, mostInc24HoursFromMem;
+    private ArrayList<String> names;
 
     private String currency;
-    private int max, totalPageNumber, total = 0;
+    private int max, totalPageNumber, tasksDone = 0;
+
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        myCoinGeckoApi = CoinGeckoRetrofitClient.getInstance().getMyCoinGeckoApi();
-        
         coinSearchModels = new ArrayList<>();
         mostInc24Hours = new ArrayList<>();
+        coinSearchModelsFromMem = new ArrayList<>();
+        mostInc24HoursFromMem = new ArrayList<>();
+        names = new ArrayList<>();
+
+        myCoinGeckoApi = CoinGeckoRetrofitClient.getInstance().getMyCoinGeckoApi();
+        sharedPreferences = getSharedPreferences("Preferences", 0);
+        Gson gson = new Gson();
+
+        String coinSearchModelsJson = sharedPreferences.getString("coinModelsForSearch", "");
+        String mostInc24HoursJson = sharedPreferences.getString("mostIncIn24List", "");
+        Type type = new TypeToken<List<CoinSearchModel>>() {}.getType();
+        if (!coinSearchModelsJson.isEmpty()) coinSearchModelsFromMem = gson.fromJson(coinSearchModelsJson, type);
+        if (!mostInc24HoursJson.isEmpty()) mostInc24HoursFromMem = gson.fromJson(mostInc24HoursJson, type);
 
         client = new CoinGeckoApiClientImpl();
 
@@ -82,12 +101,12 @@ public class HomeActivity extends AppCompatActivity {
         fragmentManager.beginTransaction().add(R.id.fragment_container, portfolioFragment,"2").hide(portfolioFragment).commit();
         fragmentManager.beginTransaction().add(R.id.fragment_container, mainFragment,"1").commit();
         bottomNavigationView.getMenu().getItem(0).setEnabled(false);
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        SharedPreferences sharedPreferences = getSharedPreferences("Preferences", 0);
         currency = sharedPreferences.getString("currency", "usd");
     }
 
@@ -135,11 +154,25 @@ public class HomeActivity extends AppCompatActivity {
             };
     
     private void getAllCoins() {
-        coinSearchModels.clear();
         for (int i = 1; i <= totalPageNumber; i++) {
             Thread thread = new MyThread(i);
             thread.start();
         }
+        Handler handler = new Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (coinSearchModels.size() == max) {
+                    mainFragment.setCoinModelsForSearch(coinSearchModels);
+                    mainFragment.setMostIncIn24List(mostInc24Hours);
+                    mainFragment.writeToMem("coinModelsForSearch", coinSearchModels);
+                    mainFragment.writeToMem("mostIncIn24List", mostInc24Hours);
+                    return;
+                }
+                handler.postDelayed(this, 250);
+            }
+        };
+        handler.postDelayed(runnable, 250);
     }
 
     public void getTotalMarketCap() {
@@ -171,10 +204,6 @@ public class HomeActivity extends AppCompatActivity {
                             coinSearchModels.add(model);
                             mostInc24Hours.add(model24H);
                         }
-                        if (integers[0] == totalPageNumber) {
-                            mainFragment.setCoinModelsForSearch(coinSearchModels);
-                            mainFragment.setMostIncIn24List(mostInc24Hours);
-                        }
                     }
                 }
 
@@ -192,6 +221,12 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            if (!coinSearchModelsFromMem.isEmpty())
+                System.out.println(coinSearchModelsFromMem.size());
+                mainFragment.setCoinModelsForSearch(coinSearchModelsFromMem);
+            if (!mostInc24HoursFromMem.isEmpty())
+                System.out.println(mostInc24HoursFromMem.size());
+                mainFragment.setMostIncIn24List(mostInc24HoursFromMem);
             getAllCoins();
         }
 

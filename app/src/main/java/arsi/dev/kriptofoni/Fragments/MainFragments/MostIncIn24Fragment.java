@@ -119,6 +119,8 @@ public class MostIncIn24Fragment extends Fragment {
     }
 
     public void setCoins(ArrayList<CoinSearchModel> coins) {
+        coinModels.clear();
+        allCoins.clear();
         this.allCoinSearchModels = coins;
         StringBuilder stringBuilder = new StringBuilder();
         String s = "";

@@ -25,10 +25,18 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.fasterxml.jackson.databind.ser.std.ObjectArraySerializer;
 import com.google.android.material.tabs.TabLayout;
+import com.google.gson.Gson;
 import com.litesoftwares.coingecko.CoinGeckoApiClient;
 import com.litesoftwares.coingecko.impl.CoinGeckoApiClientImpl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -43,6 +51,7 @@ import arsi.dev.kriptofoni.Fragments.MainFragments.MostIncIn24Fragment;
 import arsi.dev.kriptofoni.Fragments.MainFragments.MostIncIn7Fragment;
 import arsi.dev.kriptofoni.HomeActivity;
 import arsi.dev.kriptofoni.Models.CoinSearchModel;
+import arsi.dev.kriptofoni.ObjectSerializer;
 import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
 import arsi.dev.kriptofoni.R;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
@@ -162,8 +171,6 @@ public class MainFragment extends Fragment {
             }
         });
 
-//        getTotalMarketCap();
-
         return view;
     }
 
@@ -190,10 +197,6 @@ public class MainFragment extends Fragment {
             // to allow page to turn back it's initial state.
             coinsFragment.setCoinsList(new ArrayList<>());
         }
-    }
-
-    private void getTotalMarketCap() {
-//        new GetTotalMarketCap().execute();
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -278,6 +281,13 @@ public class MainFragment extends Fragment {
             });
         }
         mostIncIn24Fragment.setCoins(mostIncIn24List);
+    }
+
+    public void writeToMem(String id, ArrayList<CoinSearchModel> list) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        String json = new Gson().toJson(list);
+        editor.putString(id, json);
+        editor.apply();
     }
 
     @Override
