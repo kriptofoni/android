@@ -36,7 +36,9 @@ public class MainCoinsSearchRecyclerAdapter extends RecyclerView.Adapter<MainCoi
     @Override
     public void onBindViewHolder(@NonNull Holder holder, int position) {
         CoinSearchModel coin = coins.get(position);
-        holder.number.setText(String.valueOf(coin.getNumber()));
+        if (coin.getMarketCapRank() != 10000) {
+            holder.number.setText((String.valueOf((int)(coin.getMarketCapRank())))); 
+        }
         holder.name.setText(coin.getName());
         Picasso.get().load(coin.getImage()).into(holder.icon);
     }

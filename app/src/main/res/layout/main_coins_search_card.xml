@@ -40,7 +40,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="@id/numberLeft"
             app:layout_constraintRight_toRightOf="@id/numberRight"
-            android:text="1"
             android:textSize="12dp"
             android:textAlignment="center"/>
 

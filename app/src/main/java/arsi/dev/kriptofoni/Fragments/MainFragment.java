@@ -64,7 +64,6 @@ public class MainFragment extends Fragment {
     private ImageView search, back;
     private TextView totalMarketVal, currency;
     private ArrayList<CoinSearchModel> coinModelsForSearch;
-    private CoinsFragment coinsFragment;
     private CoinGeckoApi myCoinGeckoApi;
     private CryptoIconsApi myCryptoIconsApi;
     private RelativeLayout header, searchTab;
@@ -72,6 +71,9 @@ public class MainFragment extends Fragment {
     private String currencyText;
     private SharedPreferences sharedPreferences;
     private CoinGeckoApiClient client;
+
+    private CoinsFragment coinsFragment;
+    private MostIncIn24Fragment mostIncIn24Fragment;
 
     public MainFragment(HomeActivity homeActivity) {
         this.homeActivity = homeActivity;
@@ -197,8 +199,9 @@ public class MainFragment extends Fragment {
     private void setupViewPager(ViewPager viewPager) {
         Adapter adapter = new Adapter(getChildFragmentManager());
         coinsFragment = new CoinsFragment();
+        mostIncIn24Fragment = new MostIncIn24Fragment();
         adapter.addFragment(coinsFragment, "Coins");
-        adapter.addFragment(new MostIncIn24Fragment(), "Most Inc In 24 Hours");
+        adapter.addFragment(mostIncIn24Fragment, "Most Inc In 24 Hours");
         adapter.addFragment(new MostDecIn24Fragment(), "Most Dec In 24 Hours");
         adapter.addFragment(new MostIncIn7Fragment(), "Most Inc In 7 Days");
         adapter.addFragment(new MostDecIn7Fragment(), "Most Dec In 7 Days");
@@ -259,10 +262,22 @@ public class MainFragment extends Fragment {
             this.coinModelsForSearch.sort(new Comparator<CoinSearchModel>() {
                 @Override
                 public int compare(CoinSearchModel lhs, CoinSearchModel rhs) {
-                    return lhs.getNumber() > rhs.getNumber() ? 1 : lhs.getNumber() < rhs.getNumber() ? -1 : 0;
+                    return Double.compare(lhs.getMarketCapRank(), rhs.getMarketCapRank());
                 }
             });
         }
+    }
+
+    public void setMostIncIn24List(ArrayList<CoinSearchModel> mostIncIn24List) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            mostIncIn24List.sort(new Comparator<CoinSearchModel>() {
+                @Override
+                public int compare(CoinSearchModel lhs, CoinSearchModel rhs) {
+                    return Double.compare(rhs.getPriceChangeIn24(), lhs.getPriceChangeIn24());
+                }
+            });
+        }
+        mostIncIn24Fragment.setCoins(mostIncIn24List);
     }
 
     @Override

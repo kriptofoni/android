@@ -4,13 +4,33 @@ public class CoinSearchModel {
 
     private String id, name, symbol, image;
     private int number;
+    private double priceChangeIn24, getPriceChangeIn7, marketCap, marketCapRank;
 
-    public CoinSearchModel(int number, String id, String name, String symbol, String image) {
-        this.number = number;
+    public CoinSearchModel(double marketCapRank, String id, String name, String symbol, double marketCap, String image) {
+        this.marketCapRank = marketCapRank == 0 ? 10000 : marketCapRank;
         this.id = id;
         this.name = name;
         this.symbol = symbol;
         this.image = image;
+        this.marketCap = marketCap;
+    }
+
+    public CoinSearchModel(int number, String id, String name, String symbol, String image, double priceChangeIn24) {
+        this.id = id;
+        this.name = name;
+        this.symbol = symbol;
+        this.image = image;
+        this.number = number;
+        this.priceChangeIn24 = priceChangeIn24;
+    }
+
+    public CoinSearchModel(String id, String name, String symbol, String image, double priceChangeIn24, int number) {
+        this.id = id;
+        this.name = name;
+        this.symbol = symbol;
+        this.image = image;
+        this.number = number;
+        this.priceChangeIn24 = priceChangeIn24;
     }
 
     public String getId() {
@@ -31,6 +51,38 @@ public class CoinSearchModel {
 
     public String getImage() {
         return image;
+    }
+
+    public double getPriceChangeIn24() {
+        return priceChangeIn24;
+    }
+
+    public void setPriceChangeIn24(double priceChangeIn24) {
+        this.priceChangeIn24 = priceChangeIn24;
+    }
+
+    public double getMarketCap() {
+        return marketCap;
+    }
+
+    public double getMarketCapRank() {
+        return marketCapRank;
+    }
+
+    public void setMarketCapRank(double marketCapRank) {
+        this.marketCapRank = marketCapRank;
+    }
+
+    public void setMarketCap(double marketCap) {
+        this.marketCap = marketCap;
+    }
+
+    public double getGetPriceChangeIn7() {
+        return getPriceChangeIn7;
+    }
+
+    public void setGetPriceChangeIn7(double getPriceChangeIn7) {
+        this.getPriceChangeIn7 = getPriceChangeIn7;
     }
 
     public void setImage(String image) {

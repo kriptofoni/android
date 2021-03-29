@@ -33,6 +33,10 @@ public class MainCoinsRecyclerAdapter extends RecyclerView.Adapter<MainCoinsRecy
         this.coinsFragment = coinsFragment;
     }
 
+    public MainCoinsRecyclerAdapter(ArrayList<CoinModel> coins) {
+        this.coins = coins;
+    }
+
     @NonNull
     @Override
     public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
