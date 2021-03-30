@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -24,6 +25,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
 import com.litesoftwares.coingecko.CoinGeckoApiClient;
@@ -32,6 +35,7 @@ import com.litesoftwares.coingecko.impl.CoinGeckoApiClientImpl;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 
 import arsi.dev.kriptofoni.CurrencyChooseActivity;
@@ -50,10 +54,11 @@ import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
 public class MainFragment extends Fragment {
 
     private final HomeActivity homeActivity;
+    private final int BEHAVIOUR_RESUME_ONLY_CURRENT_FRAGMENT = 1;
     private TabLayout tabs;
     private ImageView search, back;
     private TextView totalMarketVal, currency;
-    private ArrayList<CoinSearchModel> coinModelsForSearch;
+    private List<CoinSearchModel> coinModelsForSearch;
     private RelativeLayout header, searchTab;
     private EditText searchBar;
     private String currencyText;
@@ -117,9 +122,13 @@ public class MainFragment extends Fragment {
                 }
                 searchTab.setVisibility(View.INVISIBLE);
                 header.setVisibility(View.VISIBLE);
-                // When we close the search bar we need to reset our coinsFragment's
-                // ArrayList<CoinModel>. So that coinsFragment page can turn it's initial state.
+                // When we close the search bar we need to reset our fragments'
+                // List<CoinModel>. So that fragments can turn it's initial state.
                 coinsFragment.setCoinsList(new ArrayList<>());
+                mostIncIn24Fragment.setCoinsList(new ArrayList<>());
+                mostDecIn24Fragment.setCoinsList(new ArrayList<>());
+                mostIncIn7Fragment.setCoinsList(new ArrayList<>());
+                mostDecIn7Fragment.setCoinsList(new ArrayList<>());
             }
         });
 
@@ -167,17 +176,25 @@ public class MainFragment extends Fragment {
                     contains = true;
                 }
             }
-            // Passing coinsFragment filteredList to render searched items.
+            // Passing all fragments filteredList to render searched items.
             coinsFragment.setCoinsList(filteredList, contains);
+            mostIncIn24Fragment.setCoinsList(filteredList, contains);
+            mostDecIn24Fragment.setCoinsList(filteredList, contains);
+            mostIncIn7Fragment.setCoinsList(filteredList, contains);
+            mostDecIn7Fragment.setCoinsList(filteredList, contains);
         } else {
-            // Passing coinsFragment an empty ArrayList
+            // Passing all fragments an empty ArrayList
             // to allow page to turn back it's initial state.
             coinsFragment.setCoinsList(new ArrayList<>());
+            mostIncIn24Fragment.setCoinsList(new ArrayList<>());
+            mostDecIn24Fragment.setCoinsList(new ArrayList<>());
+            mostIncIn7Fragment.setCoinsList(new ArrayList<>());
+            mostDecIn7Fragment.setCoinsList(new ArrayList<>());
         }
     }
 
     private void setupViewPager(ViewPager viewPager) {
-        Adapter adapter = new Adapter(getChildFragmentManager());
+        Adapter adapter = new Adapter(getChildFragmentManager(), BEHAVIOUR_RESUME_ONLY_CURRENT_FRAGMENT);
         coinsFragment = new CoinsFragment();
         mostIncIn24Fragment = new MostIncIn24Fragment();
         mostDecIn24Fragment = new MostDecIn24Fragment();
@@ -197,8 +214,8 @@ public class MainFragment extends Fragment {
         private ArrayList<Fragment> fragments = new ArrayList<>();
         private ArrayList<String> titles = new ArrayList<>();
 
-        public Adapter(@NonNull FragmentManager fm) {
-            super(fm);
+        public Adapter(@NonNull FragmentManager fm, int behavior) {
+            super(fm, behavior);
         }
 
         @NonNull
@@ -230,6 +247,10 @@ public class MainFragment extends Fragment {
             CountryCodePicker countryCodePicker = new CountryCodePicker();
             String[] arr = countryCodePicker.getCountryCode(currencyText);
             coinsFragment.setCurrencySymbol(arr[1]);
+            mostIncIn24Fragment.setCurrencySymbol(arr[1]);
+            mostDecIn24Fragment.setCurrencySymbol(arr[1]);
+            mostIncIn7Fragment.setCurrencySymbol(arr[1]);
+            mostDecIn7Fragment.setCurrencySymbol(arr[1]);
             // Formatting number with decimal points
             // Ex. 123456 -> 123.456
             NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
@@ -240,7 +261,7 @@ public class MainFragment extends Fragment {
         }
     }
 
-    public void setCoinModelsForSearch(ArrayList<CoinSearchModel> coinModelsForSearch) {
+    public void setCoinModelsForSearch(List<CoinSearchModel> coinModelsForSearch) {
         this.coinModelsForSearch = coinModelsForSearch;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             this.coinModelsForSearch.sort(new Comparator<CoinSearchModel>() {
@@ -252,7 +273,7 @@ public class MainFragment extends Fragment {
         }
     }
 
-    public void setMostIncIn24List(ArrayList<CoinSearchModel> mostIncIn24List) {
+    public void setMostIncIn24List(List<CoinSearchModel> mostIncIn24List) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mostIncIn24List.sort(new Comparator<CoinSearchModel>() {
                 @Override
@@ -264,7 +285,7 @@ public class MainFragment extends Fragment {
         mostIncIn24Fragment.setCoins(mostIncIn24List);
     }
 
-    public void setMostDecIn24List(ArrayList<CoinSearchModel> mostDecIn24List) {
+    public void setMostDecIn24List(List<CoinSearchModel> mostDecIn24List) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mostDecIn24List.sort(new Comparator<CoinSearchModel>() {
                 @Override
@@ -276,7 +297,7 @@ public class MainFragment extends Fragment {
         mostDecIn24Fragment.setCoins(mostDecIn24List);
     }
 
-    public void setMostIncIn7List(ArrayList<CoinSearchModel> mostIncIn7List) {
+    public void setMostIncIn7List(List<CoinSearchModel> mostIncIn7List) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mostIncIn7List.sort(new Comparator<CoinSearchModel>() {
                 @Override
@@ -288,7 +309,7 @@ public class MainFragment extends Fragment {
         mostIncIn7Fragment.setCoins(mostIncIn7List);
     }
 
-    public void setMostDecIn7List(ArrayList<CoinSearchModel> mostDecIn7List) {
+    public void setMostDecIn7List(List<CoinSearchModel> mostDecIn7List) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mostDecIn7List.sort(new Comparator<CoinSearchModel>() {
                 @Override
@@ -300,7 +321,7 @@ public class MainFragment extends Fragment {
         mostDecIn7Fragment.setCoins(mostDecIn7List);
     }
 
-    public void writeToMem(String id, ArrayList<CoinSearchModel> list) {
+    public void writeToMem(String id, List<CoinSearchModel> list) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         String json = new Gson().toJson(list);
         editor.putString(id, json);
@@ -313,9 +334,26 @@ public class MainFragment extends Fragment {
         if (requestCode == 0) {
             currencyText = sharedPreferences.getString("currency", "usd");
             homeActivity.getTotalMarketCap();
+            // Refreshing coinsFragment
             coinsFragment.setCurrency(currencyText);
             coinsFragment.setCurrentPage(1);
             coinsFragment.emptyAllCoinModels();
+            // Refreshing mostIncIn24HFragment
+            mostIncIn24Fragment.setCurrency(currencyText);
+            mostIncIn24Fragment.setCurrentPage(1);
+            mostIncIn24Fragment.emptyAllCoinModels();
+            // Refreshing mostDecIn24HFragment
+            mostDecIn24Fragment.setCurrency(currencyText);
+            mostDecIn24Fragment.setCurrentPage(1);
+            mostDecIn24Fragment.emptyAllCoinModels();
+            // Refreshing mostIncIn7HFragment
+            mostIncIn7Fragment.setCurrency(currencyText);
+            mostIncIn7Fragment.setCurrentPage(1);
+            mostIncIn7Fragment.emptyAllCoinModels();
+            // Refreshing mostDecIn7HFragment
+            mostDecIn7Fragment.setCurrency(currencyText);
+            mostDecIn7Fragment.setCurrentPage(1);
+            mostDecIn7Fragment.emptyAllCoinModels();
         }
     }
 }

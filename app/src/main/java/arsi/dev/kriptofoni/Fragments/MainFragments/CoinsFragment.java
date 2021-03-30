@@ -36,14 +36,14 @@ import retrofit2.Response;
 public class CoinsFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private ArrayList<CoinModel> coinModels, allCoinModels;
-    private ArrayList<CoinSearchModel> coinModelsForSearch;
+    private List<CoinModel> coinModels, allCoinModels;
+    private List<CoinSearchModel> coinModelsForSearch;
     private MainCoinsRecyclerAdapter mainCoinsRecyclerAdapter;
     private MainCoinsSearchRecyclerAdapter mainCoinsSearchRecyclerAdapter;
     private CoinGeckoApi myCoinGeckoApi;
     private int currentPage = 1;
     private String currency;
-    private boolean reached = false;
+    private boolean reached = false, onScreen = false;
 
     @Nullable
     @Override
@@ -83,6 +83,11 @@ public class CoinsFragment extends Fragment {
         getCoins();
 
         return view;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     public void setCoinsList(ArrayList<CoinSearchModel> coins, boolean contains) {
@@ -149,12 +154,13 @@ public class CoinsFragment extends Fragment {
                         String imageUrl = result.getImage();
                         String name = result.getName();
                         String shortCut = result.getSymbol();
+                        String id = result.getId();
                         double changeIn24Hours = result.getPrice_change_percentage_24h_in_currency();
                         double priceChangeIn24Hours = result.getPrice_change_24h();
                         double currentPrice = result.getCurrent_price();
                         double marketCap = result.getMarket_cap();
                         double changeIn7Days = result.getPrice_change_percentage_7d_in_currency();
-                        CoinModel model = new CoinModel((currentPage - 1) * 100 + (i + 1), imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days);
+                        CoinModel model = new CoinModel((currentPage - 1) * 100 + (i + 1), imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id);
                         coinModels.add(model);
                         allCoinModels.add(model);
                     }

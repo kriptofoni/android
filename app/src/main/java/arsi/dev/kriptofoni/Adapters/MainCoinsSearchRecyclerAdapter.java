@@ -1,5 +1,6 @@
 package arsi.dev.kriptofoni.Adapters;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,15 +14,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import arsi.dev.kriptofoni.Models.CoinSearchModel;
 import arsi.dev.kriptofoni.R;
 
 public class MainCoinsSearchRecyclerAdapter extends RecyclerView.Adapter<MainCoinsSearchRecyclerAdapter.Holder> {
 
-    private ArrayList<CoinSearchModel> coins;
+    private List<CoinSearchModel> coins;
 
-    public MainCoinsSearchRecyclerAdapter(ArrayList<CoinSearchModel> coins) {
+    public MainCoinsSearchRecyclerAdapter(List<CoinSearchModel> coins) {
         this.coins = coins;
     }
 
@@ -44,6 +46,8 @@ public class MainCoinsSearchRecyclerAdapter extends RecyclerView.Adapter<MainCoi
 
         holder.name.setText(coin.getName());
         Picasso.get().load(coin.getImage()).into(holder.icon);
+        if (position % 2 == 1) holder.card.setBackgroundColor(Color.parseColor("#ededed"));
+        else holder.card.setBackgroundColor(Color.parseColor("#ffffff"));
     }
 
     @Override

@@ -2,11 +2,11 @@ package arsi.dev.kriptofoni.Models;
 
 public class CoinModel {
 
-    private String name, imageUri, shortCut;
+    private String name, imageUri, shortCut, id;
     private int number;
     private double changeIn24Hours, priceChangeIn24Hours, changeIn7Days, currentPrice, marketCap;
 
-    public CoinModel(int number, String imageUri, String name, String shortCut, double changeIn24Hours, double priceChangeIn24Hours, double currentPrice, double marketCap, double changeIn7Days) {
+    public CoinModel(int number, String imageUri, String name, String shortCut, double changeIn24Hours, double priceChangeIn24Hours, double currentPrice, double marketCap, double changeIn7Days, String id) {
         this.number = number;
         this.imageUri = imageUri;
         this.name = name;
@@ -16,6 +16,7 @@ public class CoinModel {
         this.currentPrice = currentPrice;
         this.marketCap = marketCap;
         this.changeIn7Days = changeIn7Days;
+        this.id = id;
     }
 
     public CoinModel(int number, String imageUri, String name, String shortCut, double changeIn24Hours, double priceChangeIn24Hours, double currentPrice) {

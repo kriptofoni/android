@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import arsi.dev.kriptofoni.Adapters.MainCoinsRecyclerAdapter;
+import arsi.dev.kriptofoni.Adapters.MainCoinsSearchRecyclerAdapter;
 import arsi.dev.kriptofoni.Models.CoinModel;
 import arsi.dev.kriptofoni.Models.CoinSearchModel;
 import arsi.dev.kriptofoni.R;
@@ -31,16 +32,17 @@ import retrofit2.Response;
 
 public class MostIncIn7Fragment extends Fragment {
 
-    private ArrayList<CoinSearchModel> allCoinSearchModels;
-    private ArrayList<CoinModel> coinModels, allCoins;
+    private List<CoinSearchModel> allCoinSearchModels, coinModelsForSearch;
+    private List<CoinModel> coinModels, allCoins;
     private boolean first = true;
     private RecyclerView recyclerView;
     private MainCoinsRecyclerAdapter mainCoinsRecyclerAdapter;
     private int currentPage = 1;
-    private boolean reached = false;
+    private boolean reached = false, onScreen = false;
     private CoinGeckoApi myCoinGeckoApi;
-    private String currency;
-    HashMap<String, Integer> coinNumbers;
+    private String currency, ids;
+    private HashMap<String, Integer> coinNumbers;
+    private MainCoinsSearchRecyclerAdapter mainCoinsSearchRecyclerAdapter;
 
     @Nullable
     @Override
@@ -50,6 +52,7 @@ public class MostIncIn7Fragment extends Fragment {
         allCoinSearchModels = new ArrayList<>();
         coinModels = new ArrayList<>();
         allCoins = new ArrayList<>();
+        coinModelsForSearch = new ArrayList<>();
         coinNumbers = new HashMap<>();
 
         myCoinGeckoApi = CoinGeckoRetrofitClient.getInstance().getMyCoinGeckoApi();
@@ -57,9 +60,36 @@ public class MostIncIn7Fragment extends Fragment {
         recyclerView = view.findViewById(R.id.main_most_inc_7_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, "7");
+        mainCoinsSearchRecyclerAdapter = new MainCoinsSearchRecyclerAdapter(coinModelsForSearch);
         recyclerView.setAdapter(mainCoinsRecyclerAdapter);
 
         return view;
+    }
+
+    public void setCoinsList(ArrayList<CoinSearchModel> coins, boolean contains) {
+        if (recyclerView != null) {
+            if (!coins.isEmpty()) {
+                recyclerView.setAdapter(mainCoinsSearchRecyclerAdapter);
+                mainCoinsSearchRecyclerAdapter.setCoins(coins);
+            } else if (!contains) {
+                mainCoinsSearchRecyclerAdapter.setCoins(new ArrayList<>());
+            } else {
+                recyclerView.setAdapter(mainCoinsRecyclerAdapter);
+                recyclerView.scrollToPosition((currentPage - 1 ) * 100 - 4);
+            }
+        }
+    }
+
+    public void setCoinsList(ArrayList<CoinSearchModel> coins) {
+        if (recyclerView != null) {
+            if (!coins.isEmpty()) {
+                recyclerView.setAdapter(mainCoinsSearchRecyclerAdapter);
+                mainCoinsSearchRecyclerAdapter.setCoins(coins);
+            }  else {
+                recyclerView.scrollToPosition((currentPage - 1 ) * 100 - 4);
+                recyclerView.setAdapter(mainCoinsRecyclerAdapter);
+            }
+        }
     }
 
     @Override
@@ -67,6 +97,26 @@ public class MostIncIn7Fragment extends Fragment {
         super.onStart();
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
         currency = sharedPreferences.getString("currency", "usd");
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public void setCurrentPage(int currentPage) {
+        this.currentPage = currentPage;
+    }
+
+    public void setCurrencySymbol(String symbol) {
+        mainCoinsRecyclerAdapter.setCurrencySymbol(symbol);
+    }
+
+    public void emptyAllCoinModels() {
+        allCoins = new ArrayList<>();
+        coinModels = new ArrayList<>();
+        mainCoinsRecyclerAdapter.setCoins(coinModels);
+        getCoins(this.ids);
+        recyclerView.scrollTo(0, 0);
     }
 
     private void getCoins(String ids) {
@@ -93,7 +143,7 @@ public class MostIncIn7Fragment extends Fragment {
                         double currentPrice = result.getCurrent_price();
                         double marketCap = result.getMarket_cap();
                         double changeIn7Days = result.getPrice_change_percentage_7d_in_currency();
-                        CoinModel model = new CoinModel(coinNumbers.get(id), imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days);
+                        CoinModel model = new CoinModel(coinNumbers.get(id), imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id);
                         coinModels.add(model);
                         allCoins.add(model);
                     }
@@ -117,7 +167,7 @@ public class MostIncIn7Fragment extends Fragment {
         });
     }
 
-    public void setCoins(ArrayList<CoinSearchModel> coins) {
+    public void setCoins(List<CoinSearchModel> coins) {
         coinModels.clear();
         allCoins.clear();
         this.allCoinSearchModels = coins;
@@ -130,6 +180,12 @@ public class MostIncIn7Fragment extends Fragment {
         }
 
         s = stringBuilder.toString();
+        if (currentPage == 1)
+            setIds(s);
         getCoins(s);
+    }
+
+    private void setIds(String ids) {
+        this.ids = ids;
     }
 }
