@@ -206,7 +206,7 @@ public class HomeActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Integer... integers) {
-            Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, null,"id_desc", 250, integers[0], false, "24h,7d");
+            Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, null,"id_desc", 250, integers[0], true, "24h,7d");
             call.enqueue(new Callback<List<CoinMarket>>() {
                 @Override
                 public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {

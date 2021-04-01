@@ -55,6 +55,8 @@ public class CoinMarket {
     private Object roi;
     @SerializedName("last_updated")
     private String last_updated;
+    @SerializedName("sparkline_in_7d")
+    private Object sparkline_in_7d;
     @SerializedName("price_change_percentage_24h_in_currency")
     private double price_change_percentage_24h_in_currency;
     @SerializedName("price_change_percentage_7d_in_currency")
@@ -171,5 +173,13 @@ public class CoinMarket {
 
     public double getPrice_change_percentage_7d_in_currency() {
         return price_change_percentage_7d_in_currency;
+    }
+
+    public Object getSparkline_in_7d() {
+        return sparkline_in_7d;
+    }
+
+    public void setSparkline_in_7d(Object sparkline_in_7d) {
+        this.sparkline_in_7d = sparkline_in_7d;
     }
 }

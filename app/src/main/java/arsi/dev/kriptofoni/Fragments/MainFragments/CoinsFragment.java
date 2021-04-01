@@ -3,6 +3,7 @@ package arsi.dev.kriptofoni.Fragments.MainFragments;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,11 +45,24 @@ public class CoinsFragment extends Fragment {
     private int currentPage = 1;
     private String currency;
     private boolean reached = false, onScreen = false;
+    private Handler handler;
+    private Runnable runnable;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main_coins, container, false);
+
+        handler = new Handler();
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (onScreen) {
+                    getCoins();
+                    handler.postDelayed(this, 5000);
+                }
+            }
+        };
 
         coinModels = new ArrayList<>();
         coinModelsForSearch = new ArrayList<>();
@@ -88,6 +102,15 @@ public class CoinsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        onScreen = false;
+        handler.removeCallbacks(runnable);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        onScreen = true;
+        handler.postDelayed(runnable, 5000);
     }
 
     public void setCoinsList(ArrayList<CoinSearchModel> coins, boolean contains) {
@@ -141,7 +164,7 @@ public class CoinsFragment extends Fragment {
         coinModels.addAll(allCoinModels);
         // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
         // We create a simple HTTP Request via Retrofit
-        Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, null,null, 100, currentPage, false, "24h,7d");
+        Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, null,null, 100, currentPage, true, "24h,7d");
         call.enqueue(new Callback<List<CoinMarket>>() {
             @Override
             public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
@@ -160,7 +183,7 @@ public class CoinsFragment extends Fragment {
                         double currentPrice = result.getCurrent_price();
                         double marketCap = result.getMarket_cap();
                         double changeIn7Days = result.getPrice_change_percentage_7d_in_currency();
-                        CoinModel model = new CoinModel((currentPage - 1) * 100 + (i + 1), imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id);
+                        CoinModel model = new CoinModel((currentPage - 1) * 100 + (i + 1), imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id, 0);
                         coinModels.add(model);
                         allCoinModels.add(model);
                     }

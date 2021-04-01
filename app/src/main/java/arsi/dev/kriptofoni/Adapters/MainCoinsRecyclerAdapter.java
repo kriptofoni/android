@@ -65,7 +65,7 @@ public class MainCoinsRecyclerAdapter extends RecyclerView.Adapter<MainCoinsRecy
         } else {
             holder.changeIn24Hours.setText(String.format("%%%.2f", coin.getChangeIn7Days()));
             holder.changeIn24Hours.setTextColor(coin.getChangeIn7Days() > 0 ? Color.GREEN : Color.RED);
-            holder.priceChangeIn24Hours.setText(String.format("%s%.2f", currencySymbol, coin.getChangeIn7Days()));
+            holder.priceChangeIn24Hours.setText(String.format("%s%.2f", currencySymbol, coin.getPriceChangeIn7Days()));
             holder.priceChangeIn24Hours.setTextColor(coin.getChangeIn7Days() > 0 ? Color.GREEN : Color.RED);
         }
         holder.currentPrice.setText(String.format("%s%.2f", currencySymbol, coin.getCurrentPrice()));
