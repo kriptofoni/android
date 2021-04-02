@@ -44,7 +44,7 @@ public class CoinsFragment extends Fragment {
     private CoinGeckoApi myCoinGeckoApi;
     private int currentPage = 1;
     private String currency;
-    private boolean reached = false, onScreen = false;
+    private boolean reached = false, onScreen = false, firstRender = false;
     private Handler handler;
     private Runnable runnable;
 
@@ -57,9 +57,9 @@ public class CoinsFragment extends Fragment {
         runnable = new Runnable() {
             @Override
             public void run() {
-                if (onScreen) {
-                    getCoins();
-                    handler.postDelayed(this, 5000);
+                if (onScreen && firstRender) {
+                    getCoins("update");
+                    handler.postDelayed(this, 10000);
                 }
             }
         };
@@ -87,14 +87,15 @@ public class CoinsFragment extends Fragment {
                     if (!recyclerView.canScrollVertically(1) && recyclerView.getAdapter() instanceof MainCoinsRecyclerAdapter) {
                         reached = true;
                         currentPage++;
-                        getCoins();
+                        getCoins("initial");
                         recyclerView.scrollToPosition((currentPage - 1) * 100 - 4);
                     }
                 }
             }
         });
 
-        getCoins();
+        getCoins("initial");
+        if (!firstRender) firstRender = true;
 
         return view;
     }
@@ -110,7 +111,7 @@ public class CoinsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         onScreen = true;
-        handler.postDelayed(runnable, 5000);
+        handler.postDelayed(runnable, 10000);
     }
 
     public void setCoinsList(ArrayList<CoinSearchModel> coins, boolean contains) {
@@ -155,13 +156,14 @@ public class CoinsFragment extends Fragment {
         allCoinModels = new ArrayList<>();
         coinModels = new ArrayList<>();
         mainCoinsRecyclerAdapter.setCoins(coinModels);
-        getCoins();
+        getCoins("initial");
         recyclerView.scrollTo(0, 0);
     }
 
-    private void getCoins() {
+    private void getCoins(String type) {
         coinModels.clear();
         coinModels.addAll(allCoinModels);
+        ArrayList<CoinModel> temp = new ArrayList<>();
         // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
         // We create a simple HTTP Request via Retrofit
         Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, null,null, 100, currentPage, true, "24h,7d");
@@ -184,9 +186,22 @@ public class CoinsFragment extends Fragment {
                         double marketCap = result.getMarket_cap();
                         double changeIn7Days = result.getPrice_change_percentage_7d_in_currency();
                         CoinModel model = new CoinModel((currentPage - 1) * 100 + (i + 1), imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id, 0);
-                        coinModels.add(model);
-                        allCoinModels.add(model);
+                        if (type.equals("update")) {
+                            temp.add(model);
+                        } else {
+                            coinModels.add(model);
+                            allCoinModels.add(model);
+                        }
                     }
+
+                    int firstIndex = (currentPage - 1) * 100;
+
+                    if (type.equals("update")) {
+                        for (int i = 0; i < temp.size(); i++) {
+                            coinModels.set(firstIndex + i, temp.get(i));
+                        }
+                    }
+
                     mainCoinsRecyclerAdapter.notifyDataSetChanged();
                     reached = false;
                 }
@@ -194,7 +209,7 @@ public class CoinsFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
-                System.out.println(t.getMessage());
+                getCoins(type);
             }
         });
     }

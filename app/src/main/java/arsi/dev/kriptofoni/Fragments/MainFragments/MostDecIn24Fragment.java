@@ -39,7 +39,7 @@ public class MostDecIn24Fragment extends Fragment {
     private RecyclerView recyclerView;
     private MainCoinsRecyclerAdapter mainCoinsRecyclerAdapter;
     private int currentPage = 1;
-    private boolean reached = false, onScreen = false;
+    private boolean reached = false, onScreen = false, firstRender = false, startDone = false;
     private CoinGeckoApi myCoinGeckoApi;
     private String currency, ids;
     private MainCoinsSearchRecyclerAdapter mainCoinsSearchRecyclerAdapter;
@@ -50,18 +50,6 @@ public class MostDecIn24Fragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main_most_dec_24, container, false);
-
-        handler = new Handler();
-        runnable = new Runnable() {
-            @Override
-            public void run() {
-                if (onScreen) {
-                    addIds();
-                    handler.postDelayed(this, 5000);
-                }
-            }
-        };
-
 
         allCoinSearchModels = new ArrayList<>();
         coinModels = new ArrayList<>();
@@ -84,12 +72,23 @@ public class MostDecIn24Fragment extends Fragment {
                     if (!recyclerView.canScrollVertically(1) && recyclerView.getAdapter() instanceof MainCoinsRecyclerAdapter) {
                         reached = true;
                         currentPage++;
-                        addIds();
+                        addIds("initial");
                         recyclerView.scrollToPosition((currentPage - 1) * 50 - 4);
                     }
                 }
             }
         });
+
+        handler = new Handler();
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (onScreen && startDone) {
+                    addIds("update");
+                    handler.postDelayed(this, 10000);
+                }
+            }
+        };
 
         return view;
     }
@@ -112,7 +111,7 @@ public class MostDecIn24Fragment extends Fragment {
     public void onResume() {
         super.onResume();
         onScreen = true;
-        handler.postDelayed(runnable, 5000);
+        handler.postDelayed(runnable, 10000);
     }
 
     public void setCoinsList(ArrayList<CoinSearchModel> coins, boolean contains) {
@@ -157,13 +156,14 @@ public class MostDecIn24Fragment extends Fragment {
         allCoins = new ArrayList<>();
         coinModels = new ArrayList<>();
         mainCoinsRecyclerAdapter.setCoins(coinModels);
-        getCoins(this.ids);
+        getCoins(this.ids, "initial");
         recyclerView.scrollTo(0, 0);
     }
 
-    private void getCoins(String ids) {
+    private void getCoins(String ids, String type) {
         coinModels.clear();
         coinModels.addAll(allCoins);
+        ArrayList<CoinModel> temp = new ArrayList<>();
         // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
         // We create a simple HTTP Request via Retrofit
         Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, ids, null, 50, 1, true, "24h,7d");
@@ -186,9 +186,14 @@ public class MostDecIn24Fragment extends Fragment {
                         double marketCap = result.getMarket_cap();
                         double changeIn7Days = result.getPrice_change_percentage_7d_in_currency();
                         CoinModel model = new CoinModel(i, imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id, 0);
-                        coinModels.add(model);
-                        allCoins.add(model);
+                        if (type.equals("update")) {
+                            temp.add(model);
+                        } else {
+                            coinModels.add(model);
+                            allCoins.add(model);
+                        }
                     }
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         coinModels.sort(new Comparator<CoinModel>() {
                             @Override
@@ -198,7 +203,23 @@ public class MostDecIn24Fragment extends Fragment {
                         });
                     }
 
-                    for (int i = (currentPage - 1) * 50; i < (currentPage - 1) * 50 + 50; i++) {
+                    int firstIndex = (currentPage - 1) * 50;
+
+                    if (type.equals("update")) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            temp.sort(new Comparator<CoinModel>() {
+                                @Override
+                                public int compare(CoinModel lhs, CoinModel rhs) {
+                                    return Double.compare(lhs.getChangeIn24Hours(), rhs.getChangeIn24Hours());
+                                }
+                            });
+                        }
+                        for (int i = 0; i < temp.size(); i++) {
+                            coinModels.set(firstIndex + i, temp.get(i));
+                        }
+                    }
+
+                    for (int i = 0; i < coinModels.size(); i++) {
                         coinModels.get(i).setNumber(i + 1);
                     }
 
@@ -209,7 +230,7 @@ public class MostDecIn24Fragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
-                System.out.println(t.getMessage());
+                getCoins(ids, type);
             }
         });
     }
@@ -217,11 +238,14 @@ public class MostDecIn24Fragment extends Fragment {
     public void setCoins(List<CoinSearchModel> coins) {
         coinModels.clear();
         allCoins.clear();
-        this.allCoinSearchModels = coins;
-        addIds();
+        allCoinSearchModels.clear();
+        allCoinSearchModels.addAll(coins);
+        addIds("initial");
+        if (firstRender && !startDone) startDone = true;
+        if (!firstRender) firstRender = true;
     }
 
-    private void addIds() {
+    private void addIds(String type) {
         StringBuilder stringBuilder = new StringBuilder();
         String s = "";
         for (int i = (currentPage - 1) * 50; i < (currentPage - 1) * 50 + 50; i++) {
@@ -232,7 +256,7 @@ public class MostDecIn24Fragment extends Fragment {
         s = stringBuilder.toString();
         if (currentPage == 1)
             setIds(s);
-        getCoins(s);
+        getCoins(s, type);
     }
 
     private void setIds(String ids) {

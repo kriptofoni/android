@@ -174,7 +174,12 @@ public class HomeActivity extends AppCompatActivity {
     private void getAllCoins() {
         firstLoad = false;
         for (int i = 1; i <= totalPageNumber; i++) {
-            new GetAllCoins().execute(i);
+            try {
+                Thread.sleep(100);
+                new GetAllCoins().execute(i);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         Handler handler = new Handler();
         Runnable runnable = new Runnable() {
@@ -214,7 +219,7 @@ public class HomeActivity extends AppCompatActivity {
                         int index = integers[0];
                         List<CoinMarket> coins = response.body();
                         int lastIndex = coins.size();
-                        int difference = lastIndex % 10 == 0 ? lastIndex / 10 : lastIndex / 10 + 1 ;
+                        int difference = lastIndex % 10 == 0 ? lastIndex / 10 : lastIndex / 10 + 1;
                         Thread thread1 = new MyThread(coins, 0, difference, index);
                         Thread thread2 = new MyThread(coins, difference, difference * 2, index);
                         Thread thread3 = new MyThread(coins, difference * 2, difference * 3, index);
@@ -254,12 +259,14 @@ public class HomeActivity extends AppCompatActivity {
 //                            mostInc7Days.add(model7D);
 //                        }
 //                        System.out.println(coinSearchModels.size() + " , " + mostInc24Hours.size() + " , " + mostInc7Days.size());
+                    } else {
+                        System.out.println("258 " + response.code());
                     }
                 }
 
                 @Override
                 public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
-
+                    doInBackground(integers);
                 }
             });
             return true;
@@ -302,7 +309,7 @@ public class HomeActivity extends AppCompatActivity {
                     });
                 }
             } catch (CoinGeckoApiException ex) {
-                System.out.println(ex.getMessage());
+                doInBackground(voids);
             }
             return null;
         }
