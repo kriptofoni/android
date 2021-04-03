@@ -72,7 +72,7 @@ public class CoinsFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, this, "24");
         recyclerView.setAdapter(mainCoinsRecyclerAdapter);
-        mainCoinsSearchRecyclerAdapter = new MainCoinsSearchRecyclerAdapter(coinModelsForSearch);
+        mainCoinsSearchRecyclerAdapter = new MainCoinsSearchRecyclerAdapter(coinModelsForSearch, this);
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
         currency = sharedPreferences.getString("currency" ,"usd");

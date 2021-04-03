@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.github.mikephil.charting.charts.CandleStickChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.CandleData;
@@ -28,7 +29,6 @@ import com.google.gson.JsonElement;
 
 import com.google.gson.JsonObject;
 import com.squareup.picasso.Picasso;
-
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -47,7 +47,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
     private String currencyText, coinModelId;
     private TextView value, oneHourChange, twentyFourHoursChange, sevenDaysChange,
             marketValue, twentyFourHoursMarketVolume, circulatingSupply, totalSupply, webSite,
-            reddit, twitter, currency, coinName, coinMarketCap, priceInBtc, priceChangeInBtc;
+            reddit, twitter, currency, coinName, coinMarketCap, priceInBtc, priceChangeInBtc,
+            currentPrice, currentChange, currentPriceChange, currentChangeInBtc;
     private CoinGeckoApi coinGeckoApi;
     private Button buySell;
     private ImageView backButton, coinIcon;
@@ -85,6 +86,12 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         chart = findViewById(R.id.chart);
         priceInBtc = findViewById(R.id.in_btc_value);
         priceChangeInBtc = findViewById(R.id.coin_price_in_btc_change);
+        currentPrice = findViewById(R.id.currentPrice);
+        currentChange = findViewById(R.id.change);
+        currentPriceChange = findViewById(R.id.coin_price_change);
+        currentChangeInBtc = findViewById(R.id.coin_price_in_btc_change);
+
+        currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
 
         Intent intent = getIntent();
 
@@ -210,8 +217,10 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     marketValue.setText(marketCapText);
 
                     JsonObject price = (JsonObject) marketData.get("current_price");
-                    JsonElement currentPrice = price.get(currencyText);
-                    value.setText(String.valueOf(currentPrice.getAsDouble()));
+                    JsonElement currentPriceVal = price.get(currencyText);
+                    String currentPriceText = currencySymbol + " " + nf.format(currentPriceVal.getAsBigDecimal());
+                    value.setText(currentPriceText);
+                    currentPrice.setText(currentPriceText);
 
                     JsonElement currentBtcPrice = price.get("btc");
                     priceInBtc.setText(String.valueOf(currentBtcPrice.getAsDouble()));
@@ -219,24 +228,34 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     JsonObject changeOneObject = (JsonObject) marketData.get("price_change_percentage_1h_in_currency");
                     JsonElement oneHours = changeOneObject.get(currencyText);
                     oneHourChange.setText(String.valueOf("%" +oneHours.getAsDouble()));
+                    oneHourChange.setTextColor(oneHours.getAsDouble() > 0 ? Color.GREEN : Color.RED);
 
                     JsonObject changeTwentyObject = (JsonObject) marketData.get("price_change_percentage_24h_in_currency");
                     JsonElement twentyFourHours = changeTwentyObject.get(currencyText);
-                    twentyFourHoursChange.setText(String.valueOf("%" +twentyFourHours.getAsDouble()));
+                    JsonElement changePercentageInBtc = changeTwentyObject.get("btc");
+                    twentyFourHoursChange.setText(String.valueOf("%" + twentyFourHours.getAsDouble()));
+                    currentPriceChange.setText(String.valueOf("%" + twentyFourHours.getAsDouble()));
+                    currentChange.setText(String.valueOf("%" + twentyFourHours.getAsDouble()));
+                    currentChangeInBtc.setText(String.valueOf("%" + changePercentageInBtc.getAsDouble()));
+                    twentyFourHoursChange.setTextColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : Color.RED);
+                    currentPriceChange.setTextColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : Color.RED);
+                    currentChange.setTextColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : Color.RED);
+                    currentChangeInBtc.setTextColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : Color.RED);
 
                     JsonObject changeSevenDaysObject = (JsonObject) marketData.get("price_change_percentage_7d_in_currency");
                     JsonElement sevenDays = changeSevenDaysObject.get(currencyText);
                     sevenDaysChange.setText(String.valueOf("%" +sevenDays.getAsDouble()));
+                    sevenDaysChange.setTextColor(sevenDays.getAsDouble() > 0 ? Color.GREEN : Color.RED);
 
                     JsonElement twentyFourHoursMarketCapData = marketData.get("market_cap_change_percentage_24h");
                     twentyFourHoursMarketVolume.setText(String.valueOf(twentyFourHoursMarketCapData.getAsDouble()));
 
                     JsonElement circulatingSupplyData = marketData.get("circulating_supply");
-                    String circulatingSupplyText = currencySymbol + " " + circulatingSupplyData.getAsBigDecimal();
+                    String circulatingSupplyText = nf.format(circulatingSupplyData.getAsBigDecimal());
                     circulatingSupply.setText(circulatingSupplyText);
 
                     JsonElement totalSupplyData = marketData.get("total_supply");
-                    String totalSupplyText = currencySymbol + " " + totalSupplyData.getAsBigDecimal();
+                    String totalSupplyText = nf.format(totalSupplyData.getAsBigDecimal());
                     totalSupply.setText(totalSupplyText);
 
                     JsonObject links = (JsonObject) coin.get("links");

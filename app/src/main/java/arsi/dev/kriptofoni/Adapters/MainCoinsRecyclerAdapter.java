@@ -11,6 +11,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
@@ -29,18 +30,13 @@ public class MainCoinsRecyclerAdapter extends RecyclerView.Adapter<MainCoinsRecy
 
     private List<CoinModel> coins;
     private ViewGroup parent;
-    private CoinsFragment coinsFragment;
     private String currencySymbol = "";
     private String type;
+    private Fragment fragment;
 
-    public MainCoinsRecyclerAdapter(List<CoinModel> coins, CoinsFragment coinsFragment, String type) {
+    public MainCoinsRecyclerAdapter(List<CoinModel> coins, Fragment fragment, String type) {
         this.coins = coins;
-        this.coinsFragment = coinsFragment;
-        this.type = type;
-    }
-
-    public MainCoinsRecyclerAdapter(List<CoinModel> coins, String type) {
-        this.coins = coins;
+        this.fragment = fragment;
         this.type = type;
     }
 
@@ -76,9 +72,9 @@ public class MainCoinsRecyclerAdapter extends RecyclerView.Adapter<MainCoinsRecy
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(coinsFragment.getActivity(), CryptoCurrencyDetailActivity.class);
+                Intent intent = new Intent(fragment.getActivity(), CryptoCurrencyDetailActivity.class);
                 intent.putExtra("id", coin.getId());
-                coinsFragment.startActivity(intent);
+                fragment.startActivity(intent);
             }
         });
 

@@ -61,8 +61,8 @@ public class MostIncIn24Fragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.main_most_inc_24_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, "24");
-        mainCoinsSearchRecyclerAdapter = new MainCoinsSearchRecyclerAdapter(coinModelsForSearch);
+        mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, this, "24");
+        mainCoinsSearchRecyclerAdapter = new MainCoinsSearchRecyclerAdapter(coinModelsForSearch, this);
         recyclerView.setAdapter(mainCoinsRecyclerAdapter);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {

@@ -125,7 +125,7 @@
 
           <RelativeLayout
               android:layout_width="match_parent"
-              android:layout_height="400dp"
+              android:layout_height="wrap_content"
               tools:context=".MainActivity">
 
               <com.github.mikephil.charting.charts.LineChart
@@ -141,10 +141,11 @@
 
           </RelativeLayout>
 
-          <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+          <RelativeLayout
+              xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
-              android:layout_height="400dp"
+              android:layout_height="wrap_content"
               tools:context=".MainActivity">
 
           </RelativeLayout>
@@ -166,7 +167,7 @@
                   android:layout_marginVertical="10dp"/>
 
               <TextView
-                  android:id="@+id/coin_orice_change"
+                  android:id="@+id/coin_price_change"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:layout_alignParentRight="true"
@@ -180,7 +181,7 @@
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:layout_alignParentRight="true"
-                  android:layout_below="@id/coin_orice_change"
+                  android:layout_below="@id/coin_price_change"
                   android:layout_marginRight="20dp"
                   android:textColor="#000"
                   android:layout_marginBottom="5dp"

@@ -166,7 +166,6 @@ public class HomeActivity extends AppCompatActivity {
                             bottomNavigationView.getMenu().getItem(4).setEnabled(false);
                             return true;
                     }
-
                     return false;
                 }
             };

@@ -1,5 +1,6 @@
 package arsi.dev.kriptofoni.Adapters;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
@@ -16,15 +18,18 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import arsi.dev.kriptofoni.CryptoCurrencyDetailActivity;
 import arsi.dev.kriptofoni.Models.CoinSearchModel;
 import arsi.dev.kriptofoni.R;
 
 public class MainCoinsSearchRecyclerAdapter extends RecyclerView.Adapter<MainCoinsSearchRecyclerAdapter.Holder> {
 
     private List<CoinSearchModel> coins;
+    private Fragment fragment;
 
-    public MainCoinsSearchRecyclerAdapter(List<CoinSearchModel> coins) {
+    public MainCoinsSearchRecyclerAdapter(List<CoinSearchModel> coins, Fragment fragment) {
         this.coins = coins;
+        this.fragment = fragment;
     }
 
     @NonNull
@@ -48,6 +53,16 @@ public class MainCoinsSearchRecyclerAdapter extends RecyclerView.Adapter<MainCoi
         Picasso.get().load(coin.getImage()).into(holder.icon);
         if (position % 2 == 1) holder.card.setBackgroundColor(Color.parseColor("#ededed"));
         else holder.card.setBackgroundColor(Color.parseColor("#ffffff"));
+
+        holder.card.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                System.out.println(coin.getId());
+                Intent intent = new Intent(fragment.getActivity(), CryptoCurrencyDetailActivity.class);
+                intent.putExtra("id", coin.getId());
+                fragment.startActivity(intent);
+            }
+        });
     }
 
     @Override

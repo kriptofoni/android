@@ -62,8 +62,8 @@ public class MostDecIn7Fragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.main_most_dec_7_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, "7");
-        mainCoinsSearchRecyclerAdapter = new MainCoinsSearchRecyclerAdapter(coinModelsForSearch);
+        mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, this,"7");
+        mainCoinsSearchRecyclerAdapter = new MainCoinsSearchRecyclerAdapter(coinModelsForSearch, this);
         recyclerView.setAdapter(mainCoinsRecyclerAdapter);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
