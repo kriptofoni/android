@@ -1,5 +1,6 @@
 package arsi.dev.kriptofoni.Adapters;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
+import arsi.dev.kriptofoni.CryptoCurrencyDetailActivity;
 import arsi.dev.kriptofoni.Fragments.MainFragments.CoinsFragment;
 import arsi.dev.kriptofoni.Models.CoinModel;
 import arsi.dev.kriptofoni.R;
@@ -71,6 +73,14 @@ public class MainCoinsRecyclerAdapter extends RecyclerView.Adapter<MainCoinsRecy
         holder.currentPrice.setText(String.format("%s%.2f", currencySymbol, coin.getCurrentPrice()));
         if (position % 2 == 1) holder.card.setBackgroundColor(Color.parseColor("#ededed"));
         else holder.card.setBackgroundColor(Color.parseColor("#ffffff"));
+        holder.card.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(coinsFragment.getActivity(), CryptoCurrencyDetailActivity.class);
+                intent.putExtra("id", coin.getId());
+                coinsFragment.startActivity(intent);
+            }
+        });
 
         // Testing buy button...
         Random random = new Random();

@@ -44,7 +44,7 @@ public class CoinsFragment extends Fragment {
     private CoinGeckoApi myCoinGeckoApi;
     private int currentPage = 1;
     private String currency;
-    private boolean reached = false, onScreen = false, firstRender = false;
+    private boolean reached = false, onScreen = false, firstRender = false, inProgress = false;
     private Handler handler;
     private Runnable runnable;
 
@@ -57,7 +57,7 @@ public class CoinsFragment extends Fragment {
         runnable = new Runnable() {
             @Override
             public void run() {
-                if (onScreen && firstRender) {
+                if (onScreen && firstRender && !inProgress) {
                     getCoins("update");
                     handler.postDelayed(this, 10000);
                 }
@@ -86,6 +86,7 @@ public class CoinsFragment extends Fragment {
                 if (!reached) {
                     if (!recyclerView.canScrollVertically(1) && recyclerView.getAdapter() instanceof MainCoinsRecyclerAdapter) {
                         reached = true;
+                        inProgress = true;
                         currentPage++;
                         getCoins("initial");
                         recyclerView.scrollToPosition((currentPage - 1) * 100 - 4);
@@ -204,6 +205,7 @@ public class CoinsFragment extends Fragment {
 
                     mainCoinsRecyclerAdapter.notifyDataSetChanged();
                     reached = false;
+                    if (inProgress) inProgress = false;
                 }
             }
 

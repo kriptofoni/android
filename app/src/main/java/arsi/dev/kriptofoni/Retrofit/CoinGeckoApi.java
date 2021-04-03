@@ -1,10 +1,13 @@
 package arsi.dev.kriptofoni.Retrofit;
 
+import com.google.gson.JsonObject;
+
 import java.util.List;
 
 import retrofit2.Call;
 
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface CoinGeckoApi {
@@ -23,4 +26,12 @@ public interface CoinGeckoApi {
 
     @GET("coins/list")
     Call<List<Coin>> getCoins(@Query("include_platform") Boolean includePlatform);
+
+    @GET("coins/{id}")
+    Call<JsonObject> getCoinInfo(@Path("id")String id, @Query("localization") String localization,
+                                 @Query("tickers") boolean tickers,
+                                 @Query("market_data") boolean marketData ,
+                                 @Query("community_data") boolean communityData,
+                                 @Query("developer_data") boolean developerData,
+                                 @Query("spark_line") boolean sparkData);
 }

@@ -41,7 +41,7 @@ public class MostDecIn7Fragment extends Fragment {
     private RecyclerView recyclerView;
     private MainCoinsRecyclerAdapter mainCoinsRecyclerAdapter;
     private int currentPage = 1;
-    private boolean reached = false, onScreen = false, firstRender = false, startDone = false;
+    private boolean reached = false, onScreen = false, firstRender = false, startDone = false, inProgress = false;
     private CoinGeckoApi myCoinGeckoApi;
     private String currency, ids;
     private MainCoinsSearchRecyclerAdapter mainCoinsSearchRecyclerAdapter;
@@ -73,6 +73,7 @@ public class MostDecIn7Fragment extends Fragment {
                 if (!reached) {
                     if (!recyclerView.canScrollVertically(1) && recyclerView.getAdapter() instanceof MainCoinsRecyclerAdapter) {
                         reached = true;
+                        inProgress = true;
                         currentPage++;
                         addIds("initial");
                         recyclerView.scrollToPosition((currentPage - 1) * 50 - 4);
@@ -85,7 +86,7 @@ public class MostDecIn7Fragment extends Fragment {
         runnable = new Runnable() {
             @Override
             public void run() {
-                if (onScreen && startDone) {
+                if (onScreen && startDone && !inProgress) {
                     addIds("update");
                     handler.postDelayed(this, 10000);
                 }
@@ -189,7 +190,7 @@ public class MostDecIn7Fragment extends Fragment {
                         double changeIn7Days = result.getPrice_change_percentage_7d_in_currency();
                         LinkedTreeMap sparkline = (LinkedTreeMap) result.getSparkline_in_7d();
                         ArrayList<Double> prices = (ArrayList<Double>) sparkline.get("price");
-                        double pricechangeIn7Days = prices.get(prices.isEmpty() ? 0 : prices.size() - 1) - prices.get(0);
+                        double pricechangeIn7Days = prices.isEmpty() ? 0 : prices.get(prices.size() - 1) - prices.get(0);
                         CoinModel model = new CoinModel(i, imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id, pricechangeIn7Days);
                         if (type.equals("update")) {
                             temp.add(model);
@@ -230,6 +231,7 @@ public class MostDecIn7Fragment extends Fragment {
 
                     mainCoinsRecyclerAdapter.notifyDataSetChanged();
                     reached = false;
+                    if (inProgress) inProgress = false;
                 }
             }
 

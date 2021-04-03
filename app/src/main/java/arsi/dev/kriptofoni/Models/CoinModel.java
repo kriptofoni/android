@@ -70,6 +70,14 @@ public class CoinModel {
         this.changeIn24Hours = changeIn24Hours;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public double getPriceChangeIn24Hours() {
         return priceChangeIn24Hours;
     }

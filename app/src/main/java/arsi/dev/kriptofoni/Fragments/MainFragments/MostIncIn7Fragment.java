@@ -41,7 +41,7 @@ public class MostIncIn7Fragment extends Fragment {
     private RecyclerView recyclerView;
     private MainCoinsRecyclerAdapter mainCoinsRecyclerAdapter;
     private int currentPage = 1;
-    private boolean reached = false, onScreen = false, firstRender = false, startDone = false;
+    private boolean reached = false, onScreen = false, firstRender = false, startDone = false, inProgress = false;
     private CoinGeckoApi myCoinGeckoApi;
     private String currency, ids;
     private MainCoinsSearchRecyclerAdapter mainCoinsSearchRecyclerAdapter;
@@ -73,6 +73,7 @@ public class MostIncIn7Fragment extends Fragment {
                 if (!reached) {
                     if (!recyclerView.canScrollVertically(1) && recyclerView.getAdapter() instanceof MainCoinsRecyclerAdapter) {
                         reached = true;
+                        inProgress = true;
                         currentPage++;
                         addIds("initial");
                         recyclerView.scrollToPosition((currentPage - 1) * 50 - 4);
@@ -85,7 +86,7 @@ public class MostIncIn7Fragment extends Fragment {
         runnable = new Runnable() {
             @Override
             public void run() {
-                if (onScreen && startDone) {
+                if (onScreen && startDone && !inProgress) {
                     addIds("update");
                     handler.postDelayed(this, 10000);
                 }
@@ -231,6 +232,7 @@ public class MostIncIn7Fragment extends Fragment {
 
                     mainCoinsRecyclerAdapter.notifyDataSetChanged();
                     reached = false;
+                    if (inProgress) inProgress = false;
                 }
             }
 

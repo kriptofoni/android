@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -53,13 +54,14 @@ import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
 
 public class MainFragment extends Fragment {
 
-    private final HomeActivity homeActivity;
+    private HomeActivity homeActivity;
     private final int BEHAVIOUR_RESUME_ONLY_CURRENT_FRAGMENT = 1;
     private TabLayout tabs;
     private ImageView search, back;
     private TextView totalMarketVal, currency;
     private List<CoinSearchModel> coinModelsForSearch;
-    private RelativeLayout header, searchTab;
+    private RelativeLayout searchTab;
+    private ConstraintLayout header;
     private EditText searchBar;
     private String currencyText;
     private SharedPreferences sharedPreferences;
@@ -70,7 +72,7 @@ public class MainFragment extends Fragment {
     private MostIncIn7Fragment mostIncIn7Fragment;
     private MostDecIn7Fragment mostDecIn7Fragment;
 
-    public MainFragment(HomeActivity homeActivity) {
+    public MainFragment (HomeActivity homeActivity) {
         this.homeActivity = homeActivity;
     }
 
