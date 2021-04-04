@@ -1,12 +1,14 @@
 package arsi.dev.kriptofoni.Fragments.MainFragments;
 
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,6 +31,8 @@ import arsi.dev.kriptofoni.R;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
 import arsi.dev.kriptofoni.Retrofit.CoinMarket;
+import arsi.dev.kriptofoni.Retrofit.SortedCoinsApi;
+import arsi.dev.kriptofoni.Retrofit.SortedCoinsRetrofitClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -42,11 +46,12 @@ public class MostDecIn7Fragment extends Fragment {
     private MainCoinsRecyclerAdapter mainCoinsRecyclerAdapter;
     private int currentPage = 1;
     private boolean reached = false, onScreen = false, firstRender = false, startDone = false, inProgress = false;
-    private CoinGeckoApi myCoinGeckoApi;
+    private SortedCoinsApi myCoinGeckoApi;
     private String currency, ids;
     private MainCoinsSearchRecyclerAdapter mainCoinsSearchRecyclerAdapter;
     private Handler handler;
     private Runnable runnable;
+    private ProgressBar progressBar;
 
     @Nullable
     @Override
@@ -58,13 +63,15 @@ public class MostDecIn7Fragment extends Fragment {
         allCoins = new ArrayList<>();
         coinModelsForSearch = new ArrayList<>();
 
-        myCoinGeckoApi = CoinGeckoRetrofitClient.getInstance().getMyCoinGeckoApi();
+        myCoinGeckoApi = SortedCoinsRetrofitClient.getInstance().getMyCoinGeckoApi();
 
         recyclerView = view.findViewById(R.id.main_most_dec_7_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, this,"7");
         mainCoinsSearchRecyclerAdapter = new MainCoinsSearchRecyclerAdapter(coinModelsForSearch, this);
         recyclerView.setAdapter(mainCoinsRecyclerAdapter);
+
+        progressBar = view.findViewById(R.id.main_most_dec_7_progress_bar);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -159,87 +166,8 @@ public class MostDecIn7Fragment extends Fragment {
         allCoins = new ArrayList<>();
         coinModels = new ArrayList<>();
         mainCoinsRecyclerAdapter.setCoins(coinModels);
-        getCoins(this.ids, "initial");
+        new GetCoinInfo().execute(this.ids, "initial");
         recyclerView.scrollTo(0, 0);
-    }
-
-    private void getCoins(String ids, String type) {
-        coinModels.clear();
-        coinModels.addAll(allCoins);
-        ArrayList<CoinModel> temp = new ArrayList<>();
-        // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
-        // We create a simple HTTP Request via Retrofit
-        Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, ids, null, 50, 1, true, "24h,7d");
-        call.enqueue(new Callback<List<CoinMarket>>() {
-            @Override
-            public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
-                // Creating a list of Result objects using our response data.
-                List<CoinMarket> coins = response.body();
-                if (coins != null) {
-                    for (int i = 0; i < coins.size(); i++) {
-                        // Creating a coin model for each coin in our response data.
-                        CoinMarket result = coins.get(i);
-                        String imageUrl = result.getImage();
-                        String name = result.getName();
-                        String shortCut = result.getSymbol();
-                        String id = result.getId();
-                        double changeIn24Hours = result.getPrice_change_percentage_24h_in_currency();
-                        double priceChangeIn24Hours = result.getPrice_change_24h();
-                        double currentPrice = result.getCurrent_price();
-                        double marketCap = result.getMarket_cap();
-                        double changeIn7Days = result.getPrice_change_percentage_7d_in_currency();
-                        LinkedTreeMap sparkline = (LinkedTreeMap) result.getSparkline_in_7d();
-                        ArrayList<Double> prices = (ArrayList<Double>) sparkline.get("price");
-                        double pricechangeIn7Days = prices.isEmpty() ? 0 : prices.get(prices.size() - 1) - prices.get(0);
-                        CoinModel model = new CoinModel(i, imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id, pricechangeIn7Days);
-                        if (type.equals("update")) {
-                            temp.add(model);
-                        } else {
-                            coinModels.add(model);
-                            allCoins.add(model);
-                        }
-                    }
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        coinModels.sort(new Comparator<CoinModel>() {
-                            @Override
-                            public int compare(CoinModel lhs, CoinModel rhs) {
-                                return Double.compare(lhs.getChangeIn24Hours(), rhs.getChangeIn24Hours());
-                            }
-                        });
-                    }
-
-                    int firstIndex = (currentPage - 1) * 50;
-
-                    if (type.equals("update")) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            temp.sort(new Comparator<CoinModel>() {
-                                @Override
-                                public int compare(CoinModel lhs, CoinModel rhs) {
-                                    return Double.compare(lhs.getChangeIn24Hours(), rhs.getChangeIn24Hours());
-                                }
-                            });
-                        }
-                        for (int i = 0; i < temp.size(); i++) {
-                            coinModels.set(firstIndex + i, temp.get(i));
-                        }
-                    }
-
-                    for (int i = 0; i < coinModels.size(); i++) {
-                        coinModels.get(i).setNumber(i + 1);
-                    }
-
-                    mainCoinsRecyclerAdapter.notifyDataSetChanged();
-                    reached = false;
-                    if (inProgress) inProgress = false;
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
-                getCoins(ids, type);
-            }
-        });
     }
 
     public void setCoins(List<CoinSearchModel> coins) {
@@ -263,10 +191,111 @@ public class MostDecIn7Fragment extends Fragment {
         s = stringBuilder.toString();
         if (currentPage == 1)
             setIds(s);
-        getCoins(s, type);
+        new GetCoinInfo().execute(s, type);
     }
 
     private void setIds(String ids) {
         this.ids = ids;
+    }
+
+    public void setProgressBarVisibility(int visibility) {
+        progressBar.setVisibility(visibility);
+    }
+
+    private class GetCoinInfo extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... strings) {
+
+            String ids = strings[0];
+            String type = strings[1];
+
+            coinModels.clear();
+            coinModels.addAll(allCoins);
+            ArrayList<CoinModel> temp = new ArrayList<>();
+            // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
+            // We create a simple HTTP Request via Retrofit
+            Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, ids, null, 50, 1, true, "24h,7d");
+            call.enqueue(new Callback<List<CoinMarket>>() {
+                @Override
+                public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
+                    // Creating a list of Result objects using our response data.
+                    List<CoinMarket> coins = response.body();
+                    if (coins != null) {
+                        for (int i = 0; i < coins.size(); i++) {
+                            // Creating a coin model for each coin in our response data.
+                            CoinMarket result = coins.get(i);
+                            String imageUrl = result.getImage();
+                            String name = result.getName();
+                            String shortCut = result.getSymbol();
+                            String id = result.getId();
+                            double changeIn24Hours = result.getPrice_change_percentage_24h_in_currency();
+                            double priceChangeIn24Hours = result.getPrice_change_24h();
+                            double currentPrice = result.getCurrent_price();
+                            double marketCap = result.getMarket_cap();
+                            double changeIn7Days = result.getPrice_change_percentage_7d_in_currency();
+                            LinkedTreeMap sparkline = (LinkedTreeMap) result.getSparkline_in_7d();
+                            ArrayList<Double> prices = (ArrayList<Double>) sparkline.get("price");
+                            double pricechangeIn7Days = prices.isEmpty() ? 0 : prices.get(prices.size() - 1) - prices.get(0);
+                            CoinModel model = new CoinModel(i, imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id, pricechangeIn7Days);
+                            if (type.equals("update")) {
+                                temp.add(model);
+                            } else {
+                                coinModels.add(model);
+                                allCoins.add(model);
+                            }
+                        }
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            coinModels.sort(new Comparator<CoinModel>() {
+                                @Override
+                                public int compare(CoinModel lhs, CoinModel rhs) {
+                                    return Double.compare(lhs.getChangeIn24Hours(), rhs.getChangeIn24Hours());
+                                }
+                            });
+                        }
+
+                        int firstIndex = (currentPage - 1) * 50;
+
+                        if (type.equals("update")) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                temp.sort(new Comparator<CoinModel>() {
+                                    @Override
+                                    public int compare(CoinModel lhs, CoinModel rhs) {
+                                        return Double.compare(lhs.getChangeIn24Hours(), rhs.getChangeIn24Hours());
+                                    }
+                                });
+                            }
+                            for (int i = 0; i < temp.size(); i++) {
+                                coinModels.set(firstIndex + i, temp.get(i));
+                            }
+                        }
+
+                        for (int i = 0; i < coinModels.size(); i++) {
+                            coinModels.get(i).setNumber(i + 1);
+                        }
+
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mainCoinsRecyclerAdapter.notifyDataSetChanged();
+                                progressBar.setVisibility(View.GONE);
+                            }
+                        });
+                        reached = false;
+                        if (inProgress) inProgress = false;
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
+                    doInBackground(strings);
+                }
+            });
+
+            return null;
+
+        }
     }
 }

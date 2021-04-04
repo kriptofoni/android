@@ -6,10 +6,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Style;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -27,17 +31,29 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import com.litesoftwares.coingecko.CoinGeckoApiClient;
+import com.litesoftwares.coingecko.domain.Coins.CoinData.Links;
+import com.litesoftwares.coingecko.domain.Coins.CoinFullData;
+import com.litesoftwares.coingecko.domain.Coins.MarketData;
+import com.litesoftwares.coingecko.domain.Shared.Market;
+import com.litesoftwares.coingecko.exception.CoinGeckoApiException;
+import com.litesoftwares.coingecko.impl.CoinGeckoApiClientImpl;
 import com.squareup.picasso.Picasso;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
+import arsi.dev.kriptofoni.Retrofit.CoinInfoApi;
+import arsi.dev.kriptofoni.Retrofit.CoinInfoRetrofitClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -48,14 +64,16 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
     private TextView value, oneHourChange, twentyFourHoursChange, sevenDaysChange,
             marketValue, twentyFourHoursMarketVolume, circulatingSupply, totalSupply, webSite,
             reddit, twitter, currency, coinName, coinMarketCap, priceInBtc, priceChangeInBtc,
-            currentPrice, currentChange, currentPriceChange, currentChangeInBtc;
-    private CoinGeckoApi coinGeckoApi;
+            currentPrice, currentChange, currentPriceChange;
+    private CoinInfoApi coinGeckoApi;
     private Button buySell;
     private ImageView backButton, coinIcon;
     private LineChart chart;
     private CandleStickChart candleStickChart;
     private CountryCodePicker countryCodePicker;
     private String[] currencySymbols;
+    private ScrollView scrollView;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,17 +107,21 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         currentPrice = findViewById(R.id.currentPrice);
         currentChange = findViewById(R.id.change);
         currentPriceChange = findViewById(R.id.coin_price_change);
-        currentChangeInBtc = findViewById(R.id.coin_price_in_btc_change);
+        scrollView = findViewById(R.id.crypto_currency_detail_scroll_view);
+        progressBar = findViewById(R.id.crypto_currency_detail_progress_bar);
+
+        makeProgressBarVisible();
 
         currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
 
         Intent intent = getIntent();
 
         coinModelId = intent.getStringExtra("id");
-        coinGeckoApi = CoinGeckoRetrofitClient.getInstance().getMyCoinGeckoApi();
+        coinGeckoApi = CoinInfoRetrofitClient.getInstance().getMyCoinGeckoApi();
 
-        getDataForModel();
-        lineChart();
+        new GetCoinInfo().execute();
+        new Get24HVol().execute();
+        new GetMarketChart().execute();
         candleStickChart();
 
         countryCodePicker = new CountryCodePicker();
@@ -121,6 +143,16 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         });
     }
 
+    private void makeProgressBarVisible() {
+        scrollView.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void makeProgressBarInvisible() {
+        progressBar.setVisibility(View.GONE);
+        scrollView.setVisibility(View.VISIBLE);
+    }
+
     private void candleStickChart() {
 
         candleStickChart.setDragEnabled(true);
@@ -138,9 +170,9 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         cds.setShadowColor(Color.DKGRAY);
         cds.setShadowWidth(0.7f);
         cds.setDecreasingColor(Color.RED);
-        cds.setDecreasingPaintStyle(Paint.Style.FILL);
+        cds.setDecreasingPaintStyle(Style.FILL);
         cds.setIncreasingColor(Color.rgb(122, 242, 84));
-        cds.setIncreasingPaintStyle(Paint.Style.STROKE);
+        cds.setIncreasingPaintStyle(Style.STROKE);
         cds.setNeutralColor(Color.BLUE);
         cds.setValueTextColor(Color.RED);
         CandleData cd = new CandleData(cds);
@@ -150,32 +182,16 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         candleStickChart.setVisibility(View.GONE);
     }
 
-    private void lineChart(){
+    private void lineChart(ArrayList<Entry> yValue){
 
         chart.setDragEnabled(true);
         chart.setScaleEnabled(false);
 
-        ArrayList<Entry> yValue = new ArrayList<>();
-
-        yValue.add(new Entry(0,60f));
-        yValue.add(new Entry(2,50f));
-        yValue.add(new Entry(3,40f));
-        yValue.add(new Entry(4,30f));
-        yValue.add(new Entry(5,20f));
-        yValue.add(new Entry(6,10f));
-        yValue.add(new Entry(7,80f));
-        yValue.add(new Entry(8,90f));
-        yValue.add(new Entry(9,100f));
-        yValue.add(new Entry(10,110f));
-        yValue.add(new Entry(11,120f));
-        yValue.add(new Entry(12,130f));
-        yValue.add(new Entry(13,140f));
-        yValue.add(new Entry(14,150f));
-        yValue.add(new Entry(15,160f));
-        yValue.add(new Entry(16,170f));
-        yValue.add(new Entry(17,180f));
-
         LineDataSet set1 = new LineDataSet(yValue,"Data Set 1");
+        set1.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        set1.setValueTextSize(0f);
+        set1.setLineWidth(2f);
+        set1.setColor(Color.RED);
 
         set1.setFillAlpha(110);
 
@@ -185,96 +201,198 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         LineData data = new LineData(dataSets);
 
         chart.setData(data);
-        chart.setVisibility(View.GONE);
     }
 
-    private void getDataForModel(){
-        Call<JsonObject> call = coinGeckoApi.getCoinInfo(coinModelId,"false",false,true,false,false,false);
-        call.enqueue(new Callback<JsonObject>() {
-            @Override
-            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                if (response.isSuccessful()) {
-                    JsonObject coin = response.body();
-                    String currencySymbol = currencySymbols[1];
-                    NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
+    private class GetCoinInfo extends AsyncTask<Void, Void, Void> {
 
-                    JsonObject image = (JsonObject) coin.get("image");
-                    JsonElement thumb = (JsonElement) image.get("thumb");
-                    System.out.println(image + " , " + thumb);
-                    Picasso.get().load(thumb.getAsString()).into(coinIcon);
+        @Override
+        protected Void doInBackground(Void... voids) {
 
-                    JsonElement name = (JsonElement) coin.get("name");
-                    JsonElement shortCut = (JsonElement) coin.get("symbol");
-                    String nameText = name.getAsString() + " " + shortCut.getAsString().toUpperCase(Locale.ENGLISH);
-                    coinName.setText(nameText);
+            Call<JsonObject> call = coinGeckoApi.getCoinInfo(coinModelId,"false",false,true,false,false,false);
+            call.enqueue(new Callback<JsonObject>() {
+                @Override
+                public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                    if (response.isSuccessful()) {
+                        JsonObject coin = response.body();
+                        String currencySymbol = currencySymbols[1];
+                        NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
 
-                    JsonObject marketData = (JsonObject) coin.get("market_data");
-                    JsonObject marketCap = (JsonObject) marketData.get("market_cap");
-                    JsonElement marketCapInCurrency = marketCap.get(currencyText);
-                    BigDecimal marketCapDouble = marketCapInCurrency.getAsBigDecimal();
-                    String marketCapText = currencySymbol + " " + nf.format(marketCapDouble);
-                    coinMarketCap.setText(marketCapText);
-                    marketValue.setText(marketCapText);
+                        JsonObject image = (JsonObject) coin.get("image");
+                        JsonElement thumb = (JsonElement) image.get("thumb");
 
-                    JsonObject price = (JsonObject) marketData.get("current_price");
-                    JsonElement currentPriceVal = price.get(currencyText);
-                    String currentPriceText = currencySymbol + " " + nf.format(currentPriceVal.getAsBigDecimal());
-                    value.setText(currentPriceText);
-                    currentPrice.setText(currentPriceText);
+                        JsonElement name = (JsonElement) coin.get("name");
+                        JsonElement shortCut = (JsonElement) coin.get("symbol");
+                        String nameText = name.getAsString() + " " + shortCut.getAsString().toUpperCase(Locale.ENGLISH);
 
-                    JsonElement currentBtcPrice = price.get("btc");
-                    priceInBtc.setText(String.valueOf(currentBtcPrice.getAsDouble()));
+                        JsonObject marketData = (JsonObject) coin.get("market_data");
+                        JsonObject marketCap = (JsonObject) marketData.get("market_cap");
+                        JsonElement marketCapInCurrency = marketCap.get(currencyText);
+                        BigDecimal marketCapDouble = marketCapInCurrency.getAsBigDecimal();
+                        String marketCapText = currencySymbol + " " + nf.format(marketCapDouble);
 
-                    JsonObject changeOneObject = (JsonObject) marketData.get("price_change_percentage_1h_in_currency");
-                    JsonElement oneHours = changeOneObject.get(currencyText);
-                    oneHourChange.setText(String.valueOf("%" +oneHours.getAsDouble()));
-                    oneHourChange.setTextColor(oneHours.getAsDouble() > 0 ? Color.GREEN : Color.RED);
+                        JsonObject price = (JsonObject) marketData.get("current_price");
+                        JsonElement currentPriceVal = price.get(currencyText);
+                        String currentPriceText = currencySymbol + " " + nf.format(currentPriceVal.getAsBigDecimal());
 
-                    JsonObject changeTwentyObject = (JsonObject) marketData.get("price_change_percentage_24h_in_currency");
-                    JsonElement twentyFourHours = changeTwentyObject.get(currencyText);
-                    JsonElement changePercentageInBtc = changeTwentyObject.get("btc");
-                    twentyFourHoursChange.setText(String.valueOf("%" + twentyFourHours.getAsDouble()));
-                    currentPriceChange.setText(String.valueOf("%" + twentyFourHours.getAsDouble()));
-                    currentChange.setText(String.valueOf("%" + twentyFourHours.getAsDouble()));
-                    currentChangeInBtc.setText(String.valueOf("%" + changePercentageInBtc.getAsDouble()));
-                    twentyFourHoursChange.setTextColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : Color.RED);
-                    currentPriceChange.setTextColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : Color.RED);
-                    currentChange.setTextColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : Color.RED);
-                    currentChangeInBtc.setTextColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : Color.RED);
+                        JsonElement currentBtcPrice = price.get("btc");
+                        String currentBtcPriceText = currentBtcPrice.isJsonNull() ? "-" : "₿ " + nf.format(currentBtcPrice.getAsBigDecimal());
 
-                    JsonObject changeSevenDaysObject = (JsonObject) marketData.get("price_change_percentage_7d_in_currency");
-                    JsonElement sevenDays = changeSevenDaysObject.get(currencyText);
-                    sevenDaysChange.setText(String.valueOf("%" +sevenDays.getAsDouble()));
-                    sevenDaysChange.setTextColor(sevenDays.getAsDouble() > 0 ? Color.GREEN : Color.RED);
+                        JsonObject changeOneObject = (JsonObject) marketData.get("price_change_percentage_1h_in_currency");
+                        JsonElement oneHours = changeOneObject.isJsonNull() ? null : changeOneObject.get(currencyText);
 
-                    JsonElement twentyFourHoursMarketCapData = marketData.get("market_cap_change_percentage_24h");
-                    twentyFourHoursMarketVolume.setText(String.valueOf(twentyFourHoursMarketCapData.getAsDouble()));
+                        JsonObject changeTwentyObject = (JsonObject) marketData.get("price_change_percentage_24h_in_currency");
+                        JsonElement twentyFourHours = changeTwentyObject.isJsonNull() ? null : changeTwentyObject.get(currencyText);
+                        JsonElement changePercentageInBtc = changeTwentyObject.isJsonNull() ? null : changeTwentyObject.get("btc");
 
-                    JsonElement circulatingSupplyData = marketData.get("circulating_supply");
-                    String circulatingSupplyText = nf.format(circulatingSupplyData.getAsBigDecimal());
-                    circulatingSupply.setText(circulatingSupplyText);
+                        JsonObject changeSevenDaysObject = (JsonObject) marketData.get("price_change_percentage_7d_in_currency");
+                        JsonElement sevenDays = changeSevenDaysObject.isJsonNull() ? null : changeSevenDaysObject.get(currencyText);
 
-                    JsonElement totalSupplyData = marketData.get("total_supply");
-                    String totalSupplyText = nf.format(totalSupplyData.getAsBigDecimal());
-                    totalSupply.setText(totalSupplyText);
+                        JsonElement circulatingSupplyData = marketData.get("circulating_supply");
+                        String circulatingSupplyText;
 
-                    JsonObject links = (JsonObject) coin.get("links");
-                    JsonElement webSiteData = links.get("homepage");
-                    JsonElement redditText = links.get("subreddit_url");
-                    JsonElement twitterText = links.get("twitter_screen_name");
-                    String twitterUri = "https://www.twitter.com/" + twitterText.getAsString();
-                    JsonArray webSiteArray = webSiteData.getAsJsonArray();
-                    String a = webSiteArray.get(0).getAsString();
-                    webSite.setText(a);
-                    reddit.setText(redditText.getAsString());
-                    twitter.setText(twitterUri);
+                        if (circulatingSupplyData.isJsonNull()) {
+                            circulatingSupplyText = "-";
+                        } else {
+                            circulatingSupplyText = nf.format(circulatingSupplyData.getAsBigDecimal());
+                        }
+
+                        JsonElement totalSupplyData = marketData.get("total_supply");
+                        String totalSupplyText;
+
+                        if (totalSupplyData.isJsonNull()) {
+                            totalSupplyText = "-";
+                        } else {
+                            totalSupplyText = nf.format(totalSupplyData.getAsBigDecimal());
+                        }
+
+                        JsonObject links = (JsonObject) coin.get("links");
+                        JsonElement webSiteData = links.get("homepage");
+                        JsonElement redditText = links.get("subreddit_url");
+                        JsonElement twitterText = links.get("twitter_screen_name");
+                        String twitterUri = twitterText.isJsonNull() ? "-" : "https://www.twitter.com/" + twitterText.getAsString();
+                        JsonArray webSiteArray = webSiteData.isJsonNull() ? new JsonArray() : webSiteData.getAsJsonArray();
+                        String a = webSiteArray.size() == 0 ? "-" : webSiteArray.get(0).getAsString();
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Picasso.get().load(thumb.getAsString()).into(coinIcon);
+                                coinName.setText(nameText);
+                                coinMarketCap.setText(marketCapText);
+                                marketValue.setText(marketCapText);
+                                value.setText(currentPriceText);
+                                currentPrice.setText(currentPriceText);
+                                priceInBtc.setText(currentBtcPriceText);
+                                oneHourChange.setText(oneHours == null || oneHours.isJsonNull()  ? "-" : "%" + oneHours.getAsDouble());
+                                sevenDaysChange.setText(sevenDays == null || sevenDays.isJsonNull() ? "-" : "%" +sevenDays.getAsDouble());
+                                twentyFourHoursChange.setText(twentyFourHours == null || twentyFourHours.isJsonNull() ? "-" : "%" + twentyFourHours.getAsDouble());
+                                currentPriceChange.setText(twentyFourHours == null || twentyFourHours.isJsonNull() ? "-" : "%" + twentyFourHours.getAsDouble());
+                                currentChange.setText(twentyFourHours == null || twentyFourHours.isJsonNull() ? "-" : "%" + twentyFourHours.getAsDouble());
+                                priceChangeInBtc.setText(changePercentageInBtc == null || changePercentageInBtc.isJsonNull() ? "-" : "%" + changePercentageInBtc.getAsDouble());
+                                circulatingSupply.setText(circulatingSupplyText);
+                                totalSupply.setText(totalSupplyText);
+                                webSite.setText(a);
+                                reddit.setText(redditText.isJsonNull() ? "-" : redditText.getAsString());
+                                twitter.setText(twitterUri);
+
+                                if (oneHours != null && !oneHours.isJsonNull())
+                                    oneHourChange.setTextColor(oneHours.getAsDouble() > 0 ? Color.GREEN : oneHours.getAsDouble() < 0 ? Color.RED : Color.parseColor("#797676"));
+                                if (twentyFourHours != null && !twentyFourHours.isJsonNull()) {
+                                    twentyFourHoursChange.setTextColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : twentyFourHours.getAsDouble() < 0 ? Color.RED : Color.parseColor("#797676"));
+                                    currentPriceChange.setTextColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : twentyFourHours.getAsDouble() < 0 ? Color.RED : Color.parseColor("#797676"));
+                                    currentChange.setTextColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : twentyFourHours.getAsDouble() < 0 ? Color.RED : Color.parseColor("#797676"));
+                                }
+                                if (changePercentageInBtc != null && !changePercentageInBtc.isJsonNull())
+                                    priceChangeInBtc.setTextColor(changePercentageInBtc.getAsDouble() > 0 ? Color.GREEN : changePercentageInBtc.getAsDouble() < 0 ? Color.RED : Color.parseColor("#797676"));
+                                if (sevenDays != null && !sevenDays.isJsonNull())
+                                    sevenDaysChange.setTextColor(sevenDays.getAsDouble() > 0 ? Color.GREEN : sevenDays.getAsDouble() < 0 ? Color.RED : Color.parseColor("#797676"));
+
+                                makeProgressBarInvisible();
+                            }
+                        });
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<JsonObject> call, Throwable t) {
-                getDataForModel();
-            }
-        });
+                @Override
+                public void onFailure(Call<JsonObject> call, Throwable t) {
+                    doInBackground(voids);
+                }
+            });
+            return null;
+        }
+    }
+
+    private class Get24HVol extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Call<JsonObject> call = coinGeckoApi.getCoinSimple(coinModelId, currencyText, "true");
+            call.enqueue(new Callback<JsonObject>() {
+                @Override
+                public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                    if (response.isSuccessful()) {
+                        NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
+
+                        JsonObject coin = (JsonObject) response.body().get(coinModelId);
+                        String currencySymbol = currencySymbols[1];
+                        String element = currencyText + "_24h_vol";
+                        JsonElement vol24H = coin.isJsonNull() ? null : coin.get(element);
+                        String text = vol24H == null || vol24H.isJsonNull() ? "-" : currencySymbol + " " + nf.format(vol24H.getAsBigDecimal());
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                twentyFourHoursMarketVolume.setText(text);
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<JsonObject> call, Throwable t) {
+                    doInBackground(voids);
+                }
+            });
+            return null;
+        }
+    }
+
+    private class GetMarketChart extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            Call<JsonObject> call = coinGeckoApi.getMarketChart(coinModelId, currencyText, "1617474683", "1617571894");
+            call.enqueue(new Callback<JsonObject>() {
+                @Override
+                public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                    if (response.isSuccessful()) {
+                        JsonObject result = response.body();
+                        JsonArray prices = (JsonArray) result.get("prices");
+                        ArrayList<Entry> yValue = new ArrayList<>();
+                        for (int i = 0; i < prices.size(); i++) {
+                            if (i % 4 == 0) {
+                                JsonArray priceValues = (JsonArray) prices.get(i);
+                                float price = priceValues.get(1).getAsFloat();
+                                yValue.add(new Entry(i, price));
+                            }
+                        }
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                lineChart(yValue);
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<JsonObject> call, Throwable t) {
+                    doInBackground(voids);
+                }
+            });
+            return null;
+        }
     }
 }

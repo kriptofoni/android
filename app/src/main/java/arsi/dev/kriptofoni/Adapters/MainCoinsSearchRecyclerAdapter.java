@@ -18,6 +18,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import arsi.dev.kriptofoni.CoinSelectActivity;
 import arsi.dev.kriptofoni.CryptoCurrencyDetailActivity;
 import arsi.dev.kriptofoni.Models.CoinSearchModel;
 import arsi.dev.kriptofoni.R;
@@ -26,10 +27,16 @@ public class MainCoinsSearchRecyclerAdapter extends RecyclerView.Adapter<MainCoi
 
     private List<CoinSearchModel> coins;
     private Fragment fragment;
+    private CoinSelectActivity coinSelectActivity;
 
     public MainCoinsSearchRecyclerAdapter(List<CoinSearchModel> coins, Fragment fragment) {
         this.coins = coins;
         this.fragment = fragment;
+    }
+
+    public MainCoinsSearchRecyclerAdapter(List<CoinSearchModel> coins, CoinSelectActivity coinSelectActivity) {
+        this.coins = coins;
+        this.coinSelectActivity = coinSelectActivity;
     }
 
     @NonNull
@@ -57,10 +64,17 @@ public class MainCoinsSearchRecyclerAdapter extends RecyclerView.Adapter<MainCoi
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println(coin.getId());
-                Intent intent = new Intent(fragment.getActivity(), CryptoCurrencyDetailActivity.class);
-                intent.putExtra("id", coin.getId());
-                fragment.startActivity(intent);
+                if (fragment != null) {
+                    System.out.println(coin.getId());
+                    Intent intent = new Intent(fragment.getActivity(), CryptoCurrencyDetailActivity.class);
+                    intent.putExtra("id", coin.getId());
+                    fragment.startActivity(intent);
+                } else if (coinSelectActivity != null) {
+                    Intent intent = coinSelectActivity.getIntent();
+                    intent.putExtra("shortCut", coin.getSymbol());
+                    coinSelectActivity.setResult(1, intent);
+                    coinSelectActivity.finish();
+                }
             }
         });
     }

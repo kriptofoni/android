@@ -55,7 +55,7 @@ import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
 public class MainFragment extends Fragment {
 
     private HomeActivity homeActivity;
-    private final int BEHAVIOUR_RESUME_ONLY_CURRENT_FRAGMENT = 1;
+    private final int BEHAVIOUR_RESUME_ONLY_CURRENT_FRAGMENT = 1, CURRENCY_CHOOSE_REQUEST_CODE = 1;
     private TabLayout tabs;
     private ImageView search, back;
     private TextView totalMarketVal, currency;
@@ -138,7 +138,7 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), CurrencyChooseActivity.class);
-                startActivityForResult(intent, 0);
+                startActivityForResult(intent, CURRENCY_CHOOSE_REQUEST_CODE);
             }
         });
 
@@ -285,6 +285,7 @@ public class MainFragment extends Fragment {
             });
         }
         mostIncIn24Fragment.setCoins(mostIncIn24List);
+        mostIncIn24Fragment.setProgressBarVisibility(View.VISIBLE);
     }
 
     public void setMostDecIn24List(List<CoinSearchModel> mostDecIn24List) {
@@ -297,6 +298,7 @@ public class MainFragment extends Fragment {
             });
         }
         mostDecIn24Fragment.setCoins(mostDecIn24List);
+        mostDecIn24Fragment.setProgressBarVisibility(View.VISIBLE);
     }
 
     public void setMostIncIn7List(List<CoinSearchModel> mostIncIn7List) {
@@ -309,6 +311,7 @@ public class MainFragment extends Fragment {
             });
         }
         mostIncIn7Fragment.setCoins(mostIncIn7List);
+        mostIncIn7Fragment.setProgressBarVisibility(View.VISIBLE);
     }
 
     public void setMostDecIn7List(List<CoinSearchModel> mostDecIn7List) {
@@ -321,6 +324,7 @@ public class MainFragment extends Fragment {
             });
         }
         mostDecIn7Fragment.setCoins(mostDecIn7List);
+        mostDecIn7Fragment.setProgressBarVisibility(View.VISIBLE);
     }
 
     public void writeToMem(String id, List<CoinSearchModel> list) {
@@ -333,7 +337,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 0) {
+        if (requestCode == CURRENCY_CHOOSE_REQUEST_CODE && resultCode == CURRENCY_CHOOSE_REQUEST_CODE) {
             currencyText = sharedPreferences.getString("currency", "usd");
             homeActivity.getTotalMarketCap();
             // Refreshing coinsFragment

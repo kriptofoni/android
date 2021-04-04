@@ -16,6 +16,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import arsi.dev.kriptofoni.CurrencyChooseActivity;
 import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
 import arsi.dev.kriptofoni.R;
 
@@ -25,10 +26,12 @@ public class CurrencyChooseRecyclerAdapter extends RecyclerView.Adapter<Currency
     private SharedPreferences sharedPreferences;
     private String currency;
     private CountryCodePicker countryCodePicker;
+    private CurrencyChooseActivity currencyChooseActivity;
 
-    public CurrencyChooseRecyclerAdapter(ArrayList<String> currencies, SharedPreferences sharedPreferences) {
+    public CurrencyChooseRecyclerAdapter(ArrayList<String> currencies, SharedPreferences sharedPreferences, CurrencyChooseActivity currencyChooseActivity) {
         this.currencies = currencies;
         this.sharedPreferences = sharedPreferences;
+        this.currencyChooseActivity = currencyChooseActivity;
         this.currency = sharedPreferences.getString("currency", "usd");
         countryCodePicker = new CountryCodePicker();
     }
@@ -71,6 +74,7 @@ public class CurrencyChooseRecyclerAdapter extends RecyclerView.Adapter<Currency
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("currency", text);
                 editor.apply();
+                currencyChooseActivity.setResult(1);
                 notifyDataSetChanged();
                 setCurrency(text);
             }

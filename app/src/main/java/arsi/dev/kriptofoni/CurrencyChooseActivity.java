@@ -26,6 +26,8 @@ import java.util.Locale;
 import arsi.dev.kriptofoni.Adapters.CurrencyChooseRecyclerAdapter;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
+import arsi.dev.kriptofoni.Retrofit.CurrenciesApi;
+import arsi.dev.kriptofoni.Retrofit.CurrenciesRetrofitClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -36,11 +38,10 @@ public class CurrencyChooseActivity extends AppCompatActivity {
     private CurrencyChooseRecyclerAdapter currencyChooseRecyclerAdapter;
     private ImageView back;
     private EditText search;
-    private CoinGeckoApiClient client;
     private ArrayList<String> currencies;
     private String currency;
     private SharedPreferences sharedPreferences;
-    private CoinGeckoApi myCoinGeckoApi;
+    private CurrenciesApi myCoinGeckoApi;
     private ProgressBar progressBar;
 
     @Override
@@ -49,20 +50,18 @@ public class CurrencyChooseActivity extends AppCompatActivity {
         setContentView(R.layout.activity_currency_choose);
 
         sharedPreferences = getSharedPreferences("Preferences", 0);
-        myCoinGeckoApi = CoinGeckoRetrofitClient.getInstance().getMyCoinGeckoApi();
+        myCoinGeckoApi = CurrenciesRetrofitClient.getInstance().getMyCoinGeckoApi();
 
         currencies = new ArrayList<>();
 
         recyclerView = findViewById(R.id.currency_choose_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        currencyChooseRecyclerAdapter = new CurrencyChooseRecyclerAdapter(currencies, sharedPreferences);
+        currencyChooseRecyclerAdapter = new CurrencyChooseRecyclerAdapter(currencies, sharedPreferences, this);
         recyclerView.setAdapter(currencyChooseRecyclerAdapter);
 
         back = findViewById(R.id.currency_choose_back_button);
         search = findViewById(R.id.currency_choose_search_bar);
         progressBar = findViewById(R.id.currency_choose_progress_bar);
-
-        client = new CoinGeckoApiClientImpl();
 
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,15 +107,6 @@ public class CurrencyChooseActivity extends AppCompatActivity {
     }
 
     private void getCurrencies() {
-//        GetCurrencies getCurrencies = new GetCurrencies();
-//        getCurrencies.execute();
-//        try {
-//            if (getCurrencies.get()) {
-//                currencyChooseRecyclerAdapter.setCurrencies(currencies);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
         Call<String[]> call = myCoinGeckoApi.getCurrencies();
         call.enqueue(new Callback<String[]>() {
             @Override
@@ -137,16 +127,5 @@ public class CurrencyChooseActivity extends AppCompatActivity {
             }
 
         });
-    }
-
-    private class GetCurrencies extends AsyncTask<Void, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            List<String> curr = client.getSupportedVsCurrencies();
-            currencies.addAll(curr);
-
-            return true;
-        }
     }
 }

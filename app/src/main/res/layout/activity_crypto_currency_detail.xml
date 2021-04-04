@@ -47,7 +47,6 @@
             android:id="@+id/coinName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bitcoin BTC"
             android:textColor="#000"
             android:textSize="20dp"
             android:layout_marginStart="10dp"
@@ -59,7 +58,6 @@
             android:id="@+id/coinMarketCap"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="$1.727.274.164.343"
             android:layout_marginLeft="10dp"
             android:textColor="#000"
             android:textSize="15dp"
@@ -81,7 +79,14 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <ProgressBar
+        android:id="@+id/crypto_currency_detail_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
   <ScrollView
+      android:id="@+id/crypto_currency_detail_scroll_view"
       android:layout_below="@id/detail_header"
       android:layout_width="match_parent"
       android:layout_height="wrap_content">
@@ -125,19 +130,13 @@
 
           <RelativeLayout
               android:layout_width="match_parent"
-              android:layout_height="wrap_content"
+              android:layout_height="400dp"
               tools:context=".MainActivity">
 
               <com.github.mikephil.charting.charts.LineChart
                   android:id="@+id/chart"
                   android:layout_width="match_parent"
-                  android:layout_height="match_parent" >
-
-                  <com.github.mikephil.charting.charts.CandleStickChart
-                      android:id="@+id/candleStickChart"
-                      android:layout_width="match_parent"
-                      android:layout_height="match_parent" />
-              </com.github.mikephil.charting.charts.LineChart>
+                  android:layout_height="match_parent" />
 
           </RelativeLayout>
 
@@ -147,6 +146,11 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               tools:context=".MainActivity">
+
+              <com.github.mikephil.charting.charts.CandleStickChart
+                  android:id="@+id/candleStickChart"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent" />
 
           </RelativeLayout>
 
@@ -364,7 +368,7 @@
                   android:layout_marginRight="20dp"
                   android:layout_centerVertical="true"
                   android:textColor="#000"
-                  android:text="$56.549.897.996,96"/>
+                  />
 
           </RelativeLayout>
 

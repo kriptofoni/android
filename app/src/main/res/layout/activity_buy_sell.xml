@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".BuySellActivity">
+
     <RelativeLayout
         android:id="@+id/detail_header"
         android:layout_width="match_parent"
@@ -13,25 +14,25 @@
         app:layout_constraintLeft_toLeftOf="parent">
 
         <ImageView
-            android:id="@+id/detail_back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_arrow_back_black_24dp"
+            android:id="@+id/buy_sell_back_button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_baseline_clear_24"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"/>
-
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="New Operation"
-            android:layout_toRightOf="@+id/detail_back_button"
+            android:layout_toRightOf="@+id/buy_sell_back_button"
             android:layout_marginTop="20dp"
-            android:layout_marginLeft="50dp"
+            android:layout_marginLeft="40dp"
             android:textColor="#000"
             android:textSize="20dp"
+            android:textStyle="bold"
             android:layout_marginRight="20dp" />
 
         <TextView
@@ -59,7 +60,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.18" />
+        app:layout_constraintGuide_percent="0.17" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/buyButtonLeft"
@@ -73,21 +74,28 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.3" />
+        app:layout_constraintGuide_percent="0.4" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/notesRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.92" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/sellButtonLeft"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.32" />
+        app:layout_constraintGuide_percent="0.42" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/sellButtonRight"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.54" />
+        app:layout_constraintGuide_percent="0.74" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/totalMoneyTextBottom"
@@ -115,7 +123,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.9" />
+        app:layout_constraintGuide_percent="0.92" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/addButtonBottom"
@@ -145,7 +153,6 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.8" />
 
-
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/operationDateGuide"
         android:layout_width="wrap_content"
@@ -164,79 +171,88 @@
         app:layout_constraintBottom_toTopOf="@+id/totalMoneyTextBottom"
         app:layout_constraintStart_toStartOf="@+id/buyButtonLeft" />
 
-
     <EditText
         android:id="@+id/currenciesInputText"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="Amount of currency"
         android:inputType="numberDecimal"
         android:textColor="#000"
         android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@+id/totalMoneyTextBottom"
-        app:layout_constraintLeft_toRightOf="@id/editTextLeft" />
-
+        app:layout_constraintEnd_toEndOf="@id/notesRight"
+        app:layout_constraintLeft_toRightOf="@id/editTextLeft"
+        app:layout_constraintStart_toStartOf="@+id/editTextLeft" />
 
     <Button
         android:id="@+id/buyButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:text="Buy"
+        android:background="@drawable/detail_button"
         app:layout_constraintBottom_toTopOf="@+id/twoButtonsBottom"
         app:layout_constraintEnd_toStartOf="@+id/buyButtonRight"
         app:layout_constraintStart_toStartOf="@+id/buyButtonLeft"
-        app:layout_constraintTop_toTopOf="@+id/twoButtonsTop" />
+        app:layout_constraintTop_toTopOf="@+id/twoButtonsTop"
+        android:textSize="18dp"/>
 
     <Button
         android:id="@+id/sellButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:text="Sell"
+        android:background="@drawable/detail_button"
         app:layout_constraintBottom_toTopOf="@+id/twoButtonsBottom"
         app:layout_constraintEnd_toStartOf="@+id/sellButtonRight"
         app:layout_constraintStart_toStartOf="@+id/sellButtonLeft"
-        app:layout_constraintTop_toTopOf="@+id/twoButtonsTop" />
+        app:layout_constraintTop_toTopOf="@+id/twoButtonsTop"
+        android:textSize="18dp"
+        />
 
     <Button
         android:id="@+id/addOperation"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:text="Add Operatıon"
+        android:background="@drawable/detail_button"
         app:layout_constraintBottom_toBottomOf="@id/addButtonBottom"
         app:layout_constraintEnd_toStartOf="@+id/addButtonRight"
         app:layout_constraintStart_toStartOf="@+id/buyButtonLeft"
         app:layout_constraintTop_toTopOf="@+id/addButtonUp"
+        android:textSize="18dp"
+        android:textColor="#f2a900"
          />
 
     <EditText
         android:id="@+id/priceInputText"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="Price"
         android:inputType="numberDecimal"
         android:textColor="#000"
         android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@+id/priceTextGuide"
-        app:layout_constraintStart_toStartOf="@+id/editTextLeft" />
+        app:layout_constraintStart_toStartOf="@+id/editTextLeft"
+        app:layout_constraintEnd_toEndOf="@id/notesRight" />
 
     <EditText
         android:id="@+id/editCostInputText"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="Tab to Edit"
         android:textColor="#000"
         android:inputType="numberDecimal"
         android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@+id/costTextGuide"
-        app:layout_constraintStart_toStartOf="@+id/editTextLeft" />
-
+        app:layout_constraintStart_toStartOf="@+id/editTextLeft"
+        app:layout_constraintEnd_toEndOf="@id/notesRight"/>
 
     <TextView
         android:id="@+id/operationDateClick"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
-        android:text="Operation Date(Optional)"
+        android:text="Operation Date (Optional)"
         android:textColor="#000"
         android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@+id/operationDate"
@@ -293,13 +309,15 @@
 
     <EditText
         android:id="@+id/notesEditText"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="Tab to edit"
         android:textColor="#000"
         android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@+id/notesGuide"
-        app:layout_constraintStart_toStartOf="@+id/buyButtonLeft" />
+        app:layout_constraintStart_toStartOf="@+id/buyButtonLeft"
+        app:layout_constraintEnd_toEndOf="@id/notesRight"
+        />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

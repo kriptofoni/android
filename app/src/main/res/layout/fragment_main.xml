@@ -85,7 +85,6 @@
                 android:id="@+id/main_total_market_value"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="$1.727.274.164.343"
                 android:textColor="#000"
                 android:textSize="20dp"
                 android:layout_toRightOf="@id/main_search"

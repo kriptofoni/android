@@ -3,7 +3,7 @@
     package="arsi.dev.kriptofoni">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:allowBackup="true"
@@ -12,9 +12,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".CurrencyChooseActivity"></activity>
-        <activity android:name=".CryptoCurrencyDetailActivity"></activity>
-        <activity android:name=".BuySellActivity"></activity>
+        <activity android:name=".CoinSelectActivity"/>
+        <activity android:name=".CurrencyChooseActivity" />
+        <activity android:name=".CryptoCurrencyDetailActivity" />
+        <activity android:name=".BuySellActivity" />
         <activity android:name=".HomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
