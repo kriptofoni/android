@@ -62,7 +62,8 @@ public class CoinsFragment extends Fragment {
             @Override
             public void run() {
                 if (onScreen && firstRender && !inProgress) {
-                    new GetCoinInfo().execute("update");
+//                    new GetCoinInfo().execute("update");
+                    getCoinInfo("update");
                     handler.postDelayed(this, 10000);
                 }
             }
@@ -94,14 +95,16 @@ public class CoinsFragment extends Fragment {
                         reached = true;
                         inProgress = true;
                         currentPage++;
-                        new GetCoinInfo().execute("initial");
+//                        new GetCoinInfo().execute("initial");
+                        getCoinInfo("initial");
                         recyclerView.scrollToPosition((currentPage - 1) * 100 - 4);
                     }
                 }
             }
         });
 
-        new GetCoinInfo().execute("initial");
+//        new GetCoinInfo().execute("initial");
+        getCoinInfo("initial");
         if (!firstRender) firstRender = true;
 
         return view;
@@ -164,8 +167,71 @@ public class CoinsFragment extends Fragment {
         allCoinModels = new ArrayList<>();
         coinModels = new ArrayList<>();
         mainCoinsRecyclerAdapter.setCoins(coinModels);
-        new GetCoinInfo().execute("initial");
+//        new GetCoinInfo().execute("initial");
+        getCoinInfo("initial");
         recyclerView.scrollTo(0, 0);
+    }
+
+    private void getCoinInfo(String type) {
+        coinModels.clear();
+        coinModels.addAll(allCoinModels);
+        ArrayList<CoinModel> temp = new ArrayList<>();
+        // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
+        // We create a simple HTTP Request via Retrofit
+        Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, null,null, 100, currentPage, true, "24h,7d");
+        call.enqueue(new Callback<List<CoinMarket>>() {
+            @Override
+            public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
+                // Creating a list of Result objects using our response data.
+                List<CoinMarket> coins = response.body();
+                if (coins != null) {
+                    for (int i = 0; i < coins.size(); i++) {
+                        // Creating a coin model for each coin in our response data.
+                        CoinMarket result = coins.get(i);
+                        String imageUrl = result.getImage();
+                        String name = result.getName();
+                        String shortCut = result.getSymbol();
+                        String id = result.getId();
+                        double changeIn24Hours = result.getPrice_change_percentage_24h_in_currency();
+                        double priceChangeIn24Hours = result.getPrice_change_24h();
+                        double currentPrice = result.getCurrent_price();
+                        double marketCap = result.getMarket_cap();
+                        double changeIn7Days = result.getPrice_change_percentage_7d_in_currency();
+                        CoinModel model = new CoinModel((currentPage - 1) * 100 + (i + 1), imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id, 0);
+                        if (type.equals("update")) {
+                            temp.add(model);
+                        } else {
+                            coinModels.add(model);
+                            allCoinModels.add(model);
+                        }
+                    }
+
+                    int firstIndex = (currentPage - 1) * 100;
+
+                    if (type.equals("update") && !coinModels.isEmpty()) {
+                        for (int i = 0; i < temp.size(); i++) {
+                            coinModels.set(firstIndex + i, temp.get(i));
+                        }
+                    }
+
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mainCoinsRecyclerAdapter.notifyDataSetChanged();
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    });
+
+                    reached = false;
+                    if (inProgress) inProgress = false;
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
+                getCoinInfo(type);
+            }
+        });
     }
 
     private class GetCoinInfo extends AsyncTask<String, Void, Void> {

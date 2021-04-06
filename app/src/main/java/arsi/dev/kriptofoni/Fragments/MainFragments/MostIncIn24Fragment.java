@@ -167,7 +167,8 @@ public class MostIncIn24Fragment extends Fragment {
         allCoins = new ArrayList<>();
         coinModels = new ArrayList<>();
         mainCoinsRecyclerAdapter.setCoins(coinModels);
-        new GetCoinInfo().execute(this.ids, "initial");
+//        new GetCoinInfo().execute(this.ids, "initial");
+        getCoinInfo(this.ids, "initial");
         recyclerView.scrollTo(0, 0);
     }
 
@@ -195,7 +196,8 @@ public class MostIncIn24Fragment extends Fragment {
         s = stringBuilder.toString();
         if (currentPage == 1)
             setIds(s);
-        new GetCoinInfo().execute(s, type);
+//        new GetCoinInfo().execute(s, type);
+        getCoinInfo(s, type);
     }
 
     private void setIds(String ids) {
@@ -204,6 +206,89 @@ public class MostIncIn24Fragment extends Fragment {
 
     public void setProgressBarVisibility(int visibility) {
         progressBar.setVisibility(visibility);
+    }
+
+    private void getCoinInfo(String ids, String type) {
+        coinModels.clear();
+        coinModels.addAll(allCoins);
+        ArrayList<CoinModel> temp = new ArrayList<>();
+        // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
+        // We create a simple HTTP Request via Retrofit
+        Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, ids, null, 50, 1, true, "24h,7d");
+        call.enqueue(new Callback<List<CoinMarket>>() {
+            @Override
+            public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
+                // Creating a list of Result objects using our response data.
+                List<CoinMarket> coins = response.body();
+                if (coins != null) {
+                    for (int i = 0; i < coins.size(); i++) {
+                        // Creating a coin model for each coin in our response data.
+                        CoinMarket result = coins.get(i);
+                        String imageUrl = result.getImage();
+                        String name = result.getName();
+                        String shortCut = result.getSymbol();
+                        String id = result.getId();
+                        double changeIn24Hours = result.getPrice_change_percentage_24h_in_currency();
+                        double priceChangeIn24Hours = result.getPrice_change_24h();
+                        double currentPrice = result.getCurrent_price();
+                        double marketCap = result.getMarket_cap();
+                        double changeIn7Days = result.getPrice_change_percentage_7d_in_currency();
+                        CoinModel model = new CoinModel(i, imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id, 0);
+                        if (type.equals("update")) {
+                            temp.add(model);
+                        } else {
+                            coinModels.add(model);
+                            allCoins.add(model);
+                        }
+                    }
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        coinModels.sort(new Comparator<CoinModel>() {
+                            @Override
+                            public int compare(CoinModel lhs, CoinModel rhs) {
+                                return Double.compare(rhs.getChangeIn24Hours(), lhs.getChangeIn24Hours());
+                            }
+                        });
+                    }
+
+                    int firstIndex = (currentPage - 1) * 50;
+                    int lastIndex = firstIndex + 50;
+
+                    if (type.equals("update")) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            temp.sort(new Comparator<CoinModel>() {
+                                @Override
+                                public int compare(CoinModel lhs, CoinModel rhs) {
+                                    return Double.compare(rhs.getChangeIn24Hours(), lhs.getChangeIn24Hours());
+                                }
+                            });
+                        }
+                        for (int i = 0; i < temp.size(); i++) {
+                            coinModels.set(firstIndex + i, temp.get(i));
+                        }
+                    }
+
+                    for (int i = 0; i < coinModels.size(); i++) {
+                        coinModels.get(i).setNumber(i + 1);
+                    }
+
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mainCoinsRecyclerAdapter.notifyDataSetChanged();
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    });
+                    reached = false;
+                    if (inProgress) inProgress = false;
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
+                getCoinInfo(ids, type);
+            }
+        });
     }
 
     private class GetCoinInfo extends AsyncTask<String, Void, Void> {

@@ -130,7 +130,7 @@
 
           <RelativeLayout
               android:layout_width="match_parent"
-              android:layout_height="400dp"
+              android:layout_height="300dp"
               tools:context=".MainActivity">
 
               <com.github.mikephil.charting.charts.LineChart
@@ -138,19 +138,167 @@
                   android:layout_width="match_parent"
                   android:layout_height="match_parent" />
 
-          </RelativeLayout>
-
-          <RelativeLayout
-              xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              tools:context=".MainActivity">
-
               <com.github.mikephil.charting.charts.CandleStickChart
                   android:id="@+id/candleStickChart"
                   android:layout_width="match_parent"
-                  android:layout_height="match_parent" />
+                  android:layout_height="match_parent"
+                  android:visibility="gone"/>
+
+          </RelativeLayout>
+
+          <RelativeLayout
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="10dp">
+
+              <androidx.constraintlayout.widget.ConstraintLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginVertical="5dp">
+
+                  <androidx.constraintlayout.widget.Guideline
+                      android:id="@+id/expandLeft"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      app:layout_constraintGuide_percent="0.05"
+                      android:orientation="vertical" />
+
+                  <androidx.constraintlayout.widget.Guideline
+                      android:id="@+id/chartIconLeft"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      app:layout_constraintGuide_percent="0.15"
+                      android:orientation="vertical" />
+
+                  <androidx.constraintlayout.widget.Guideline
+                      android:id="@+id/tfHourLeft"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      app:layout_constraintGuide_percent="0.25"
+                      android:orientation="vertical" />
+
+                  <androidx.constraintlayout.widget.Guideline
+                      android:id="@+id/oneWeekLeft"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      app:layout_constraintGuide_percent="0.35"
+                      android:orientation="vertical" />
+
+                  <androidx.constraintlayout.widget.Guideline
+                      android:id="@+id/oneMonthLeft"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      app:layout_constraintGuide_percent="0.45"
+                      android:orientation="vertical" />
+
+                  <androidx.constraintlayout.widget.Guideline
+                      android:id="@+id/threeMonthsLeft"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      app:layout_constraintGuide_percent="0.55"
+                      android:orientation="vertical" />
+
+                  <androidx.constraintlayout.widget.Guideline
+                      android:id="@+id/sixMonthsLeft"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      app:layout_constraintGuide_percent="0.65"
+                      android:orientation="vertical" />
+
+                  <androidx.constraintlayout.widget.Guideline
+                      android:id="@+id/oneYearLeft"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      app:layout_constraintGuide_percent="0.75"
+                      android:orientation="vertical" />
+
+                  <androidx.constraintlayout.widget.Guideline
+                      android:id="@+id/allLeft"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      app:layout_constraintGuide_percent="0.85"
+                      android:orientation="vertical" />
+
+                  <ImageView
+                      android:id="@+id/crypto_currency_detail_expand"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      app:layout_constraintTop_toTopOf="parent"
+                      app:layout_constraintStart_toStartOf="@id/expandLeft"
+                      android:src="@drawable/ic_resize" />
+
+                  <ImageView
+                      android:id="@+id/crypto_currency_detail_chart_icon"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      app:layout_constraintTop_toTopOf="parent"
+                      app:layout_constraintStart_toStartOf="@id/chartIconLeft"
+                      android:src="@drawable/ic_candlestickchart" />
+
+                  <TextView
+                      android:id="@+id/cryto_currency_detail_24h"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="24 H"
+                      app:layout_constraintLeft_toLeftOf="@id/tfHourLeft"
+                      app:layout_constraintTop_toTopOf="parent"
+                      app:layout_constraintBottom_toBottomOf="parent"/>
+
+                  <TextView
+                      android:id="@+id/cryto_currency_detail_1w"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="1 W"
+                      app:layout_constraintLeft_toLeftOf="@id/oneWeekLeft"
+                      app:layout_constraintTop_toTopOf="parent"
+                      app:layout_constraintBottom_toBottomOf="parent"/>
+
+                  <TextView
+                      android:id="@+id/cryto_currency_detail_1m"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="1 M"
+                      app:layout_constraintLeft_toLeftOf="@id/oneMonthLeft"
+                      app:layout_constraintTop_toTopOf="parent"
+                      app:layout_constraintBottom_toBottomOf="parent"/>
+
+                  <TextView
+                      android:id="@+id/cryto_currency_detail_3m"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="3 M"
+                      app:layout_constraintLeft_toLeftOf="@id/threeMonthsLeft"
+                      app:layout_constraintTop_toTopOf="parent"
+                      app:layout_constraintBottom_toBottomOf="parent"/>
+
+                  <TextView
+                      android:id="@+id/cryto_currency_detail_6m"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="6 M"
+                      app:layout_constraintLeft_toLeftOf="@id/sixMonthsLeft"
+                      app:layout_constraintTop_toTopOf="parent"
+                      app:layout_constraintBottom_toBottomOf="parent"/>
+
+                  <TextView
+                      android:id="@+id/cryto_currency_detail_1y"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="1 Y"
+                      app:layout_constraintLeft_toLeftOf="@id/oneYearLeft"
+                      app:layout_constraintTop_toTopOf="parent"
+                      app:layout_constraintBottom_toBottomOf="parent"/>
+
+                  <TextView
+                      android:id="@+id/cryto_currency_detail_all"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="All"
+                      app:layout_constraintLeft_toLeftOf="@id/allLeft"
+                      app:layout_constraintTop_toTopOf="parent"
+                      app:layout_constraintBottom_toBottomOf="parent"/>
+
+              </androidx.constraintlayout.widget.ConstraintLayout>
 
           </RelativeLayout>
 

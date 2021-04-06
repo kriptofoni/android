@@ -293,7 +293,7 @@ public class MainFragment extends Fragment {
             mostDecIn24List.sort(new Comparator<CoinSearchModel>() {
                 @Override
                 public int compare(CoinSearchModel lhs, CoinSearchModel rhs) {
-                    return Double.compare(lhs.getPriceChangeIn24(), rhs.getPriceChangeIn24());
+                    return Double.compare(rhs.getPriceChangeIn24(), lhs.getPriceChangeIn24());
                 }
             });
         }
