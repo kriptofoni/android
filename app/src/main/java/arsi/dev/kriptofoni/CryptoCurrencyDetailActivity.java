@@ -7,12 +7,14 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -51,6 +53,8 @@ import com.squareup.picasso.Picasso;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -67,10 +71,10 @@ import retrofit2.Response;
 
 public class CryptoCurrencyDetailActivity extends AppCompatActivity{
 
-    private String currencyText, coinModelId, chartType;
+    private String currencyText, coinModelId, chartType, twitterScreenName, webLink, redditLink, coinShortCut;
     private TextView value, oneHourChange, twentyFourHoursChange, sevenDaysChange,
             marketValue, twentyFourHoursMarketVolume, circulatingSupply, totalSupply, webSite,
-            reddit, twitter, currency, coinName, coinMarketCap, priceInBtc, priceChangeInBtc,
+            reddit, twitter, coinName, coinMarketCap, priceInBtc, priceChangeInBtc,
             currentPrice, currentChange, currentPriceChange, oneDay, oneWeek, oneMonth, threeMonths,
             sixMonths, oneYear, allTime;
     private CoinInfoApi coinGeckoApi;
@@ -83,6 +87,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
     private long from, to;
     private TextView active;
     private ArrayList<LineChartEntryModel> lineChartEntryModels;
+    private LineChart lineChart;
+    private RelativeLayout twitterRedirect, webRedirect, redditRedirect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +103,6 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         coinIcon = findViewById(R.id.coinIcon);
         coinName = findViewById(R.id.coinName);
         coinMarketCap = findViewById(R.id.coinMarketCap);
-        currency = findViewById(R.id.detail_currency);
         backButton = findViewById(R.id.backButton);
         buySell = findViewById(R.id.addToProt);
         value = findViewById(R.id.value);
@@ -127,26 +132,31 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         allTime = findViewById(R.id.cryto_currency_detail_all);
         expand = findViewById(R.id.crypto_currency_detail_expand);
         chartIcon = findViewById(R.id.crypto_currency_detail_chart_icon);
+        lineChart = findViewById(R.id.chart);
+        webRedirect = findViewById(R.id.crypto_currency_detail_web_redirect);
+        redditRedirect = findViewById(R.id.crypto_currency_detail_reddit_redirect);
+        twitterRedirect = findViewById(R.id.crypto_currency_detail_twitter_redirect);
 
+        // Initial chart values
         chartType = "line";
         active = oneDay;
         oneDay.setTextColor(Color.parseColor("#000000"));
-        from = System.currentTimeMillis() / 1000 - (60 * 60 * 24);
+        // Current time in seconds
         to = System.currentTimeMillis() / 1000;
+        // 24 hours ago in seconds
+        from = System.currentTimeMillis() / 1000 - (60 * 60 * 24);
 
         makeProgressBarVisible();
-
-        currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
 
         Intent intent = getIntent();
         coinModelId = intent.getStringExtra("id");
         coinGeckoApi = CoinInfoRetrofitClient.getInstance().getMyCoinGeckoApi();
 
+        // We use different threads to speed up data fetch.
         for (int i = 0; i < 3; i++) {
             Thread thread = new MyThread(i);
             thread.start();
         }
-        candleStickChart();
 
         countryCodePicker = new CountryCodePicker();
         currencySymbols = countryCodePicker.getCountryCode(currencyText);
@@ -162,6 +172,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(CryptoCurrencyDetailActivity.this,BuySellActivity.class);
+                intent.putExtra("shortCut", coinShortCut);
                 startActivity(intent);
             }
         });
@@ -171,8 +182,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onClick(View view) {
                 if (active != oneDay) {
                     oneDay.setTextColor(Color.parseColor("#000000"));
-                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24);
                     to = System.currentTimeMillis() / 1000;
+                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24);
                     active.setTextColor(Color.parseColor("#797676"));
                     active = oneDay;
                     getMarketChart();
@@ -185,8 +196,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onClick(View view) {
                 if (active != oneWeek) {
                     oneWeek.setTextColor(Color.parseColor("#000000"));
-                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 7);
                     to = System.currentTimeMillis() / 1000;
+                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 7);
                     active.setTextColor(Color.parseColor("#797676"));
                     active = oneWeek;
                     getMarketChart();
@@ -199,8 +210,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onClick(View view) {
                 if (active != oneMonth) {
                     oneMonth.setTextColor(Color.parseColor("#000000"));
-                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30);
                     to = System.currentTimeMillis() / 1000;
+                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30);
                     active.setTextColor(Color.parseColor("#797676"));
                     active = oneMonth;
                     getMarketChart();
@@ -213,8 +224,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onClick(View view) {
                 if (active != threeMonths) {
                     threeMonths.setTextColor(Color.parseColor("#000000"));
-                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30 * 3);
                     to = System.currentTimeMillis() / 1000;
+                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30 * 3);
                     active.setTextColor(Color.parseColor("#797676"));
                     active = threeMonths;
                     getMarketChart();
@@ -227,8 +238,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onClick(View view) {
                 if (active != sixMonths) {
                     sixMonths.setTextColor(Color.parseColor("#000000"));
-                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30 * 6);
                     to = System.currentTimeMillis() / 1000;
+                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30 * 6);
                     active.setTextColor(Color.parseColor("#797676"));
                     active = sixMonths;
                     getMarketChart();
@@ -241,8 +252,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onClick(View view) {
                 if (active != oneYear) {
                     oneYear.setTextColor(Color.parseColor("#000000"));
-                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 365);
                     to = System.currentTimeMillis() / 1000;
+                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 365);
                     active.setTextColor(Color.parseColor("#797676"));
                     active = oneYear;
                     getMarketChart();
@@ -253,7 +264,14 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         allTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if (active != allTime) {
+                    allTime.setTextColor(Color.parseColor("#000000"));
+                    from = 0;
+                    to = System.currentTimeMillis() / 1000;
+                    active.setTextColor(Color.parseColor("#797676"));
+                    active = allTime;
+                    getMarketChart();
+                }
             }
         });
 
@@ -271,6 +289,48 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
 
+            }
+        });
+
+        webRedirect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(webLink));
+                startActivity(intent);
+            }
+        });
+
+        redditRedirect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = null;
+                try {
+                    // Get the Reddit app if possible
+                    getPackageManager().getPackageInfo("com.reddit.frontpage", 0);
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(redditLink));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                } catch (Exception ex) {
+                    // No twitter app, revert to browser
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(redditLink));
+                }
+                startActivity(intent);
+            }
+        });
+
+        twitterRedirect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = null;
+                try {
+                    // Get the Twitter app if possible
+                    getPackageManager().getPackageInfo("com.twitter.android", 0);
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse("twitter://user?screen_name=" + twitterScreenName));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                } catch (Exception ex) {
+                    // No twitter app, revert to browser
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://twitter.com/" + twitterScreenName));
+                }
+                startActivity(intent);
             }
         });
     }
@@ -318,39 +378,38 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
     private void lineChart(ArrayList<Entry> yValue) {
 
         chartType = "line";
-        LineChart chart = findViewById(R.id.chart);
 
-        if (chart.getData() != null) {
-            chart.clearValues();
-            chart.notifyDataSetChanged();
+        if (lineChart.getData() != null) {
+            lineChart.clearValues();
+            lineChart.notifyDataSetChanged();
         }
 
-        final ArrayList<String> xAxisLabel = new ArrayList<>();
-        xAxisLabel.add("00:00");
-        xAxisLabel.add("04:00");
-        xAxisLabel.add("08:00");
-        xAxisLabel.add("12:00");
-        xAxisLabel.add("16:00");
-        xAxisLabel.add("20:00");
+        // Customizing chart appearance
+        lineChart.setDragEnabled(true);
+        lineChart.setScaleEnabled(false);
+        lineChart.setDrawGridBackground(false);
+        lineChart.setDescription(null);
 
-        chart.setDragEnabled(true);
-        chart.setScaleEnabled(false);
-        chart.setDrawGridBackground(false);
-        chart.setDescription(null);
-
-        XAxis xAxis = chart.getXAxis();
-        YAxis yAxisLeft = chart.getAxisLeft();
-        YAxis yAxisRight = chart.getAxisRight();
+        XAxis xAxis = lineChart.getXAxis();
+        YAxis yAxisLeft = lineChart.getAxisLeft();
+        YAxis yAxisRight = lineChart.getAxisRight();
+        xAxis.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                String result = "";
+                if (active == oneDay) {
+                    result = getChartXAxisHourAndMinute(value);
+                } else if (active == allTime) {
+                    result = getChartXAxisYears(value);
+                } else {
+                    result = getChartXAxisDayAndMonth(value);
+                }
+                return result;
+            }
+        });
         xAxis.setDrawGridLines(false);
         xAxis.setDrawAxisLine(false);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-//        xAxis.setValueFormatter(new IAxisValueFormatter() {
-//            @Override
-//            public String getFormattedValue(float value, AxisBase axis) {
-//                System.out.println(value);
-//                return "0";
-//            }
-//        });
         yAxisLeft.setDrawGridLines(false);
         yAxisLeft.setDrawAxisLine(false);
         yAxisRight.setEnabled(false);
@@ -368,8 +427,62 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
 
         LineData data = new LineData(dataSets);
 
-        chart.setData(data);
-        chart.notifyDataSetChanged();
+        lineChart.setData(data);
+        lineChart.notifyDataSetChanged();
+        lineChart.invalidate();
+    }
+
+    private String getChartXAxisHourAndMinute(float timestamp) {
+        Date date = new Date((long) timestamp);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        String result = "";
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+        if (hour < 10) {
+            if (minute < 10) {
+                result = 0 + "" + hour + ":" + 0 + "" + minute;
+            } else {
+                result = 0 + "" + hour + ":" + minute;
+            }
+        } else {
+            if (minute < 10)  {
+                result = hour + ":" + 0 + "" + minute;
+            } else {
+                result = hour + ":" + minute;
+            }
+        }
+        return result;
+    }
+
+    private String getChartXAxisDayAndMonth(float timestamp) {
+        Date date = new Date((long) timestamp);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int month = calendar.get(Calendar.MONTH);
+        String result = "";
+        if (day < 10) {
+            if (month < 10) {
+                result = 0 + "" + day + "/" + 0 + "" + month;
+            } else {
+                result = 0 + "" + day + "/" + month;
+            }
+        } else {
+            if (month < 10) {
+                result = day + "/" + 0 + "" + month;
+            } else {
+                result = day + "/" + month;
+            }
+        }
+        return result;
+    }
+
+    private String getChartXAxisYears(float timestamp) {
+        Date date = new Date((long) timestamp);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return String.valueOf(calendar.get(Calendar.YEAR));
     }
 
     private void getCoinInfo() {
@@ -383,10 +496,11 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
 
                     JsonObject image = (JsonObject) coin.get("image");
-                    JsonElement thumb = (JsonElement) image.get("thumb");
+                    JsonElement thumb = (JsonElement) image.get("large");
 
                     JsonElement name = (JsonElement) coin.get("name");
                     JsonElement shortCut = (JsonElement) coin.get("symbol");
+                    coinShortCut = shortCut.isJsonNull() ? "" : shortCut.getAsString();
                     String nameText = name.getAsString() + " " + shortCut.getAsString().toUpperCase(Locale.ENGLISH);
 
                     JsonObject marketData = (JsonObject) coin.get("market_data");
@@ -436,7 +550,9 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     JsonElement twitterText = links.get("twitter_screen_name");
                     String twitterUri = twitterText.isJsonNull() ? "-" : "https://www.twitter.com/" + twitterText.getAsString();
                     JsonArray webSiteArray = webSiteData.isJsonNull() ? new JsonArray() : webSiteData.getAsJsonArray();
-                    String a = webSiteArray.size() == 0 ? "-" : webSiteArray.get(0).getAsString();
+                    webLink =  webSiteArray.size() == 0 ? "" : webSiteArray.get(0).getAsString();
+                    twitterScreenName = twitterText.isJsonNull() ? "" : twitterText.getAsString();
+                    redditLink = redditText.isJsonNull() ? "" : redditText.getAsString();
 
                     Picasso.get().load(thumb.getAsString()).into(coinIcon);
                     coinName.setText(nameText);
@@ -453,9 +569,6 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     priceChangeInBtc.setText(changePercentageInBtc == null || changePercentageInBtc.isJsonNull() ? "-" : "%" + changePercentageInBtc.getAsDouble());
                     circulatingSupply.setText(circulatingSupplyText);
                     totalSupply.setText(totalSupplyText);
-                    webSite.setText(a);
-                    reddit.setText(redditText.isJsonNull() ? "-" : redditText.getAsString());
-                    twitter.setText(twitterUri);
 
                     if (oneHours != null && !oneHours.isJsonNull())
                         oneHourChange.setTextColor(oneHours.getAsDouble() > 0 ? Color.GREEN : oneHours.getAsDouble() < 0 ? Color.RED : Color.parseColor("#797676"));
@@ -519,10 +632,11 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                         for (int i = 0; i < prices.size(); i++) {
                             if (i % 4 == 0) {
                                 JsonArray priceValues = (JsonArray) prices.get(i);
+                                float timestamp = priceValues.get(0).getAsFloat();
                                 float price = priceValues.get(1).getAsFloat();
-                                LineChartEntryModel model = new LineChartEntryModel(i, price);
+                                LineChartEntryModel model = new LineChartEntryModel(timestamp, price);
                                 lineChartEntryModels.add(model);
-                                yValue.add(new Entry(i, price));
+                                yValue.add(new Entry(timestamp, price));
                             }
                         }
                         lineChart(yValue);

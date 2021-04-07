@@ -65,18 +65,6 @@
             app:layout_constraintStart_toEndOf="@id/coinIcon"
             android:layout_marginTop="5dp"/>
 
-        <TextView
-            android:id="@+id/detail_currency"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="USD"
-            android:textColor="#000"
-            android:textSize="20dp"
-            android:layout_marginRight="20dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ProgressBar
@@ -577,10 +565,10 @@
           </RelativeLayout>
 
           <RelativeLayout
+              android:id="@+id/crypto_currency_detail_web_redirect"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_marginTop="10dp">
-
 
               <ImageView
                   android:id="@+id/webIcon"
@@ -604,6 +592,7 @@
           </RelativeLayout>
 
           <RelativeLayout
+              android:id="@+id/crypto_currency_detail_reddit_redirect"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_marginTop="10dp">
@@ -630,6 +619,7 @@
           </RelativeLayout>
 
           <RelativeLayout
+              android:id="@+id/crypto_currency_detail_twitter_redirect"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_marginTop="10dp">

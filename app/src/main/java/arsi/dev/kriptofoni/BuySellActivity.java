@@ -37,7 +37,6 @@ public class BuySellActivity extends AppCompatActivity {
     private ImageView backButton;
     private final int COIN_SELECT_REQUEST_CODE = 1;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +54,13 @@ public class BuySellActivity extends AppCompatActivity {
         addOperation = findViewById(R.id.addOperation);
         currenciesInputText = findViewById(R.id.currenciesInputText);
         currencies = findViewById(R.id.currencies);
+
+        Intent intent = getIntent();
+        String coinShortCut = intent.getStringExtra("shortCut");
+        if (coinShortCut != null) {
+            String text = "Total " + coinShortCut.toUpperCase(Locale.ENGLISH);
+            currencies.setText(text);
+        }
 
         buy.setTextColor(Color.parseColor("#5b8d65"));
 

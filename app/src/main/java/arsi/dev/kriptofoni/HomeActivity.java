@@ -159,18 +159,22 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         // we are launching an AsyncTaskLoader to perform this process.
         loaderManager.initLoader(0, null, this);
 
+        // We use a handler that repeats every 250ms to find out that the
+        // download of all coins is complete.
         Handler handler = new Handler();
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 if (coinSearchModels.size() == max && max != 0) {
-                    System.out.println("run");
+                    // When the data download is complete, we send the data to the required pages.
                     mainFragment.setCoinModelsForSearch(coinSearchModels);
                     mainFragment.setMostIncIn24List(coinSearchModels);
                     mainFragment.setMostDecIn24List(coinSearchModels);
                     mainFragment.setMostIncIn7List(coinSearchModels);
                     mainFragment.setMostDecIn7List(coinSearchModels);
 
+                    // We save the data in memory to prevent the user from waiting with
+                    // the download when the application is opened again.
                     mainFragment.writeToMem("coinModelsForSearch", coinSearchModels);
                     mainFragment.writeToMem("mostIncIn24List", coinSearchModels);
                     mainFragment.writeToMem("mostIncIn7List", coinSearchModels);
@@ -193,7 +197,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onLoadFinished(Loader<String> loader, String s) {
-
     }
 
     @Override
@@ -217,7 +220,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                     mainFragment.setMostIncIn7List(mostInc7DaysFromMem);
                     mainFragment.setMostDecIn7List(mostInc7DaysFromMem);
                 }
-
                 getAllCoins();
             }
         }
