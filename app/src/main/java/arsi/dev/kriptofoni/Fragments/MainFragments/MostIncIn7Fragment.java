@@ -45,7 +45,7 @@ public class MostIncIn7Fragment extends Fragment {
     private RecyclerView recyclerView;
     private MainCoinsRecyclerAdapter mainCoinsRecyclerAdapter;
     private int currentPage = 1;
-    private boolean reached = false, onScreen = false, firstRender = false, startDone = false, inProgress = false;
+    private boolean reached = false, onScreen = false, firstRender = false, startDone = false, inProgress = false, firstOnResume = false;
     private SortedCoinsApi myCoinGeckoApi;
     private String currency, ids;
     private MainCoinsSearchRecyclerAdapter mainCoinsSearchRecyclerAdapter;
@@ -123,6 +123,10 @@ public class MostIncIn7Fragment extends Fragment {
         super.onResume();
         onScreen = true;
         handler.postDelayed(runnable, 10000);
+        if (!firstOnResume) {
+            firstOnResume = true;
+            addIds("initial");
+        }
     }
 
     public void setCoinsList(ArrayList<CoinSearchModel> coins, boolean contains) {
@@ -167,8 +171,8 @@ public class MostIncIn7Fragment extends Fragment {
         allCoins = new ArrayList<>();
         coinModels = new ArrayList<>();
         mainCoinsRecyclerAdapter.setCoins(coinModels);
-//        new GetCoinInfo().execute(this.ids, "initial");
-        getCoinInfo(this.ids, "initial");
+        new GetCoinInfo().execute(this.ids, "initial");
+//        getCoinInfo(this.ids, "initial");
         recyclerView.scrollTo(0, 0);
     }
 
@@ -177,7 +181,8 @@ public class MostIncIn7Fragment extends Fragment {
         allCoins.clear();
         allCoinSearchModels.clear();
         allCoinSearchModels.addAll(coins);
-        addIds("initial");
+        if (onScreen && firstRender && firstOnResume)
+            addIds("initial");
         if (firstRender && !startDone) startDone = true;
         if (!firstRender) firstRender = true;
     }
@@ -193,8 +198,8 @@ public class MostIncIn7Fragment extends Fragment {
         s = stringBuilder.toString();
         if (currentPage == 1)
             setIds(s);
-//        new GetCoinInfo().execute(s, type);
-        getCoinInfo(s, type);
+        new GetCoinInfo().execute(s, type);
+//        getCoinInfo(s, type);
     }
 
     private void setIds(String ids) {
@@ -202,7 +207,8 @@ public class MostIncIn7Fragment extends Fragment {
     }
 
     public void setProgressBarVisibility(int visibility) {
-        progressBar.setVisibility(visibility);
+        if (!firstOnResume)
+            progressBar.setVisibility(visibility);
     }
 
     private void getCoinInfo(String ids, String type) {

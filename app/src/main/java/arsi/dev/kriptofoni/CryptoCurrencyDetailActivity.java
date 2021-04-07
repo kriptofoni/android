@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.github.mikephil.charting.charts.CandleStickChart;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
@@ -28,6 +29,7 @@ import com.github.mikephil.charting.data.CandleEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
@@ -316,12 +318,20 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
     private void lineChart(ArrayList<Entry> yValue) {
 
         chartType = "line";
-
         LineChart chart = findViewById(R.id.chart);
+
         if (chart.getData() != null) {
             chart.clearValues();
             chart.notifyDataSetChanged();
         }
+
+        final ArrayList<String> xAxisLabel = new ArrayList<>();
+        xAxisLabel.add("00:00");
+        xAxisLabel.add("04:00");
+        xAxisLabel.add("08:00");
+        xAxisLabel.add("12:00");
+        xAxisLabel.add("16:00");
+        xAxisLabel.add("20:00");
 
         chart.setDragEnabled(true);
         chart.setScaleEnabled(false);
@@ -334,6 +344,13 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         xAxis.setDrawGridLines(false);
         xAxis.setDrawAxisLine(false);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+//        xAxis.setValueFormatter(new IAxisValueFormatter() {
+//            @Override
+//            public String getFormattedValue(float value, AxisBase axis) {
+//                System.out.println(value);
+//                return "0";
+//            }
+//        });
         yAxisLeft.setDrawGridLines(false);
         yAxisLeft.setDrawAxisLine(false);
         yAxisRight.setEnabled(false);
@@ -496,19 +513,22 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                 if (response.isSuccessful()) {
                     JsonObject result = response.body();
-                    JsonArray prices = (JsonArray) result.get("prices");
-                    ArrayList<Entry> yValue = new ArrayList<>();
-                    for (int i = 0; i < prices.size(); i++) {
-                        if (i % 4 == 0) {
-                            JsonArray priceValues = (JsonArray) prices.get(i);
-                            float price = priceValues.get(1).getAsFloat();
-                            LineChartEntryModel model = new LineChartEntryModel(i, price);
-                            lineChartEntryModels.add(model);
-                            yValue.add(new Entry(i, price));
+                    if (result != null && !result.isJsonNull() && result.size() != 0) {
+                        JsonArray prices = (JsonArray) result.get("prices");
+                        ArrayList<Entry> yValue = new ArrayList<>();
+                        for (int i = 0; i < prices.size(); i++) {
+                            if (i % 4 == 0) {
+                                JsonArray priceValues = (JsonArray) prices.get(i);
+                                float price = priceValues.get(1).getAsFloat();
+                                LineChartEntryModel model = new LineChartEntryModel(i, price);
+                                lineChartEntryModels.add(model);
+                                yValue.add(new Entry(i, price));
+                            }
                         }
+                        lineChart(yValue);
+                    } else {
+                        getMarketChart();
                     }
-
-                    lineChart(yValue);
                 }
             }
 

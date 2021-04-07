@@ -17,7 +17,8 @@
         <activity android:name=".CurrencyChooseActivity" />
         <activity android:name=".CryptoCurrencyDetailActivity" />
         <activity android:name=".BuySellActivity" />
-        <activity android:name=".HomeActivity">
+        <activity android:name=".HomeActivity"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

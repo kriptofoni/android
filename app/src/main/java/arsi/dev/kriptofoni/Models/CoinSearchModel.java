@@ -6,13 +6,16 @@ public class CoinSearchModel {
     private int number;
     private double priceChangeIn24, priceChangeIn7, marketCap, marketCapRank;
 
-    public CoinSearchModel(double marketCapRank, String id, String name, String symbol, double marketCap, String image) {
+    public CoinSearchModel(double marketCapRank, String id, String name, String symbol, double marketCap, String image, double priceChangeIn24, double priceChangeIn7, int number) {
         this.marketCapRank = marketCapRank == 0 ? 10000 : marketCapRank;
         this.id = id;
         this.name = name;
         this.symbol = symbol;
         this.image = image;
         this.marketCap = marketCap;
+        this.priceChangeIn24 = priceChangeIn24;
+        this.number = number;
+        this.priceChangeIn7 = priceChangeIn7;
     }
 
     public CoinSearchModel(int number, String id, String name, String symbol, String image, double priceChangeIn24) {

@@ -50,7 +50,7 @@ public class CoinsFragment extends Fragment {
     private boolean reached = false, onScreen = false, firstRender = false, inProgress = false;
     private Handler handler;
     private Runnable runnable;
-    private ProgressBar progressBar;
+    private ProgressBar progressBar, bottomProgressBar;
 
     @Nullable
     @Override
@@ -62,8 +62,8 @@ public class CoinsFragment extends Fragment {
             @Override
             public void run() {
                 if (onScreen && firstRender && !inProgress) {
-//                    new GetCoinInfo().execute("update");
-                    getCoinInfo("update");
+                    new GetCoinInfo().execute("update");
+//                    getCoinInfo("update");
                     handler.postDelayed(this, 10000);
                 }
             }
@@ -74,6 +74,7 @@ public class CoinsFragment extends Fragment {
         allCoinModels = new ArrayList<>();
 
         progressBar = view.findViewById(R.id.main_coins_progress_bar);
+        bottomProgressBar = view.findViewById(R.id.main_coins_bottom_progress_bar);
 
         recyclerView = view.findViewById(R.id.main_coins_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -95,16 +96,17 @@ public class CoinsFragment extends Fragment {
                         reached = true;
                         inProgress = true;
                         currentPage++;
-//                        new GetCoinInfo().execute("initial");
-                        getCoinInfo("initial");
+                        bottomProgressBar.setVisibility(View.VISIBLE);
+                        new GetCoinInfo().execute("initial");
+//                        getCoinInfo("initial");
                         recyclerView.scrollToPosition((currentPage - 1) * 100 - 4);
                     }
                 }
             }
         });
 
-//        new GetCoinInfo().execute("initial");
-        getCoinInfo("initial");
+        new GetCoinInfo().execute("initial");
+//        getCoinInfo("initial");
         if (!firstRender) firstRender = true;
 
         return view;
@@ -167,8 +169,8 @@ public class CoinsFragment extends Fragment {
         allCoinModels = new ArrayList<>();
         coinModels = new ArrayList<>();
         mainCoinsRecyclerAdapter.setCoins(coinModels);
-//        new GetCoinInfo().execute("initial");
-        getCoinInfo("initial");
+        new GetCoinInfo().execute("initial");
+//        getCoinInfo("initial");
         recyclerView.scrollTo(0, 0);
     }
 
@@ -285,6 +287,7 @@ public class CoinsFragment extends Fragment {
                             public void run() {
                                 mainCoinsRecyclerAdapter.notifyDataSetChanged();
                                 progressBar.setVisibility(View.GONE);
+                                bottomProgressBar.setVisibility(View.GONE);
                             }
                         });
 

@@ -5,12 +5,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.AsyncTaskLoader;
-import androidx.loader.content.Loader;
+import android.app.LoaderManager;
 
+import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,18 +20,14 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.litesoftwares.coingecko.CoinGeckoApiClient;
-import com.litesoftwares.coingecko.domain.Coins.CoinMarkets;
 import com.litesoftwares.coingecko.domain.Global.Global;
 import com.litesoftwares.coingecko.exception.CoinGeckoApiException;
 import com.litesoftwares.coingecko.impl.CoinGeckoApiClientImpl;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import arsi.dev.kriptofoni.Fragments.AlertsFragment;
 import arsi.dev.kriptofoni.Fragments.MainFragment;
@@ -47,7 +42,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
 
     private BottomNavigationView bottomNavigationView;
     private final MainFragment mainFragment = new MainFragment(this);
@@ -61,13 +56,8 @@ public class HomeActivity extends AppCompatActivity {
     private CoinGeckoApi myCoinGeckoApi;
     private CoinGeckoApiClient client;
 
-    private List<CoinSearchModel> coinSearchModels, mostInc24Hours, mostInc7Days,
+    private static List<CoinSearchModel> coinSearchModels,
             coinSearchModelsFromMem, mostInc24HoursFromMem, mostInc7DaysFromMem;
-    private ArrayList<String> names;
-
-//    private ArrayList<CoinSearchModel> coinSearchModels, mostInc24Hours, mostInc7Days,
-//            coinSearchModelsFromMem, mostInc24HoursFromMem, mostInc7DaysFromMem;
-//    private ArrayList<String> names;
 
     private String currency;
     private int max, totalPageNumber, tasksDone = 0;
@@ -75,28 +65,26 @@ public class HomeActivity extends AppCompatActivity {
 
     private SharedPreferences sharedPreferences;
 
+    private LoaderManager loaderManager;
+
+    public HomeActivity() {
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-//        coinSearchModels = new ArrayList<>();
-//        mostInc24Hours = new ArrayList<>();
-//        coinSearchModelsFromMem = new ArrayList<>();
-//        mostInc24HoursFromMem = new ArrayList<>();
-//        mostInc7Days = new ArrayList<>();
-//        mostInc7DaysFromMem = new ArrayList<>();
-//        names = new ArrayList<>();
+        loaderManager = getLoaderManager();
 
         coinSearchModels = Collections.synchronizedList(new ArrayList<>());
-        mostInc24Hours = Collections.synchronizedList(new ArrayList<>());
         coinSearchModelsFromMem = Collections.synchronizedList(new ArrayList<>());
         mostInc24HoursFromMem = Collections.synchronizedList(new ArrayList<>());
-        mostInc7Days = Collections.synchronizedList(new ArrayList<>());
         mostInc7DaysFromMem = Collections.synchronizedList(new ArrayList<>());
 
         myCoinGeckoApi = CoinGeckoRetrofitClient.getInstance().getMyCoinGeckoApi();
         sharedPreferences = getSharedPreferences("Preferences", 0);
+        currency = sharedPreferences.getString("currency", "usd");
         Gson gson = new Gson();
 
         String coinSearchModelsJson = sharedPreferences.getString("coinModelsForSearch", "");
@@ -121,12 +109,6 @@ public class HomeActivity extends AppCompatActivity {
         fragmentManager.beginTransaction().add(R.id.fragment_container, mainFragment,"1").commit();
         bottomNavigationView.getMenu().getItem(0).setEnabled(false);
 
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        currency = sharedPreferences.getString("currency", "usd");
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener =
@@ -173,28 +155,25 @@ public class HomeActivity extends AppCompatActivity {
     
     private void getAllCoins() {
         firstLoad = false;
-        for (int i = 1; i <= totalPageNumber; i++) {
-            try {
-                Thread.sleep(100);
-                new GetAllCoins().execute(i);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        // Since downloading the data of all coins is a long process,
+        // we are launching an AsyncTaskLoader to perform this process.
+        loaderManager.initLoader(0, null, this);
+
         Handler handler = new Handler();
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                if (coinSearchModels.size() == max && mostInc24Hours.size() == max && mostInc7Days.size() == max && max != 0) {
+                if (coinSearchModels.size() == max && max != 0) {
+                    System.out.println("run");
                     mainFragment.setCoinModelsForSearch(coinSearchModels);
-                    mainFragment.setMostIncIn24List(mostInc24Hours);
-                    mainFragment.setMostDecIn24List(mostInc24Hours);
-                    mainFragment.setMostIncIn7List(mostInc7Days);
-                    mainFragment.setMostDecIn7List(mostInc7Days);
+                    mainFragment.setMostIncIn24List(coinSearchModels);
+                    mainFragment.setMostDecIn24List(coinSearchModels);
+                    mainFragment.setMostIncIn7List(coinSearchModels);
+                    mainFragment.setMostDecIn7List(coinSearchModels);
 
                     mainFragment.writeToMem("coinModelsForSearch", coinSearchModels);
-                    mainFragment.writeToMem("mostIncIn24List", mostInc24Hours);
-                    mainFragment.writeToMem("mostIncIn7List", mostInc7Days);
+                    mainFragment.writeToMem("mostIncIn24List", coinSearchModels);
+                    mainFragment.writeToMem("mostIncIn7List", coinSearchModels);
                     return;
                 }
                 handler.postDelayed(this, 250);
@@ -207,70 +186,19 @@ public class HomeActivity extends AppCompatActivity {
         new GetTotalMarketCap().execute();
     }
 
-    private class GetAllCoins extends AsyncTask<Integer, Void, Boolean> {
+    @Override
+    public Loader<String> onCreateLoader(int i, Bundle bundle) {
+        return new GetAllCoinsAsyncTaskLoader(this, totalPageNumber, myCoinGeckoApi, currency);
+    }
 
-        @Override
-        protected Boolean doInBackground(Integer... integers) {
-            Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, null,"id_desc", 250, integers[0], true, "24h,7d");
-            call.enqueue(new Callback<List<CoinMarket>>() {
-                @Override
-                public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
-                    if (response.isSuccessful()) {
-                        int index = integers[0];
-                        List<CoinMarket> coins = response.body();
-                        int lastIndex = coins.size();
-                        int difference = lastIndex % 10 == 0 ? lastIndex / 10 : lastIndex / 10 + 1;
-                        Thread thread1 = new MyThread(coins, 0, difference, index);
-                        Thread thread2 = new MyThread(coins, difference, difference * 2, index);
-                        Thread thread3 = new MyThread(coins, difference * 2, difference * 3, index);
-                        Thread thread4 = new MyThread(coins, difference * 3, difference * 4, index);
-                        Thread thread5 = new MyThread(coins, difference * 4, difference * 5, index);
-                        Thread thread6 = new MyThread(coins, difference * 5, difference * 6, index);
-                        Thread thread7 = new MyThread(coins, difference * 6, difference * 7, index);
-                        Thread thread8 = new MyThread(coins, difference * 7, difference * 8, index);
-                        Thread thread9 = new MyThread(coins, difference * 8, difference * 9, index);
-                        Thread thread10 = new MyThread(coins, difference * 9, lastIndex, index);
+    @Override
+    public void onLoadFinished(Loader<String> loader, String s) {
 
-                        thread1.start();
-                        thread2.start();
-                        thread3.start();
-                        thread4.start();
-                        thread5.start();
-                        thread6.start();
-                        thread7.start();
-                        thread8.start();
-                        thread9.start();
-                        thread10.start();
-//                        for (int i = 0; i < coins.size(); i++) {
-//                            CoinMarket coin = coins.get(i);
-//                            String name = coin.getName();
-//                            String id = coin.getId();
-//                            String symbol = coin.getSymbol();
-//                            String image = coin.getImage();
-//                            double priceChangeIn24h = coin.getPrice_change_percentage_24h_in_currency();
-//                            double priceChangeIn7d = coin.getPrice_change_percentage_7d_in_currency();
-//                            double marketCapRank = coin.getMarket_cap_rank();
-//                            double marketCap = coin.getMarket_cap();
-//                            CoinSearchModel model = new CoinSearchModel(marketCapRank, id, name, symbol, marketCap, image);
-//                            CoinSearchModel model24H = new CoinSearchModel((index - 1) * 100 + i + 1, id, name, symbol, image, priceChangeIn24h);
-//                            CoinSearchModel model7D = new CoinSearchModel(id, name, symbol, image, priceChangeIn7d, (index - 1) * 100 + i + 1);
-//                            coinSearchModels.add(model);
-//                            mostInc24Hours.add(model24H);
-//                            mostInc7Days.add(model7D);
-//                        }
-//                        System.out.println(coinSearchModels.size() + " , " + mostInc24Hours.size() + " , " + mostInc7Days.size());
-                    } else {
-                        System.out.println("258 " + response.code());
-                    }
-                }
+    }
 
-                @Override
-                public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
-                    doInBackground(integers);
-                }
-            });
-            return true;
-        }
+    @Override
+    public void onLoaderReset(Loader<String> loader) {
+
     }
 
     private class GetTotalMarketCap extends AsyncTask<Void, Void, Void> {
@@ -289,6 +217,7 @@ public class HomeActivity extends AppCompatActivity {
                     mainFragment.setMostIncIn7List(mostInc7DaysFromMem);
                     mainFragment.setMostDecIn7List(mostInc7DaysFromMem);
                 }
+
                 getAllCoins();
             }
         }
@@ -315,7 +244,7 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private class MyThread extends Thread {
+    public static class MyThread extends Thread {
 
         private List<CoinMarket> coins;
         private int first, last, index;
@@ -331,8 +260,6 @@ public class HomeActivity extends AppCompatActivity {
         public void run() {
             super.run();
             List<CoinSearchModel> search = Collections.synchronizedList(new ArrayList<>());
-            List<CoinSearchModel> most24 = Collections.synchronizedList(new ArrayList<>());
-            List<CoinSearchModel> most7 = Collections.synchronizedList(new ArrayList<>());
             for (int i = first; i < last; i++) {
                 CoinMarket coin = coins.get(i);
                 String name = coin.getName();
@@ -343,26 +270,13 @@ public class HomeActivity extends AppCompatActivity {
                 double priceChangeIn7d = coin.getPrice_change_percentage_7d_in_currency();
                 double marketCapRank = coin.getMarket_cap_rank();
                 double marketCap = coin.getMarket_cap();
-                CoinSearchModel model = new CoinSearchModel(marketCapRank, id, name, symbol, marketCap, image);
-                CoinSearchModel model24H = new CoinSearchModel((index - 1) * 100 + i + 1, id, name, symbol, image, priceChangeIn24h);
-                CoinSearchModel model7D = new CoinSearchModel(id, name, symbol, image, priceChangeIn7d, (index - 1) * 100 + i + 1);
+                CoinSearchModel model = new CoinSearchModel(marketCapRank, id, name, symbol, marketCap, image, priceChangeIn24h, priceChangeIn7d, (index - 1) * 100 + i + 1);
                 search.add(model);
-                most24.add(model24H);
-                most7.add(model7D);
             }
             synchronized (search) {
                 coinSearchModels.addAll(search);
             }
-
-            synchronized (most24) {
-                mostInc24Hours.addAll(most24);
-            }
-
-            synchronized (search) {
-                mostInc7Days.addAll(most7);
-            }
-
-//            System.out.println(coinSearchModels.size() + " , " + mostInc24Hours.size() + " , " + mostInc7Days.size());
+//            System.out.println(coinSearchModels.size());
         }
     }
 }
