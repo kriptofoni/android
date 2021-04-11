@@ -51,7 +51,7 @@ public class MostDecIn7Fragment extends Fragment {
     private MainCoinsSearchRecyclerAdapter mainCoinsSearchRecyclerAdapter;
     private Handler handler;
     private Runnable runnable;
-    private ProgressBar progressBar;
+    private ProgressBar progressBar, bottomProgressBar;
 
     @Nullable
     @Override
@@ -72,6 +72,7 @@ public class MostDecIn7Fragment extends Fragment {
         recyclerView.setAdapter(mainCoinsRecyclerAdapter);
 
         progressBar = view.findViewById(R.id.main_most_dec_7_progress_bar);
+        bottomProgressBar = view.findViewById(R.id.main_most_dec_7_bottom_progress_bar);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -82,6 +83,7 @@ public class MostDecIn7Fragment extends Fragment {
                         reached = true;
                         inProgress = true;
                         currentPage++;
+                        bottomProgressBar.setVisibility(View.VISIBLE);
                         addIds("initial");
                         recyclerView.scrollToPosition((currentPage - 1) * 50 - 4);
                     }
@@ -375,6 +377,7 @@ public class MostDecIn7Fragment extends Fragment {
                             public void run() {
                                 mainCoinsRecyclerAdapter.notifyDataSetChanged();
                                 progressBar.setVisibility(View.GONE);
+                                bottomProgressBar.setVisibility(View.GONE);
                             }
                         });
                         reached = false;

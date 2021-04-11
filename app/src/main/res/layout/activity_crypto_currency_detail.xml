@@ -121,6 +121,13 @@
               android:layout_height="300dp"
               tools:context=".MainActivity">
 
+              <ProgressBar
+                  android:id="@+id/crypto_currency_detail_chart_progress_bar"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_centerInParent="true"
+                  android:visibility="gone"/>
+
               <com.github.mikephil.charting.charts.LineChart
                   android:id="@+id/chart"
                   android:layout_width="match_parent"

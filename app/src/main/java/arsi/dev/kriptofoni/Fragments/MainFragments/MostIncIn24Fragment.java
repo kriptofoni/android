@@ -43,14 +43,14 @@ public class MostIncIn24Fragment extends Fragment {
     private List<CoinModel> coinModels, allCoins;
     private RecyclerView recyclerView;
     private MainCoinsRecyclerAdapter mainCoinsRecyclerAdapter;
-    private int currentPage = 1;
+    private int currentPage = 1, firstVisibleItemPos = 0;
     private boolean reached = false, onScreen = false, startDone = false, firstRender = false, inProgress = false, firstOnResume = false;
     private SortedCoinsApi myCoinGeckoApi;
     private String currency, ids;
     private MainCoinsSearchRecyclerAdapter mainCoinsSearchRecyclerAdapter;
     private Handler handler;
     private Runnable runnable;
-    private ProgressBar progressBar;
+    private ProgressBar progressBar, bottomProgressBar;
 
     @Nullable
     @Override
@@ -74,16 +74,20 @@ public class MostIncIn24Fragment extends Fragment {
         recyclerView.setAdapter(mainCoinsRecyclerAdapter);
 
         progressBar = view.findViewById(R.id.main_most_inc_24_progress_bar);
+        bottomProgressBar = view.findViewById(R.id.main_most_inc_24_bottom_progress_bar);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+//                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+//                firstVisibleItemPos = linearLayoutManager.findFirstCompletelyVisibleItemPosition();
                 if (!reached) {
                     if (!recyclerView.canScrollVertically(1) && recyclerView.getAdapter() instanceof MainCoinsRecyclerAdapter) {
                         reached = true;
                         inProgress = true;
                         currentPage++;
+                        bottomProgressBar.setVisibility(View.VISIBLE);
                         addIds("initial");
                         recyclerView.scrollToPosition((currentPage - 1) * 50 - 4);
                     }
@@ -97,7 +101,6 @@ public class MostIncIn24Fragment extends Fragment {
             public void run() {
                 if (onScreen && startDone && !inProgress) {
                     addIds("update");
-                    System.out.println(allCoinSearchModels.get(0).getId());
                 }
 
                 handler.postDelayed(this, 10000);
@@ -369,6 +372,7 @@ public class MostIncIn24Fragment extends Fragment {
                             public void run() {
                                 mainCoinsRecyclerAdapter.notifyDataSetChanged();
                                 progressBar.setVisibility(View.GONE);
+                                bottomProgressBar.setVisibility(View.GONE);
                             }
                         });
                         reached = false;

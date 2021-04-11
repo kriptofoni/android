@@ -71,7 +71,7 @@ import retrofit2.Response;
 
 public class CryptoCurrencyDetailActivity extends AppCompatActivity{
 
-    private String currencyText, coinModelId, chartType, twitterScreenName, webLink, redditLink, coinShortCut;
+    private String currencyText, coinModelId, chartType, twitterScreenName, webLink, redditLink, coinShortCut, time;
     private TextView value, oneHourChange, twentyFourHoursChange, sevenDaysChange,
             marketValue, twentyFourHoursMarketVolume, circulatingSupply, totalSupply, webSite,
             reddit, twitter, coinName, coinMarketCap, priceInBtc, priceChangeInBtc,
@@ -83,11 +83,12 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
     private CountryCodePicker countryCodePicker;
     private String[] currencySymbols;
     private ScrollView scrollView;
-    private ProgressBar progressBar;
+    private ProgressBar progressBar, chartProgressBar;
     private long from, to;
     private TextView active;
     private ArrayList<LineChartEntryModel> lineChartEntryModels;
     private LineChart lineChart;
+    private CandleStickChart candleStickChart;
     private RelativeLayout twitterRedirect, webRedirect, redditRedirect;
 
     @Override
@@ -136,9 +137,11 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         webRedirect = findViewById(R.id.crypto_currency_detail_web_redirect);
         redditRedirect = findViewById(R.id.crypto_currency_detail_reddit_redirect);
         twitterRedirect = findViewById(R.id.crypto_currency_detail_twitter_redirect);
+        chartProgressBar = findViewById(R.id.crypto_currency_detail_chart_progress_bar);
 
         // Initial chart values
         chartType = "line";
+        time = "oneDay";
         active = oneDay;
         oneDay.setTextColor(Color.parseColor("#000000"));
         // Current time in seconds
@@ -186,6 +189,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24);
                     active.setTextColor(Color.parseColor("#797676"));
                     active = oneDay;
+                    time = "oneDay";
+                    setChartProgressBarVisible();
                     getMarketChart();
                 }
             }
@@ -200,6 +205,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 7);
                     active.setTextColor(Color.parseColor("#797676"));
                     active = oneWeek;
+                    time = "oneWeek";
+                    setChartProgressBarVisible();
                     getMarketChart();
                 }
             }
@@ -214,6 +221,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30);
                     active.setTextColor(Color.parseColor("#797676"));
                     active = oneMonth;
+                    time = "oneMonth";
+                    setChartProgressBarVisible();
                     getMarketChart();
                 }
             }
@@ -228,6 +237,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30 * 3);
                     active.setTextColor(Color.parseColor("#797676"));
                     active = threeMonths;
+                    time = "threeMonths";
+                    setChartProgressBarVisible();
                     getMarketChart();
                 }
             }
@@ -242,6 +253,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30 * 6);
                     active.setTextColor(Color.parseColor("#797676"));
                     active = sixMonths;
+                    time = "sixMonths";
+                    setChartProgressBarVisible();
                     getMarketChart();
                 }
             }
@@ -256,6 +269,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 365);
                     active.setTextColor(Color.parseColor("#797676"));
                     active = oneYear;
+                    time = "oneYear";
+                    setChartProgressBarVisible();
                     getMarketChart();
                 }
             }
@@ -270,6 +285,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     to = System.currentTimeMillis() / 1000;
                     active.setTextColor(Color.parseColor("#797676"));
                     active = allTime;
+                    time = "allTime";
+                    setChartProgressBarVisible();
                     getMarketChart();
                 }
             }
@@ -279,6 +296,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(CryptoCurrencyDetailActivity.this, FullScreenChartActivity.class);
+                intent.putExtra("time", time);
                 intent.putExtra("type", chartType);
                 intent.putParcelableArrayListExtra("lineChartModels", lineChartEntryModels);
                 startActivity(intent);
@@ -333,6 +351,18 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                 startActivity(intent);
             }
         });
+    }
+
+    private void setChartProgressBarVisible() {
+        if (chartType.equals("line")) lineChart.setVisibility(View.GONE);
+        else candleStickChart.setVisibility(View.GONE);
+        chartProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void setChartProgressBarInvisible() {
+        chartProgressBar.setVisibility(View.GONE);
+        if (chartType.equals("line")) lineChart.setVisibility(View.VISIBLE);
+        else candleStickChart.setVisibility(View.VISIBLE);
     }
 
     private void makeProgressBarVisible() {
@@ -429,6 +459,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
 
         lineChart.setData(data);
         lineChart.notifyDataSetChanged();
+        setChartProgressBarInvisible();
         lineChart.invalidate();
     }
 

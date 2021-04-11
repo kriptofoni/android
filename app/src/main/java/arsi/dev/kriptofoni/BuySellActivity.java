@@ -1,13 +1,8 @@
 package arsi.dev.kriptofoni;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.TimePickerDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -18,9 +13,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -28,6 +24,7 @@ import java.util.Locale;
 
 public class BuySellActivity extends AppCompatActivity {
 
+    private final int COIN_SELECT_REQUEST_CODE = 1;
     private Button buy, sell, addOperation;
     private TextView datePickerClick, datePickerText, timePickerText, currencies;
     private EditText notesInput, currenciesInputText, costInput, priceInput;
@@ -35,7 +32,6 @@ public class BuySellActivity extends AppCompatActivity {
     private DatePickerDialog.OnDateSetListener dateSetListener;
     private TimePickerDialog.OnTimeSetListener timeSetListener;
     private ImageView backButton;
-    private final int COIN_SELECT_REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,8 +92,8 @@ public class BuySellActivity extends AppCompatActivity {
         currencies.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                 Intent intent = new Intent(BuySellActivity.this, CoinSelectActivity.class);
-                 startActivityForResult(intent, COIN_SELECT_REQUEST_CODE);
+                Intent intent = new Intent(BuySellActivity.this, CoinSelectActivity.class);
+                startActivityForResult(intent, COIN_SELECT_REQUEST_CODE);
             }
         });
 
@@ -119,28 +115,28 @@ public class BuySellActivity extends AppCompatActivity {
         dateSetListener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                GregorianCalendar selectedDate = new GregorianCalendar(i,i1,i2);
-                int month = i1+1;
-                datePickerText.setText(i2 + "/" + month+"/" + i);
+                GregorianCalendar selectedDate = new GregorianCalendar(i, i1, i2);
+                int month = i1 + 1;
+                datePickerText.setText(i2 + "/" + month + "/" + i);
             }
         };
 
         timeSetListener = new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker timePicker, int i, int i1) {
-                String h,m;
+                String h, m;
                 if (i < 10) {
                     if (i1 < 10) {
-                        h = "0"+i;
-                        m = "0"+i1;
+                        h = "0" + i;
+                        m = "0" + i1;
                     } else {
-                        h = "0"+i;
+                        h = "0" + i;
                         m = String.valueOf(i1);
                     }
                 } else {
                     if (i1 < 10) {
                         h = String.valueOf(i);
-                        m = "0"+i1;
+                        m = "0" + i1;
                     } else {
                         h = String.valueOf(i);
                         m = String.valueOf(i1);
@@ -163,11 +159,11 @@ public class BuySellActivity extends AppCompatActivity {
                 int hour = cal1.get(Calendar.HOUR_OF_DAY);
                 int minute = cal1.get(Calendar.MINUTE);
 
-                TimePickerDialog dialog1 = new TimePickerDialog(BuySellActivity.this, AlertDialog.THEME_HOLO_DARK,timeSetListener, hour,minute,true);
+                TimePickerDialog dialog1 = new TimePickerDialog(BuySellActivity.this, AlertDialog.THEME_HOLO_DARK, timeSetListener, hour, minute, true);
                 dialog1.show();
 
-                DatePickerDialog dialog = new DatePickerDialog(BuySellActivity.this, AlertDialog.THEME_HOLO_LIGHT,dateSetListener,year,month,day);
-                dialog.getDatePicker().setMinDate(new Date().getTime()-60000);
+                DatePickerDialog dialog = new DatePickerDialog(BuySellActivity.this, AlertDialog.THEME_HOLO_LIGHT, dateSetListener, year, month, day);
+                dialog.getDatePicker().setMinDate(new Date().getTime() - 60000);
                 dialog.show();
             }
         });
