@@ -52,6 +52,10 @@ public class CoinsFragment extends Fragment {
     private Runnable runnable;
     private ProgressBar progressBar, bottomProgressBar;
 
+    public CoinsFragment() {
+
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

@@ -67,8 +67,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private LoaderManager loaderManager;
 
-    public HomeActivity() {
-    }
+    public HomeActivity() {}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

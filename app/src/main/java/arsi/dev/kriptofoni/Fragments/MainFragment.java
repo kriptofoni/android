@@ -72,6 +72,8 @@ public class MainFragment extends Fragment {
     private MostIncIn7Fragment mostIncIn7Fragment;
     private MostDecIn7Fragment mostDecIn7Fragment;
 
+    public MainFragment() {}
+
     public MainFragment (HomeActivity homeActivity) {
         this.homeActivity = homeActivity;
     }

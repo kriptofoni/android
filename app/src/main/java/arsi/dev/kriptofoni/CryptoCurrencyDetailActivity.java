@@ -295,11 +295,13 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         expand.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(CryptoCurrencyDetailActivity.this, FullScreenChartActivity.class);
-                intent.putExtra("time", time);
-                intent.putExtra("type", chartType);
-                intent.putParcelableArrayListExtra("lineChartModels", lineChartEntryModels);
-                startActivity(intent);
+                if (chartProgressBar.getVisibility() == View.GONE) {
+                    Intent intent = new Intent(CryptoCurrencyDetailActivity.this, FullScreenChartActivity.class);
+                    intent.putExtra("time", time);
+                    intent.putExtra("type", chartType);
+                    intent.putParcelableArrayListExtra("lineChartModels", lineChartEntryModels);
+                    startActivity(intent);
+                }
             }
         });
 

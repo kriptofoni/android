@@ -53,6 +53,10 @@ public class MostDecIn7Fragment extends Fragment {
     private Runnable runnable;
     private ProgressBar progressBar, bottomProgressBar;
 
+    public MostDecIn7Fragment() {
+
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -334,6 +338,7 @@ public class MostDecIn7Fragment extends Fragment {
                             ArrayList<Double> prices = (ArrayList<Double>) sparkline.get("price");
                             double pricechangeIn7Days = prices.isEmpty() ? 0 : prices.get(prices.size() - 1) - prices.get(0);
                             CoinModel model = new CoinModel(i, imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id, pricechangeIn7Days);
+
                             if (type.equals("update")) {
                                 temp.add(model);
                             } else {
@@ -353,7 +358,7 @@ public class MostDecIn7Fragment extends Fragment {
 
                         int firstIndex = (currentPage - 1) * 50;
 
-                        if (type.equals("update")) {
+                        if (type.equals("update") && !coinModels.isEmpty()) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 temp.sort(new Comparator<CoinModel>() {
                                     @Override

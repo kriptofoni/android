@@ -53,6 +53,8 @@ public class MostIncIn7Fragment extends Fragment {
     private Runnable runnable;
     private ProgressBar progressBar, bottomProgressBar;
 
+    public MostIncIn7Fragment() {}
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -353,7 +355,7 @@ public class MostIncIn7Fragment extends Fragment {
 
                         int firstIndex = (currentPage - 1) * 50;
 
-                        if (type.equals("update")) {
+                        if (type.equals("update") && !coinModels.isEmpty()) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 temp.sort(new Comparator<CoinModel>() {
                                     @Override
