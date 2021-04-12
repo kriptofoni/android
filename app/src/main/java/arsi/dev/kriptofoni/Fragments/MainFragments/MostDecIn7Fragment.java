@@ -88,7 +88,7 @@ public class MostDecIn7Fragment extends Fragment {
                         inProgress = true;
                         currentPage++;
                         bottomProgressBar.setVisibility(View.VISIBLE);
-                        addIds("initial");
+                        addIds("newPage");
                         recyclerView.scrollToPosition((currentPage - 1) * 50 - 4);
                     }
                 }
@@ -183,11 +183,15 @@ public class MostDecIn7Fragment extends Fragment {
 
     public void setCoins(List<CoinSearchModel> coins) {
         coinModels.clear();
-        allCoins.clear();
         allCoinSearchModels.clear();
-        this.allCoinSearchModels.addAll(coins);
-        if (onScreen && firstRender && firstOnResume)
-            addIds("initial");
+        allCoinSearchModels.addAll(coins);
+        if (onScreen) {
+            if (!firstRender)
+                addIds("initial");
+            else
+                addIds("dataReload");
+        }
+
         if (firstRender && !startDone) startDone = true;
         if (!firstRender) firstRender = true;
     }
@@ -195,15 +199,18 @@ public class MostDecIn7Fragment extends Fragment {
     private void addIds(String type) {
         StringBuilder stringBuilder = new StringBuilder();
         String s = "";
-        for (int i = (currentPage - 1) * 50; i < (currentPage - 1) * 50 + 50; i++) {
-            stringBuilder.append(this.allCoinSearchModels.get(i).getId() + ",");
-            allCoinSearchModels.get(i).setNumber(i + 1);
-        }
 
-        s = stringBuilder.toString();
-        if (currentPage == 1)
-            setIds(s);
-        new GetCoinInfo().execute(s, type);
+        if (allCoinSearchModels != null && !allCoinSearchModels.isEmpty()) {
+            for (int i = (currentPage - 1) * 50; i < (currentPage - 1) * 50 + 50; i++) {
+                stringBuilder.append(this.allCoinSearchModels.get(i).getId() + ",");
+                allCoinSearchModels.get(i).setNumber(i + 1);
+            }
+
+            s = stringBuilder.toString();
+            if (currentPage == 1)
+                setIds(s);
+            new GetCoinInfo().execute(s, type);
+        }
 //        getCoinInfo(s, type);
     }
 
@@ -312,7 +319,9 @@ public class MostDecIn7Fragment extends Fragment {
 
             coinModels.clear();
             coinModels.addAll(allCoins);
+            allCoins.clear();
             ArrayList<CoinModel> temp = new ArrayList<>();
+            ArrayList<CoinModel> newPage = new ArrayList<>();
             // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
             // We create a simple HTTP Request via Retrofit
             Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, ids, null, 50, 1, true, "24h,7d");
@@ -339,11 +348,12 @@ public class MostDecIn7Fragment extends Fragment {
                             double pricechangeIn7Days = prices.isEmpty() ? 0 : prices.get(prices.size() - 1) - prices.get(0);
                             CoinModel model = new CoinModel(i, imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id, pricechangeIn7Days);
 
-                            if (type.equals("update")) {
+                            if (type.equals("update") || type.equals("dataReload")) {
                                 temp.add(model);
+                            } else if (type.equals("newPage")) {
+                                newPage.add(model);
                             } else {
                                 coinModels.add(model);
-                                allCoins.add(model);
                             }
                         }
 
@@ -372,6 +382,20 @@ public class MostDecIn7Fragment extends Fragment {
                             }
                         }
 
+                        if (type.equals("update") && !coinModels.isEmpty()) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                temp.sort(new Comparator<CoinModel>() {
+                                    @Override
+                                    public int compare(CoinModel lhs, CoinModel rhs) {
+                                        return Double.compare(lhs.getChangeIn24Hours(), rhs.getChangeIn24Hours());
+                                    }
+                                });
+                            }
+                            for (int i = 0; i < temp.size(); i++) {
+                                coinModels.set(firstIndex + i, temp.get(i));
+                            }
+                        }
+
                         for (int i = 0; i < coinModels.size(); i++) {
                             coinModels.get(i).setNumber(i + 1);
                         }
@@ -382,9 +406,10 @@ public class MostDecIn7Fragment extends Fragment {
                             public void run() {
                                 mainCoinsRecyclerAdapter.notifyDataSetChanged();
                                 progressBar.setVisibility(View.GONE);
-                                bottomProgressBar.setVisibility(View.GONE);
+                                bottomProgressBar.setVisibility(View.GONE);if (type.equals("newPage")) recyclerView.scrollToPosition((currentPage - 1) * 50 - 4);
                             }
                         });
+                        allCoins.addAll(coinModels);
                         reached = false;
                         if (inProgress) inProgress = false;
                     }

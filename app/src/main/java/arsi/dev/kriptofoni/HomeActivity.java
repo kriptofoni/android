@@ -165,6 +165,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
             @Override
             public void run() {
                 if (coinSearchModels.size() == max && max != 0) {
+                    System.out.println("run");
                     // When the data download is complete, we send the data to the required pages.
                     mainFragment.setCoinModelsForSearch(coinSearchModels);
                     mainFragment.setMostIncIn24List(coinSearchModels);
@@ -232,6 +233,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            currency = sharedPreferences.getString("currency", "usd");
                             mainFragment.setTotalMarketValue(global.getData().getTotalMarketCap().get(currency));
                             max = (int) global.getData().getActiveCryptocurrencies();
                             totalPageNumber = max / 250 + 1;

@@ -286,6 +286,7 @@ public class MainFragment extends Fragment {
                 }
             });
         }
+        System.out.println(mostIncIn24List.get(0).getName());
         mostIncIn24Fragment.setCoins(mostIncIn24List);
         mostIncIn24Fragment.setProgressBarVisibility(View.VISIBLE);
     }

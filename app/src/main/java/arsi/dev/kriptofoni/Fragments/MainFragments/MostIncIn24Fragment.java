@@ -90,8 +90,7 @@ public class MostIncIn24Fragment extends Fragment {
                         inProgress = true;
                         currentPage++;
                         bottomProgressBar.setVisibility(View.VISIBLE);
-                        addIds("initial");
-                        recyclerView.scrollToPosition((currentPage - 1) * 50 - 4);
+                        addIds("newPage");
                     }
                 }
             }
@@ -179,11 +178,15 @@ public class MostIncIn24Fragment extends Fragment {
 
     public void setCoins(List<CoinSearchModel> coins) {
         coinModels.clear();
-        allCoins.clear();
         allCoinSearchModels.clear();
         allCoinSearchModels.addAll(coins);
-        if (onScreen && firstRender && firstOnResume)
-            addIds("initial");
+        if (onScreen) {
+            if (!firstRender)
+                addIds("initial");
+            else
+                addIds("dataReload");
+        }
+
         if (firstRender && !startDone) startDone = true;
         if (!firstRender) firstRender = true;
     }
@@ -195,14 +198,17 @@ public class MostIncIn24Fragment extends Fragment {
         int firstIndex = (currentPage - 1) * 50;
         int lastIndex = firstIndex + 50;
 
-        for (int i = firstIndex; i < lastIndex; i++) {
-            stringBuilder.append(allCoinSearchModels.get(i).getId() + ",");
+        if (allCoinSearchModels != null && !allCoinSearchModels.isEmpty()) {
+            for (int i = firstIndex; i < lastIndex; i++) {
+                stringBuilder.append(allCoinSearchModels.get(i).getId() + ",");
+            }
+
+            s = stringBuilder.toString();
+            if (currentPage == 1)
+                setIds(s);
+            new GetCoinInfo().execute(s, type);
         }
 
-        s = stringBuilder.toString();
-        if (currentPage == 1)
-            setIds(s);
-        new GetCoinInfo().execute(s, type);
 //        getCoinInfo(s, type);
     }
 
@@ -219,6 +225,7 @@ public class MostIncIn24Fragment extends Fragment {
         coinModels.clear();
         coinModels.addAll(allCoins);
         ArrayList<CoinModel> temp = new ArrayList<>();
+        ArrayList<CoinModel> newPage = new ArrayList<>();
         // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
         // We create a simple HTTP Request via Retrofit
         Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, ids, null, 50, 1, true, "24h,7d");
@@ -243,19 +250,23 @@ public class MostIncIn24Fragment extends Fragment {
                         CoinModel model = new CoinModel(i, imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id, 0);
                         if (type.equals("update")) {
                             temp.add(model);
+                        } else if (type.equals("newPage")) {
+                            newPage.add(model);
                         } else {
                             coinModels.add(model);
                             allCoins.add(model);
                         }
                     }
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        coinModels.sort(new Comparator<CoinModel>() {
-                            @Override
-                            public int compare(CoinModel lhs, CoinModel rhs) {
-                                return Double.compare(rhs.getChangeIn24Hours(), lhs.getChangeIn24Hours());
-                            }
-                        });
+                    if (type.equals("initial")) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            coinModels.sort(new Comparator<CoinModel>() {
+                                @Override
+                                public int compare(CoinModel lhs, CoinModel rhs) {
+                                    return Double.compare(rhs.getChangeIn24Hours(), lhs.getChangeIn24Hours());
+                                }
+                            });
+                        }
                     }
 
                     int firstIndex = (currentPage - 1) * 50;
@@ -273,6 +284,18 @@ public class MostIncIn24Fragment extends Fragment {
                         for (int i = 0; i < temp.size(); i++) {
                             coinModels.set(firstIndex + i, temp.get(i));
                         }
+                    }
+
+                    if (type.equals("newPage") && !coinModels.isEmpty()) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            newPage.sort(new Comparator<CoinModel>() {
+                                @Override
+                                public int compare(CoinModel lhs, CoinModel rhs) {
+                                    return Double.compare(rhs.getChangeIn24Hours(), lhs.getChangeIn24Hours());
+                                }
+                            });
+                        }
+                        coinModels.addAll(newPage);
                     }
 
                     for (int i = 0; i < coinModels.size(); i++) {
@@ -308,7 +331,9 @@ public class MostIncIn24Fragment extends Fragment {
 
             coinModels.clear();
             coinModels.addAll(allCoins);
+            allCoins.clear();
             ArrayList<CoinModel> temp = new ArrayList<>();
+            ArrayList<CoinModel> newPage = new ArrayList<>();
             // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
             // We create a simple HTTP Request via Retrofit
             Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, ids, null, 50, 1, true, "24h,7d");
@@ -331,11 +356,12 @@ public class MostIncIn24Fragment extends Fragment {
                             double marketCap = result.getMarket_cap();
                             double changeIn7Days = result.getPrice_change_percentage_7d_in_currency();
                             CoinModel model = new CoinModel(i, imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id, 0);
-                            if (type.equals("update")) {
+                            if (type.equals("update") || type.equals("dataReload")) {
                                 temp.add(model);
+                            } else if (type.equals("newPage")) {
+                                newPage.add(model);
                             } else {
                                 coinModels.add(model);
-                                allCoins.add(model);
                             }
                         }
 
@@ -351,7 +377,7 @@ public class MostIncIn24Fragment extends Fragment {
                         int firstIndex = (currentPage - 1) * 50;
                         int lastIndex = firstIndex + 50;
 
-                        if (type.equals("update")) {
+                        if (type.equals("update") && !coinModels.isEmpty()) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 temp.sort(new Comparator<CoinModel>() {
                                     @Override
@@ -365,6 +391,18 @@ public class MostIncIn24Fragment extends Fragment {
                             }
                         }
 
+                        if (type.equals("newPage") && !coinModels.isEmpty()) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                newPage.sort(new Comparator<CoinModel>() {
+                                    @Override
+                                    public int compare(CoinModel lhs, CoinModel rhs) {
+                                        return Double.compare(rhs.getChangeIn24Hours(), lhs.getChangeIn24Hours());
+                                    }
+                                });
+                            }
+                            coinModels.addAll(newPage);
+                        }
+
                         for (int i = 0; i < coinModels.size(); i++) {
                             coinModels.get(i).setNumber(i + 1);
                         }
@@ -375,8 +413,10 @@ public class MostIncIn24Fragment extends Fragment {
                                 mainCoinsRecyclerAdapter.notifyDataSetChanged();
                                 progressBar.setVisibility(View.GONE);
                                 bottomProgressBar.setVisibility(View.GONE);
+                                if (type.equals("newPage")) recyclerView.scrollToPosition((currentPage - 1) * 50 - 4);
                             }
                         });
+                        allCoins.addAll(coinModels);
                         reached = false;
                         if (inProgress) inProgress = false;
                     }
