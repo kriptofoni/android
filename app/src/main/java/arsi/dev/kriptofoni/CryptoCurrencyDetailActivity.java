@@ -423,7 +423,6 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         lineChart.setDescription(null);
 
         XAxis xAxis = lineChart.getXAxis();
-        YAxis yAxisLeft = lineChart.getAxisLeft();
         YAxis yAxisRight = lineChart.getAxisRight();
         xAxis.setValueFormatter(new IAxisValueFormatter() {
             @Override
@@ -439,19 +438,15 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                 return result;
             }
         });
-        xAxis.setDrawGridLines(false);
-        xAxis.setDrawAxisLine(false);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        yAxisLeft.setDrawGridLines(false);
-        yAxisLeft.setDrawAxisLine(false);
         yAxisRight.setEnabled(false);
 
-        LineDataSet set = new LineDataSet(yValue, "");
+        LineDataSet set = new LineDataSet(yValue, "Prices");
         set.setDrawCircleHole(false);
         set.setDrawCircles(false);
         set.setValueTextSize(0f);
         set.setLineWidth(2f);
-        set.setColor(Color.RED);
+        set.setColor(Color.BLACK);
         set.setFillAlpha(110);
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
@@ -586,6 +581,9 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     webLink =  webSiteArray.size() == 0 ? "" : webSiteArray.get(0).getAsString();
                     twitterScreenName = twitterText.isJsonNull() ? "" : twitterText.getAsString();
                     redditLink = redditText.isJsonNull() ? "" : redditText.getAsString();
+                    if (webLink.isEmpty()) webRedirect.setVisibility(View.GONE);
+                    if (twitterScreenName.isEmpty()) twitterRedirect.setVisibility(View.GONE);
+                    if (redditLink.isEmpty()) redditRedirect.setVisibility(View.GONE);
 
                     Picasso.get().load(thumb.getAsString()).into(coinIcon);
                     coinName.setText(nameText);

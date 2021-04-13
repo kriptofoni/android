@@ -1,10 +1,11 @@
 package arsi.dev.kriptofoni;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.loader.content.AsyncTaskLoader;
 
 import java.util.List;
 
@@ -16,28 +17,27 @@ import retrofit2.Response;
 
 public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
 
-    private int totalPageNumber;
     private CoinGeckoApi myCoinGeckoApi;
     private String currency;
+    private int index;
 
-    public GetAllCoinsAsyncTaskLoader(@NonNull Context context, int totalPageNumber, CoinGeckoApi myCoinGeckoApi, String currency) {
+    public GetAllCoinsAsyncTaskLoader(@NonNull Context context, CoinGeckoApi myCoinGeckoApi, String currency, int index) {
         super(context);
-        this.totalPageNumber = totalPageNumber;
         this.myCoinGeckoApi = myCoinGeckoApi;
         this.currency = currency;
+        this.index = index;
     }
 
     @Nullable
     @Override
     public String loadInBackground() {
-        for (int i = 1; i <= totalPageNumber; i++) {
-            final int index = i;
-            Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, null,"id_desc", 250, index, true, "24h,7d");
-            call.enqueue(new Callback<List<CoinMarket>>() {
-                @Override
-                public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
-                    if (response.isSuccessful()) {
-                        List<CoinMarket> coins = response.body();
+        Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, null,"id_desc", 250, index, true, "24h,7d");
+        call.enqueue(new Callback<List<CoinMarket>>() {
+            @Override
+            public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
+                if (response.isSuccessful()) {
+                    List<CoinMarket> coins = response.body();
+                    if (coins != null && !coins.isEmpty()) {
                         int lastIndex = coins.size();
                         int difference = lastIndex % 10 == 0 ? lastIndex / 10 : lastIndex / 10 + 1;
                         // We create 10 different threads to speed up model creation and listing.
@@ -52,15 +52,19 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
                             }
                             thread.start();
                         }
+                    } else {
+                        System.out.println("else");
+                        loadInBackground();
                     }
                 }
+            }
 
-                @Override
-                public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
-                    loadInBackground();
-                }
-            });
-        }
+            @Override
+            public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
+                System.out.println("fail");
+                loadInBackground();
+            }
+        });
         return "Task Result";
     }
 

@@ -5,11 +5,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import android.app.LoaderManager;
+import androidx.loader.app.LoaderManager;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.content.Loader;
+import androidx.loader.content.Loader;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -74,7 +73,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        loaderManager = getLoaderManager();
+        loaderManager = LoaderManager.getInstance(this);
 
         coinSearchModels = Collections.synchronizedList(new ArrayList<>());
         coinSearchModelsFromMem = Collections.synchronizedList(new ArrayList<>());
@@ -156,7 +155,11 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         firstLoad = false;
         // Since downloading the data of all coins is a long process,
         // we are launching an AsyncTaskLoader to perform this process.
-        loaderManager.initLoader(0, null, this);
+        for (int i = 1; i <= totalPageNumber; i++) {
+            Bundle bundle = new Bundle();
+            bundle.putInt("index", i);
+            loaderManager.initLoader(i, bundle, this);
+        }
 
         // We use a handler that repeats every 250ms to find out that the
         // download of all coins is complete.
@@ -165,7 +168,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
             @Override
             public void run() {
                 if (coinSearchModels.size() == max && max != 0) {
-                    System.out.println("run");
+                    System.out.println("runned");
                     // When the data download is complete, we send the data to the required pages.
                     mainFragment.setCoinModelsForSearch(coinSearchModels);
                     mainFragment.setMostIncIn24List(coinSearchModels);
@@ -192,23 +195,27 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public Loader<String> onCreateLoader(int i, Bundle bundle) {
-        return new GetAllCoinsAsyncTaskLoader(this, totalPageNumber, myCoinGeckoApi, currency);
+        return new GetAllCoinsAsyncTaskLoader(this, myCoinGeckoApi, currency, bundle.getInt("index"));
     }
 
     @Override
-    public void onLoadFinished(Loader<String> loader, String s) {
+    public void onLoadFinished(@NonNull Loader<String> loader, String data) {
+
     }
 
     @Override
-    public void onLoaderReset(Loader<String> loader) {
+    public void onLoaderReset(@NonNull Loader<String> loader) {
 
     }
+
 
     private class GetTotalMarketCap extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            // At the first opening of the application, if there is data stored in memory,
+            // we send this data to the required pages.
             if (firstLoad) {
                 if (!coinSearchModelsFromMem.isEmpty())
                     mainFragment.setCoinModelsForSearch(coinSearchModelsFromMem);

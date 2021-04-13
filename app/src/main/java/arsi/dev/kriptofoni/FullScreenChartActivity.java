@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.github.mikephil.charting.charts.CandleStickChart;
 import com.github.mikephil.charting.charts.LineChart;
@@ -30,6 +31,7 @@ public class FullScreenChartActivity extends AppCompatActivity {
     private CandleStickChart candleStickChart;
     private ArrayList<LineChartEntryModel> lineChartEntryModels;
     private String time;
+    private ImageView backButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,7 @@ public class FullScreenChartActivity extends AppCompatActivity {
 
         lineChart = findViewById(R.id.full_screen_chart_line_chart);
         candleStickChart = findViewById(R.id.full_screen_chart_candlestick_chart);
+        backButton = findViewById(R.id.full_screen_chart_back_button);
 
         Intent intent = getIntent();
 
@@ -49,6 +52,13 @@ public class FullScreenChartActivity extends AppCompatActivity {
             getLineChart();
         else
             getCandleStickChart();
+
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
     }
 
@@ -78,7 +88,6 @@ public class FullScreenChartActivity extends AppCompatActivity {
         lineChart.setDescription(null);
 
         XAxis xAxis = lineChart.getXAxis();
-        YAxis yAxisLeft = lineChart.getAxisLeft();
         YAxis yAxisRight = lineChart.getAxisRight();
         xAxis.setValueFormatter(new IAxisValueFormatter() {
             @Override
@@ -94,19 +103,16 @@ public class FullScreenChartActivity extends AppCompatActivity {
                 return result;
             }
         });
-        xAxis.setDrawGridLines(false);
-        xAxis.setDrawAxisLine(false);
+
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        yAxisLeft.setDrawGridLines(false);
-        yAxisLeft.setDrawAxisLine(false);
         yAxisRight.setEnabled(false);
 
-        LineDataSet set = new LineDataSet(yValue, "");
+        LineDataSet set = new LineDataSet(yValue, "Prices");
         set.setDrawCircleHole(false);
         set.setDrawCircles(false);
         set.setValueTextSize(0f);
         set.setLineWidth(2f);
-        set.setColor(Color.RED);
+        set.setColor(Color.BLACK);
         set.setFillAlpha(110);
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
@@ -116,6 +122,7 @@ public class FullScreenChartActivity extends AppCompatActivity {
 
         lineChart.setData(data);
         lineChart.notifyDataSetChanged();
+        lineChart.invalidate();
     }
 
     private String getChartXAxisHourAndMinute(float timestamp) {

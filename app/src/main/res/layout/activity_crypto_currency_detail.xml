@@ -77,7 +77,8 @@
       android:id="@+id/crypto_currency_detail_scroll_view"
       android:layout_below="@id/detail_header"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content">
+      android:layout_height="wrap_content"
+      android:overScrollMode="never">
 
       <LinearLayout
           android:layout_width="match_parent"
