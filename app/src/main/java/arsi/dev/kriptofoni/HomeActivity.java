@@ -155,11 +155,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         firstLoad = false;
         // Since downloading the data of all coins is a long process,
         // we are launching an AsyncTaskLoader to perform this process.
-        for (int i = 1; i <= totalPageNumber; i++) {
-            Bundle bundle = new Bundle();
-            bundle.putInt("index", i);
-            loaderManager.initLoader(i, bundle, this);
-        }
+        loaderManager.initLoader(0, null, this);
 
         // We use a handler that repeats every 250ms to find out that the
         // download of all coins is complete.
@@ -167,8 +163,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
+                System.out.println(coinSearchModels.size() + " , " + max);
                 if (coinSearchModels.size() == max && max != 0) {
-                    System.out.println("runned");
                     // When the data download is complete, we send the data to the required pages.
                     mainFragment.setCoinModelsForSearch(coinSearchModels);
                     mainFragment.setMostIncIn24List(coinSearchModels);
@@ -195,7 +191,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public Loader<String> onCreateLoader(int i, Bundle bundle) {
-        return new GetAllCoinsAsyncTaskLoader(this, myCoinGeckoApi, currency, bundle.getInt("index"));
+        return new GetAllCoinsAsyncTaskLoader(this, totalPageNumber, myCoinGeckoApi, currency);
     }
 
     @Override
@@ -248,7 +244,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                     });
                 }
             } catch (CoinGeckoApiException ex) {
-                doInBackground(voids);
+                new GetTotalMarketCap().execute();
+                cancel(true);
             }
             return null;
         }

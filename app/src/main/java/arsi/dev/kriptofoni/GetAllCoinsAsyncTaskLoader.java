@@ -19,18 +19,16 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
 
     private CoinGeckoApi myCoinGeckoApi;
     private String currency;
-    private int index;
+    private int totalPageNumber;
 
-    public GetAllCoinsAsyncTaskLoader(@NonNull Context context, CoinGeckoApi myCoinGeckoApi, String currency, int index) {
+    public GetAllCoinsAsyncTaskLoader(@NonNull Context context, int totalPageNumber, CoinGeckoApi myCoinGeckoApi, String currency) {
         super(context);
         this.myCoinGeckoApi = myCoinGeckoApi;
         this.currency = currency;
-        this.index = index;
+        this.totalPageNumber = totalPageNumber;
     }
 
-    @Nullable
-    @Override
-    public String loadInBackground() {
+    private void loadData (int index) {
         Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, null,"id_desc", 250, index, true, "24h,7d");
         call.enqueue(new Callback<List<CoinMarket>>() {
             @Override
@@ -54,7 +52,7 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
                         }
                     } else {
                         System.out.println("else");
-                        loadInBackground();
+                        loadData(index);
                     }
                 }
             }
@@ -62,9 +60,17 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
             @Override
             public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
                 System.out.println("fail");
-                loadInBackground();
+                loadData(index);
             }
         });
+    }
+
+    @Nullable
+    @Override
+    public String loadInBackground() {
+        for (int i = 1; i <= totalPageNumber ; i++) {
+            loadData(i);
+        }
         return "Task Result";
     }
 
