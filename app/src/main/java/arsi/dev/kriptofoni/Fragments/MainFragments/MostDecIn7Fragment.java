@@ -48,7 +48,7 @@ public class MostDecIn7Fragment extends Fragment {
     private boolean reached = false, onScreen = false, firstRender = false, startDone = false,
             inProgress = false, firstOnResume = false, isInterrupted = false;
     private SortedCoinsApi myCoinGeckoApi;
-    private String currency, ids, fetchType;
+    private String currency, fetchType;
     private MainCoinsSearchRecyclerAdapter mainCoinsSearchRecyclerAdapter;
     private Handler handler;
     private Runnable runnable;
@@ -83,7 +83,7 @@ public class MostDecIn7Fragment extends Fragment {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if (!reached) {
+                if (!reached && !inProgress) {
                     if (!recyclerView.canScrollVertically(1) && recyclerView.getAdapter() instanceof MainCoinsRecyclerAdapter) {
                         reached = true;
                         currentPage++;
@@ -136,6 +136,7 @@ public class MostDecIn7Fragment extends Fragment {
         onScreen = true;
         handler.postDelayed(runnable, 10000);
         if (!firstOnResume) {
+            progressBar.setVisibility(View.VISIBLE);
             firstOnResume = true;
             addIds();
             fetchType = "initial";
@@ -185,19 +186,15 @@ public class MostDecIn7Fragment extends Fragment {
     }
 
     public void emptyAllCoinModels() {
-        allCoins = new ArrayList<>();
-        coinModels = new ArrayList<>();
-        mainCoinsRecyclerAdapter.setCoins(coinModels);
-        new GetCoinInfo().execute(this.ids);
-        fetchType = "initial";
+        allCoins.clear();
+        coinModels.clear();
         recyclerView.scrollTo(0, 0);
     }
 
     public void setCoins(List<CoinSearchModel> coins) {
-        coinModels.clear();
         allCoinSearchModels.clear();
         allCoinSearchModels.addAll(coins);
-        if (onScreen) {
+        if (onScreen && !inProgress) {
             if (!firstRender) {
                 addIds();
                 fetchType = "initial";
@@ -222,20 +219,18 @@ public class MostDecIn7Fragment extends Fragment {
             }
 
             s = stringBuilder.toString();
-            if (currentPage == 1)
-                setIds(s);
             inProgress = true;
             new GetCoinInfo().execute(s);
         }
     }
 
-    private void setIds(String ids) {
-        this.ids = ids;
-    }
-
     public void setProgressBarVisibility(int visibility) {
         if (!firstOnResume)
             progressBar.setVisibility(visibility);
+    }
+
+    public void setFirstOnResume(boolean firstOnResume) {
+        this.firstOnResume = firstOnResume;
     }
 
     private class GetCoinInfo extends AsyncTask<String, Void, Void> {
@@ -296,7 +291,7 @@ public class MostDecIn7Fragment extends Fragment {
 
                         int firstIndex = (currentPage - 1) * 50;
 
-                        if (fetchType.equals("update") && !coinModels.isEmpty()) {
+                        if ((fetchType.equals("update") || fetchType.equals("dataReload")) && !coinModels.isEmpty()) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 temp.sort(new Comparator<CoinModel>() {
                                     @Override
@@ -329,7 +324,10 @@ public class MostDecIn7Fragment extends Fragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                mainCoinsRecyclerAdapter.notifyDataSetChanged();
+                                if (fetchType.equals("update") || fetchType.equals("dataReload"))
+                                    mainCoinsRecyclerAdapter.notifyItemRangeChanged(firstIndex, 50);
+                                else
+                                    mainCoinsRecyclerAdapter.notifyDataSetChanged();
                                 progressBar.setVisibility(View.GONE);
                                 bottomProgressBar.setVisibility(View.GONE);
                                 if (fetchType.equals("newPage")) recyclerView.scrollToPosition((currentPage - 1) * 50 - 4);

@@ -48,7 +48,7 @@ public class CoinsFragment extends Fragment {
     private int currentPage = 1;
     private String currency, fetchType;
     private boolean reached = false, onScreen = false, firstRender = false, inProgress = false,
-            isInterrupted = false;
+            isInterrupted = false, firstOnResume = false;
     private Handler handler;
     private Runnable runnable;
     private ProgressBar progressBar, bottomProgressBar;
@@ -67,9 +67,7 @@ public class CoinsFragment extends Fragment {
             @Override
             public void run() {
                 if (onScreen && firstRender && !inProgress) {
-                    new GetCoinInfo().execute();
-                    fetchType = "update";
-                    inProgress = true;
+                    getCoins("update");
                     handler.postDelayed(this, 10000);
                 }
             }
@@ -97,24 +95,21 @@ public class CoinsFragment extends Fragment {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if (!reached) {
+                if (!reached && !inProgress) {
                     if (!recyclerView.canScrollVertically(1) && recyclerView.getAdapter() instanceof MainCoinsRecyclerAdapter) {
                         reached = true;
-                        inProgress = true;
                         currentPage++;
                         bottomProgressBar.setVisibility(View.VISIBLE);
-                        new GetCoinInfo().execute();
-                        fetchType = "newPage";
+                        getCoins("newPage");
                         recyclerView.scrollToPosition((currentPage - 1) * 100 - 4);
                     }
                 }
             }
         });
 
-        new GetCoinInfo().execute();
-        fetchType = "initial";
-        inProgress = true;
+        getCoins("initial");
         if (!firstRender) firstRender = true;
+        if (!firstOnResume) firstOnResume = true;
 
         return view;
     }
@@ -140,6 +135,11 @@ public class CoinsFragment extends Fragment {
             new GetCoinInfo().execute();
             inProgress = true;
             isInterrupted = false;
+        }
+        if (firstRender && !firstOnResume) {
+            progressBar.setVisibility(View.VISIBLE);
+            getCoins("initial");
+            firstOnResume = true;
         }
     }
 
@@ -183,13 +183,19 @@ public class CoinsFragment extends Fragment {
 
     public void emptyAllCoinModels() {
         progressBar.setVisibility(View.VISIBLE);
-        allCoinModels = new ArrayList<>();
-        coinModels = new ArrayList<>();
-        mainCoinsRecyclerAdapter.setCoins(coinModels);
-        new GetCoinInfo().execute();
-        fetchType = "initial";
-        inProgress = true;
+        allCoinModels.clear();
+        coinModels.clear();
         recyclerView.scrollTo(0, 0);
+    }
+
+    private void getCoins(String type) {
+        new GetCoinInfo().execute();
+        fetchType = type;
+        inProgress = true;
+    }
+
+    public void setFirstOnResume(boolean firstOnResume) {
+        this.firstOnResume = firstOnResume;
     }
 
     private class GetCoinInfo extends AsyncTask<Void, Void, Void> {
@@ -240,13 +246,18 @@ public class CoinsFragment extends Fragment {
                             }
                         }
 
-                        if (fetchType.equals("newPage") && !coinModels.isEmpty())
+                        if (fetchType.equals("newPage"))
                             coinModels.addAll(newPage);
+
+                        System.out.println(coinModels.size());
 
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                mainCoinsRecyclerAdapter.notifyDataSetChanged();
+                                if (fetchType.equals("update"))
+                                    mainCoinsRecyclerAdapter.notifyItemRangeChanged(firstIndex, 100);
+                                else
+                                    mainCoinsRecyclerAdapter.notifyDataSetChanged();
                                 progressBar.setVisibility(View.GONE);
                                 bottomProgressBar.setVisibility(View.GONE);
                             }

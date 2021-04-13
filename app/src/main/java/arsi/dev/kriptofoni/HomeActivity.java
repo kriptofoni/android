@@ -163,7 +163,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                System.out.println(coinSearchModels.size() + " , " + max);
                 if (coinSearchModels.size() == max && max != 0) {
                     // When the data download is complete, we send the data to the required pages.
                     mainFragment.setCoinModelsForSearch(coinSearchModels);
