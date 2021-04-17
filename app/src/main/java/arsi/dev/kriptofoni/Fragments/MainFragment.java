@@ -72,6 +72,8 @@ public class MainFragment extends Fragment {
     private MostIncIn7Fragment mostIncIn7Fragment;
     private MostDecIn7Fragment mostDecIn7Fragment;
 
+    private ViewPager viewPager;
+
     public MainFragment() {}
 
     public MainFragment (HomeActivity homeActivity) {
@@ -82,8 +84,8 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
-        ViewPager viewPager = view.findViewById(R.id.main_viewpager);
-        setupViewPager(viewPager);
+        viewPager = view.findViewById(R.id.main_viewpager);
+        setupViewPager();
 
         tabs = view.findViewById(R.id.main_tabs);
         tabs.setSelectedTabIndicatorColor(Color.parseColor("#f2a900"));
@@ -170,6 +172,37 @@ public class MainFragment extends Fragment {
         currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
     }
 
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        Fragment active;
+        switch (viewPager.getCurrentItem()) {
+            case 0:
+                active = coinsFragment;
+                break;
+            case 1:
+                active = mostIncIn24Fragment;
+                break;
+            case 2:
+                active = mostDecIn24Fragment;
+                break;
+            case 3:
+                active = mostIncIn7Fragment;
+                break;
+            case 4:
+                active = mostDecIn7Fragment;
+                break;
+            default:
+                active = null;
+        }
+
+        if (hidden) {
+            active.onPause();
+        } else {
+            active.onResume();
+        }
+    }
+
     private void filter(String text) {
         boolean contains = false;
         ArrayList<CoinSearchModel> filteredList = new ArrayList<>();
@@ -197,7 +230,7 @@ public class MainFragment extends Fragment {
         }
     }
 
-    private void setupViewPager(ViewPager viewPager) {
+    private void setupViewPager() {
         Adapter adapter = new Adapter(getChildFragmentManager(), BEHAVIOUR_RESUME_ONLY_CURRENT_FRAGMENT);
         coinsFragment = new CoinsFragment();
         mostIncIn24Fragment = new MostIncIn24Fragment();

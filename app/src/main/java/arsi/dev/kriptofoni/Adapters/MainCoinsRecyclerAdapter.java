@@ -98,12 +98,12 @@ public class MainCoinsRecyclerAdapter extends RecyclerView.Adapter<MainCoinsRecy
 
         public Holder(@NonNull View itemView) {
             super(itemView);
-            name = itemView.findViewById(R.id.main_coins_coin_name);
-            changeIn24Hours = itemView.findViewById(R.id.main_coins_change_percent_in_24_hours);
-            priceChangeIn24Hours = itemView.findViewById(R.id.main_coins_change_in_24_hours);
-            currentPrice = itemView.findViewById(R.id.main_coins_current_price);
-            icon = itemView.findViewById(R.id.main_coins_icon);
-            buy = itemView.findViewById(R.id.main_coins_buy);
+            name = itemView.findViewById(R.id.main_coins_card_coin_name);
+            changeIn24Hours = itemView.findViewById(R.id.main_coins_card_change_percent_in_24_hours);
+            priceChangeIn24Hours = itemView.findViewById(R.id.main_coins_card_change_in_24_hours);
+            currentPrice = itemView.findViewById(R.id.main_coins_card_current_price);
+            icon = itemView.findViewById(R.id.main_coins_card_icon);
+            buy = itemView.findViewById(R.id.main_coins_card_buy);
             card = itemView.findViewById(R.id.main_coins_card);
         }
     }

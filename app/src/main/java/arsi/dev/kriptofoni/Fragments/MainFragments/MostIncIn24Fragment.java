@@ -216,7 +216,6 @@ public class MostIncIn24Fragment extends Fragment {
         if (allCoinSearchModels != null && !allCoinSearchModels.isEmpty()) {
             for (int i = firstIndex; i < lastIndex; i++) {
                 stringBuilder.append(allCoinSearchModels.get(i).getId() + ",");
-                System.out.println(allCoinSearchModels.get(i).getId() + " , " + allCoinSearchModels.get(i).getPriceChangeIn24());
             }
 
             s = stringBuilder.toString();
@@ -240,7 +239,6 @@ public class MostIncIn24Fragment extends Fragment {
         protected Void doInBackground(String... strings) {
 
             String ids = strings[0];
-            System.out.println(fetchType);
 
             coinModels.clear();
             coinModels.addAll(allCoins);
@@ -322,8 +320,6 @@ public class MostIncIn24Fragment extends Fragment {
                         for (int i = 0; i < coinModels.size(); i++) {
                             coinModels.get(i).setNumber(i + 1);
                         }
-
-                        System.out.println(coinModels.size());
 
                         getActivity().runOnUiThread(new Runnable() {
                             @Override

@@ -2,13 +2,11 @@ package arsi.dev.kriptofoni;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -17,52 +15,36 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.github.mikephil.charting.charts.CandleStickChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
-import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.CandleData;
-import com.github.mikephil.charting.data.CandleDataSet;
-import com.github.mikephil.charting.data.CandleEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
-import com.github.mikephil.charting.listener.OnChartGestureListener;
-import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
-import com.github.mikephil.charting.renderer.YAxisRenderer;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import com.litesoftwares.coingecko.CoinGeckoApiClient;
-import com.litesoftwares.coingecko.domain.Coins.CoinData.Links;
-import com.litesoftwares.coingecko.domain.Coins.CoinFullData;
-import com.litesoftwares.coingecko.domain.Coins.MarketData;
-import com.litesoftwares.coingecko.domain.Shared.Market;
-import com.litesoftwares.coingecko.exception.CoinGeckoApiException;
-import com.litesoftwares.coingecko.impl.CoinGeckoApiClientImpl;
 import com.squareup.picasso.Picasso;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import arsi.dev.kriptofoni.Models.LineChartEntryModel;
 import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
-import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
-import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
 import arsi.dev.kriptofoni.Retrofit.CoinInfoApi;
 import arsi.dev.kriptofoni.Retrofit.CoinInfoRetrofitClient;
 import retrofit2.Call;
@@ -71,14 +53,15 @@ import retrofit2.Response;
 
 public class CryptoCurrencyDetailActivity extends AppCompatActivity{
 
-    private String currencyText, coinModelId, chartType, twitterScreenName, webLink, redditLink, coinShortCut, time;
+    private String currencyText, coinModelId, chartType, twitterScreenName, webLink,
+            redditLink, coinShortCut, time;
     private TextView value, oneHourChange, twentyFourHoursChange, sevenDaysChange,
             marketValue, twentyFourHoursMarketVolume, circulatingSupply, totalSupply, webSite,
             reddit, twitter, coinName, coinMarketCap, priceInBtc, priceChangeInBtc,
             currentPrice, currentChange, currentPriceChange, oneDay, oneWeek, oneMonth, threeMonths,
             sixMonths, oneYear, allTime;
     private CoinInfoApi coinGeckoApi;
-    private Button buySell;
+    private Button buySell, addWatchingList;
     private ImageView backButton, coinIcon, expand, chartIcon;
     private CountryCodePicker countryCodePicker;
     private String[] currencySymbols;
@@ -90,6 +73,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
     private LineChart lineChart;
     private CandleStickChart candleStickChart;
     private RelativeLayout twitterRedirect, webRedirect, redditRedirect;
+    private int chartColor;
+    private LineDataSet set;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +83,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
 
         SharedPreferences sharedPreferences = getSharedPreferences("Preferences", 0);
         currencyText = sharedPreferences.getString("currency", "usd");
+        String watchingList = sharedPreferences.getString("watchingList", "");
+        List<String> watchingCoins = new LinkedList<>(Arrays.asList(watchingList.split(",")));
 
         lineChartEntryModels = new ArrayList<>();
 
@@ -138,6 +125,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         redditRedirect = findViewById(R.id.crypto_currency_detail_reddit_redirect);
         twitterRedirect = findViewById(R.id.crypto_currency_detail_twitter_redirect);
         chartProgressBar = findViewById(R.id.crypto_currency_detail_chart_progress_bar);
+        addWatchingList = findViewById(R.id.addWatchingList);
 
         // Initial chart values
         chartType = "line";
@@ -177,6 +165,30 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                 Intent intent = new Intent(CryptoCurrencyDetailActivity.this,BuySellActivity.class);
                 intent.putExtra("shortCut", coinShortCut);
                 startActivity(intent);
+            }
+        });
+
+        addWatchingList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (watchingCoins.contains(coinModelId)) {
+                    Toast.makeText(CryptoCurrencyDetailActivity.this, "Coin is already at your watching list.", Toast.LENGTH_LONG).show();
+                } else {
+                    // Since watchingList is a final variable,
+                    // it is copied to another variable in order to make changes on it.
+                    String copy = watchingList;
+                    // Updating string to be written to Shared Preferences
+                    copy += coinModelId + ",";
+                    // If the add button is pressed without leaving the page,
+                    // the coin id is added to the watchingCoins in order not to add the coin again.
+                    watchingCoins.add(coinModelId);
+
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("watchingList", copy);
+                    editor.apply();
+
+                    Toast.makeText(CryptoCurrencyDetailActivity.this, "Coin has added to your watching list.", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -441,13 +453,15 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         yAxisRight.setEnabled(false);
 
-        LineDataSet set = new LineDataSet(yValue, "Prices");
+        set = new LineDataSet(yValue, "Prices");
         set.setDrawCircleHole(false);
         set.setDrawCircles(false);
         set.setValueTextSize(0f);
         set.setLineWidth(2f);
-        set.setColor(Color.BLACK);
-        set.setFillAlpha(110);
+        set.setFillAlpha(170);
+        set.setDrawFilled(true);
+        set.setColor(chartColor);
+        set.setFillColor(chartColor);
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
         dataSets.add(set);
@@ -513,6 +527,13 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         return String.valueOf(calendar.get(Calendar.YEAR));
     }
 
+    private void setChartColor(int color) {
+        set.setFillColor(color);
+        set.setColor(color);
+        set.setFillAlpha(170);
+        lineChart.invalidate();
+    }
+
     private void getCoinInfo() {
         Call<JsonObject> call = coinGeckoApi.getCoinInfo(coinModelId,"false",false,true,false,false,false);
         call.enqueue(new Callback<JsonObject>() {
@@ -549,6 +570,10 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
 
                     JsonObject changeTwentyObject = (JsonObject) marketData.get("price_change_percentage_24h_in_currency");
                     JsonElement twentyFourHours = changeTwentyObject.isJsonNull() ? null : changeTwentyObject.get(currencyText);
+                    if (set != null)
+                        setChartColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : twentyFourHours.getAsDouble() < 0 ? Color.RED : Color.BLACK);
+                    else
+                        chartColor = twentyFourHours.getAsDouble() > 0 ? Color.GREEN : twentyFourHours.getAsDouble() < 0 ? Color.RED : Color.BLACK;
                     JsonElement changePercentageInBtc = changeTwentyObject.isJsonNull() ? null : changeTwentyObject.get("btc");
 
                     JsonObject changeSevenDaysObject = (JsonObject) marketData.get("price_change_percentage_7d_in_currency");
@@ -660,17 +685,21 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     if (result != null && !result.isJsonNull() && result.size() != 0) {
                         JsonArray prices = (JsonArray) result.get("prices");
                         ArrayList<Entry> yValue = new ArrayList<>();
-                        for (int i = 0; i < prices.size(); i++) {
-                            if (i % 4 == 0) {
-                                JsonArray priceValues = (JsonArray) prices.get(i);
-                                float timestamp = priceValues.get(0).getAsFloat();
-                                float price = priceValues.get(1).getAsFloat();
-                                LineChartEntryModel model = new LineChartEntryModel(timestamp, price);
-                                lineChartEntryModels.add(model);
-                                yValue.add(new Entry(timestamp, price));
+                        if (prices != null && !prices.isJsonNull()) {
+                            for (int i = 0; i < prices.size(); i++) {
+                                if (i % 4 == 0) {
+                                    JsonArray priceValues = (JsonArray) prices.get(i);
+                                    if (priceValues != null && !priceValues.isJsonNull()) {
+                                        float timestamp = priceValues.get(0).getAsFloat();
+                                        float price = priceValues.get(1).getAsFloat();
+                                        LineChartEntryModel model = new LineChartEntryModel(timestamp, price);
+                                        lineChartEntryModels.add(model);
+                                        yValue.add(new Entry(timestamp, price));
+                                    }
+                                }
                             }
+                            lineChart(yValue);
                         }
-                        lineChart(yValue);
                     } else {
                         getMarketChart();
                     }

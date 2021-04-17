@@ -118,6 +118,7 @@ public class CoinsFragment extends Fragment {
     public void onPause() {
         super.onPause();
         onScreen = false;
+        System.out.println("paused");
         handler.removeCallbacks(runnable);
         // If the page is stopped while a data loading process is in progress,
         // we check whether there is any data fetch process when the page
@@ -129,6 +130,7 @@ public class CoinsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        System.out.println("resumed");
         onScreen = true;
         handler.postDelayed(runnable, 10000);
         if (isInterrupted) {
@@ -248,8 +250,6 @@ public class CoinsFragment extends Fragment {
 
                         if (fetchType.equals("newPage"))
                             coinModels.addAll(newPage);
-
-                        System.out.println(coinModels.size());
 
                         getActivity().runOnUiThread(new Runnable() {
                             @Override

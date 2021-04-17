@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/header_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintGuide_percent="0.07"
+        android:orientation="horizontal" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintGuide_percent="0.92"
+        android:orientation="horizontal" />
+
+    <RelativeLayout
+        android:id="@+id/detail_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/header_top"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/alerts_watching_list_add_coin"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_baseline_add_24"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/alerts_watching_list_currency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="USD"
+            android:textSize="20dp"
+            android:textColor="#000"
+            android:layout_marginVertical="10dp"
+            android:layout_toLeftOf="@id/alerts_watching_list_select_coins"
+            android:layout_marginRight="30dp"
+            />
+
+        <ImageView
+            android:id="@+id/alerts_watching_list_select_coins"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_baseline_more_vert_24"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="20dp"
+            android:layout_centerVertical="true"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/alerts_watching_list_no_coin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/detail_header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/no_coin_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No Crypto Coin Added"
+            android:textSize="20dp"
+            android:textColor="#000"
+            android:textAlignment="center"
+            android:layout_marginHorizontal="20dp"/>
+
+        <Button
+            android:id="@+id/alerts_watching_list_no_coin_add_button"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:text="Add Crypto Coin"
+            android:background="@drawable/detail_button"
+            android:layout_marginHorizontal="30dp"
+            android:layout_below="@id/no_coin_text"
+            android:layout_marginTop="30dp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/alerts_watching_list_coins"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/detail_header"
+        app:layout_constraintBottom_toBottomOf="@id/bottom"
+        android:visibility="gone">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/alerts_watching_list_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:overScrollMode="never" />
+
+    </RelativeLayout>
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
