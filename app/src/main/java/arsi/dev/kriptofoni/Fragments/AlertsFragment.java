@@ -35,7 +35,6 @@ public class AlertsFragment extends Fragment {
 
     private AlertFragment alertFragment;
     private WatchingListFragment watchingListFragment;
-    private boolean onScreen = false;
 
     private HomeActivity homeActivity;
 
@@ -124,9 +123,5 @@ public class AlertsFragment extends Fragment {
             alertFragmentsList.add(fragment);
             alertFragmentsTitlesList.add(title);
         }
-    }
-
-    public void setOnScreen(boolean onScreen) {
-        this.onScreen = onScreen;
     }
 }

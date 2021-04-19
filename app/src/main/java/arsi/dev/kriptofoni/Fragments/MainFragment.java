@@ -64,7 +64,6 @@ public class MainFragment extends Fragment {
     private ConstraintLayout header;
     private EditText searchBar;
     private String currencyText;
-    private boolean onScreen = true;
     private SharedPreferences sharedPreferences;
 
     private CoinsFragment coinsFragment;
@@ -374,10 +373,6 @@ public class MainFragment extends Fragment {
         String json = new Gson().toJson(list);
         editor.putString(id, json);
         editor.apply();
-    }
-
-    public void setOnScreen(boolean onScreen) {
-        this.onScreen = onScreen;
     }
 
     @Override
