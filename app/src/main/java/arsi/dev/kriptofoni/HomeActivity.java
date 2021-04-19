@@ -28,7 +28,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import arsi.dev.kriptofoni.Adapters.MainCoinsRecyclerAdapter;
 import arsi.dev.kriptofoni.Fragments.AlertsFragment;
+import arsi.dev.kriptofoni.Fragments.AlertsFragments.AlertFragment;
 import arsi.dev.kriptofoni.Fragments.MainFragment;
 import arsi.dev.kriptofoni.Fragments.MoreFragment;
 import arsi.dev.kriptofoni.Fragments.NewsFragment;
@@ -46,7 +48,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     private BottomNavigationView bottomNavigationView;
     private final MainFragment mainFragment = new MainFragment(this);
     private final PortfolioFragment portfolioFragment = new PortfolioFragment();
-    private final AlertsFragment alertsFragment = new AlertsFragment();
+    private final AlertsFragment alertsFragment = new AlertsFragment(this);
     private final NewsFragment newsFragment = new NewsFragment();
     private final MoreFragment moreFragment = new MoreFragment();
     private Fragment active = mainFragment;
@@ -186,6 +188,10 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     public void getTotalMarketCap() {
         new GetTotalMarketCap().execute();
+    }
+
+    public Fragment getActive() {
+        return active;
     }
 
     @Override

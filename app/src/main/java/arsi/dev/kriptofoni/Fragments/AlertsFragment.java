@@ -21,6 +21,7 @@ import java.util.List;
 
 import arsi.dev.kriptofoni.Fragments.AlertsFragments.AlertFragment;
 import arsi.dev.kriptofoni.Fragments.AlertsFragments.WatchingListFragment;
+import arsi.dev.kriptofoni.HomeActivity;
 import arsi.dev.kriptofoni.Models.WatchingListModel;
 import arsi.dev.kriptofoni.R;
 
@@ -34,6 +35,14 @@ public class AlertsFragment extends Fragment {
 
     private AlertFragment alertFragment;
     private WatchingListFragment watchingListFragment;
+    private boolean onScreen = false;
+
+    private HomeActivity homeActivity;
+
+    public AlertsFragment() {}
+    public AlertsFragment(HomeActivity homeActivity) {
+        this.homeActivity = homeActivity;
+    }
 
     @Nullable
     @Override
@@ -41,14 +50,18 @@ public class AlertsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_alerts, container, false);
 
         viewPager = view.findViewById(R.id.alerts_view_pager);
+        setUpViewPager();
+
         tabLayout = view.findViewById(R.id.alerts_tab_layout);
         tabLayout.setSelectedTabIndicatorColor(Color.parseColor("#f2a900"));
+        tabLayout.setupWithViewPager(viewPager);
 
         return view;
     }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
         Fragment active;
         switch (viewPager.getCurrentItem()) {
             case 0:
@@ -61,7 +74,6 @@ public class AlertsFragment extends Fragment {
                 active = null;
         }
 
-        super.onHiddenChanged(hidden);
         if (hidden) {
             active.onPause();
         } else {
@@ -69,32 +81,7 @@ public class AlertsFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        setUpViewPager(viewPager);
-        tabLayout.setupWithViewPager(viewPager);
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
-    }
-
-    private void setUpViewPager(ViewPager viewPager) {
+    private void setUpViewPager() {
 
         Adapter adapter = new Adapter(getChildFragmentManager(), BEHAVIOUR_RESUME_ONLY_CURRENT_FRAGMENT);
 
@@ -137,5 +124,9 @@ public class AlertsFragment extends Fragment {
             alertFragmentsList.add(fragment);
             alertFragmentsTitlesList.add(title);
         }
+    }
+
+    public void setOnScreen(boolean onScreen) {
+        this.onScreen = onScreen;
     }
 }

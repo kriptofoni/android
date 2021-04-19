@@ -27,6 +27,8 @@ import java.util.function.Predicate;
 
 import arsi.dev.kriptofoni.Adapters.MainCoinsRecyclerAdapter;
 import arsi.dev.kriptofoni.Adapters.MainCoinsSearchRecyclerAdapter;
+import arsi.dev.kriptofoni.Fragments.MainFragment;
+import arsi.dev.kriptofoni.HomeActivity;
 import arsi.dev.kriptofoni.Models.CoinModel;
 import arsi.dev.kriptofoni.Models.CoinSearchModel;
 import arsi.dev.kriptofoni.R;
@@ -56,7 +58,13 @@ public class MostIncIn24Fragment extends Fragment {
     private Runnable runnable;
     private ProgressBar progressBar, bottomProgressBar;
 
+    private HomeActivity homeActivity;
+
     public MostIncIn24Fragment() {}
+
+    public MostIncIn24Fragment(HomeActivity homeActivity) {
+        this.homeActivity = homeActivity;
+    }
 
     @Nullable
     @Override
@@ -119,29 +127,33 @@ public class MostIncIn24Fragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        onScreen = false;
-        handler.removeCallbacks(runnable);
-        // If the page is stopped while a data loading process is in progress,
-        // we check whether there is any data fetch process when the page
-        // is stopped in order to start the data fetch process
-        // from the beginning when the page is opened again.
-        if (inProgress) isInterrupted = true;
+        if (onScreen) {
+            onScreen = false;
+            handler.removeCallbacks(runnable);
+            // If the page is stopped while a data loading process is in progress,
+            // we check whether there is any data fetch process when the page
+            // is stopped in order to start the data fetch process
+            // from the beginning when the page is opened again.
+            if (inProgress) isInterrupted = true;
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        onScreen = true;
-        handler.postDelayed(runnable, 10000);
-        if (!firstOnResume) {
-            progressBar.setVisibility(View.VISIBLE);
-            firstOnResume = true;
-            addIds();
-            fetchType = "initial";
-        }
-        if (isInterrupted) {
-            addIds();
-            isInterrupted = false;
+        if (homeActivity.getActive() instanceof MainFragment) {
+            onScreen = true;
+            handler.postDelayed(runnable, 10000);
+            if (!firstOnResume) {
+                progressBar.setVisibility(View.VISIBLE);
+                firstOnResume = true;
+                addIds();
+                fetchType = "initial";
+            }
+            if (isInterrupted) {
+                addIds();
+                isInterrupted = false;
+            }
         }
     }
 
@@ -240,9 +252,6 @@ public class MostIncIn24Fragment extends Fragment {
 
             String ids = strings[0];
 
-            coinModels.clear();
-            coinModels.addAll(allCoins);
-            allCoins.clear();
             ArrayList<CoinModel> temp = new ArrayList<>();
             ArrayList<CoinModel> newPage = new ArrayList<>();
             ArrayList<String> idList = new ArrayList<>();
@@ -255,6 +264,9 @@ public class MostIncIn24Fragment extends Fragment {
                     // Creating a list of Result objects using our response data.
                     List<CoinMarket> coins = response.body();
                     if (coins != null && !coins.isEmpty()) {
+                        coinModels.clear();
+                        coinModels.addAll(allCoins);
+                        allCoins.clear();
                         for (int i = 0; i < coins.size(); i++) {
                             // Creating a coin model for each coin in our response data.
                             CoinMarket result = coins.get(i);

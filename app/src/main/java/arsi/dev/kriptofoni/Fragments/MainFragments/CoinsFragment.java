@@ -25,6 +25,8 @@ import java.util.List;
 
 import arsi.dev.kriptofoni.Adapters.MainCoinsRecyclerAdapter;
 import arsi.dev.kriptofoni.Adapters.MainCoinsSearchRecyclerAdapter;
+import arsi.dev.kriptofoni.Fragments.MainFragment;
+import arsi.dev.kriptofoni.HomeActivity;
 import arsi.dev.kriptofoni.Models.CoinModel;
 import arsi.dev.kriptofoni.Models.CoinSearchModel;
 import arsi.dev.kriptofoni.R;
@@ -53,8 +55,14 @@ public class CoinsFragment extends Fragment {
     private Runnable runnable;
     private ProgressBar progressBar, bottomProgressBar;
 
+    private HomeActivity homeActivity;
+
     public CoinsFragment() {
 
+    }
+
+    public CoinsFragment(HomeActivity homeActivity) {
+        this.homeActivity = homeActivity;
     }
 
     @Nullable
@@ -117,31 +125,33 @@ public class CoinsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        onScreen = false;
-        System.out.println("paused");
-        handler.removeCallbacks(runnable);
-        // If the page is stopped while a data loading process is in progress,
-        // we check whether there is any data fetch process when the page
-        // is stopped in order to start the data fetch process
-        // from the beginning when the page is opened again.
-        if (inProgress) isInterrupted = true;
+        if (onScreen) {
+            onScreen = false;
+            handler.removeCallbacks(runnable);
+            // If the page is stopped while a data loading process is in progress,
+            // we check whether there is any data fetch process when the page
+            // is stopped in order to start the data fetch process
+            // from the beginning when the page is opened again.
+            if (inProgress) isInterrupted = true;
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        System.out.println("resumed");
-        onScreen = true;
-        handler.postDelayed(runnable, 10000);
-        if (isInterrupted) {
-            new GetCoinInfo().execute();
-            inProgress = true;
-            isInterrupted = false;
-        }
-        if (firstRender && !firstOnResume) {
-            progressBar.setVisibility(View.VISIBLE);
-            getCoins("initial");
-            firstOnResume = true;
+        if (homeActivity.getActive() instanceof MainFragment) {
+            onScreen = true;
+            handler.postDelayed(runnable, 10000);
+            if (isInterrupted) {
+                new GetCoinInfo().execute();
+                inProgress = true;
+                isInterrupted = false;
+            }
+            if (firstRender && !firstOnResume) {
+                progressBar.setVisibility(View.VISIBLE);
+                getCoins("initial");
+                firstOnResume = true;
+            }
         }
     }
 
@@ -204,9 +214,6 @@ public class CoinsFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            coinModels.clear();
-            coinModels.addAll(allCoinModels);
-            allCoinModels.clear();
             ArrayList<CoinModel> temp = new ArrayList<>();
             ArrayList<CoinModel> newPage = new ArrayList<>();
             // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
@@ -218,6 +225,9 @@ public class CoinsFragment extends Fragment {
                     // Creating a list of Result objects using our response data.
                     List<CoinMarket> coins = response.body();
                     if (coins != null && !coins.isEmpty()) {
+                        coinModels.clear();
+                        coinModels.addAll(allCoinModels);
+                        allCoinModels.clear();
                         for (int i = 0; i < coins.size(); i++) {
                             // Creating a coin model for each coin in our response data.
                             CoinMarket result = coins.get(i);

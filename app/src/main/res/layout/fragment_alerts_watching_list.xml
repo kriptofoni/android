@@ -53,11 +53,30 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:src="@drawable/ic_baseline_more_vert_24"
+            android:layout_toStartOf="@id/alerts_watching_list_delete"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="20dp"
             android:layout_centerVertical="true"/>
 
+        <ImageView
+            android:id="@+id/alerts_watching_list_delete"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_baseline_delete_24"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
+            android:visibility="gone"/>
+
     </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/alerts_watching_list_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/detail_header"
+        app:layout_constraintBottom_toBottomOf="@id/bottom"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <RelativeLayout
         android:id="@+id/alerts_watching_list_no_coin"
@@ -66,7 +85,8 @@
         app:layout_constraintTop_toBottomOf="@id/detail_header"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/no_coin_text"

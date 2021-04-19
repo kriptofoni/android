@@ -64,6 +64,7 @@ public class MainFragment extends Fragment {
     private ConstraintLayout header;
     private EditText searchBar;
     private String currencyText;
+    private boolean onScreen = true;
     private SharedPreferences sharedPreferences;
 
     private CoinsFragment coinsFragment;
@@ -167,6 +168,11 @@ public class MainFragment extends Fragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
@@ -175,6 +181,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
+
         Fragment active;
         switch (viewPager.getCurrentItem()) {
             case 0:
@@ -232,11 +239,11 @@ public class MainFragment extends Fragment {
 
     private void setupViewPager() {
         Adapter adapter = new Adapter(getChildFragmentManager(), BEHAVIOUR_RESUME_ONLY_CURRENT_FRAGMENT);
-        coinsFragment = new CoinsFragment();
-        mostIncIn24Fragment = new MostIncIn24Fragment();
-        mostDecIn24Fragment = new MostDecIn24Fragment();
-        mostIncIn7Fragment = new MostIncIn7Fragment();
-        mostDecIn7Fragment = new MostDecIn7Fragment();
+        coinsFragment = new CoinsFragment(homeActivity);
+        mostIncIn24Fragment = new MostIncIn24Fragment(homeActivity);
+        mostDecIn24Fragment = new MostDecIn24Fragment(homeActivity);
+        mostIncIn7Fragment = new MostIncIn7Fragment(homeActivity);
+        mostDecIn7Fragment = new MostDecIn7Fragment(homeActivity);
         adapter.addFragment(coinsFragment, "Coins");
         adapter.addFragment(mostIncIn24Fragment, "Most Inc In 24 Hours");
         adapter.addFragment(mostDecIn24Fragment, "Most Dec In 24 Hours");
@@ -299,15 +306,15 @@ public class MainFragment extends Fragment {
     }
 
     public void setCoinModelsForSearch(List<CoinSearchModel> coinModelsForSearch) {
-        this.coinModelsForSearch = coinModelsForSearch;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            this.coinModelsForSearch.sort(new Comparator<CoinSearchModel>() {
+            coinModelsForSearch.sort(new Comparator<CoinSearchModel>() {
                 @Override
                 public int compare(CoinSearchModel lhs, CoinSearchModel rhs) {
                     return Double.compare(lhs.getMarketCapRank(), rhs.getMarketCapRank());
                 }
             });
         }
+        this.coinModelsForSearch = coinModelsForSearch;
     }
 
     public void setMostIncIn24List(List<CoinSearchModel> mostIncIn24List) {
@@ -367,6 +374,10 @@ public class MainFragment extends Fragment {
         String json = new Gson().toJson(list);
         editor.putString(id, json);
         editor.apply();
+    }
+
+    public void setOnScreen(boolean onScreen) {
+        this.onScreen = onScreen;
     }
 
     @Override

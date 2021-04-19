@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.loader.content.AsyncTaskLoader;
 
+import java.net.SocketTimeoutException;
 import java.util.List;
 
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
@@ -51,16 +52,28 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
                             thread.start();
                         }
                     } else {
-                        System.out.println("else");
-                        loadData(index);
+                        System.out.println(response.code());
+                        try {
+                            Thread.sleep(500);
+                            loadData(index);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
-                System.out.println("fail");
-                loadData(index);
+                if (t instanceof SocketTimeoutException) {
+                    System.out.println(t.getMessage());
+                    try {
+                        Thread.sleep(500);
+                        loadData(index);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
     }
@@ -71,7 +84,7 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
         for (int i = 1; i <= totalPageNumber ; i++) {
             loadData(i);
         }
-        return "Task Result";
+        return "Task Done";
     }
 
     @Override

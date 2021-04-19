@@ -1,6 +1,7 @@
 package arsi.dev.kriptofoni;
 
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -17,6 +18,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -53,6 +55,15 @@ public class CoinSelectActivity extends AppCompatActivity {
         Type type = new TypeToken<List<CoinSearchModel>>() {}.getType();
         if (!coinSearchModelsJson.isEmpty()) coins = gson.fromJson(coinSearchModelsJson, type);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            coins.sort(new Comparator<CoinSearchModel>() {
+                @Override
+                public int compare(CoinSearchModel lhs, CoinSearchModel rhs) {
+                    return Double.compare(lhs.getMarketCapRank(), rhs.getMarketCapRank());
+                }
+            });
+        }
+
         mainCoinsSearchRecyclerAdapter.setCoins(coins);
 
         backButton.setOnClickListener(new View.OnClickListener() {
@@ -85,7 +96,8 @@ public class CoinSelectActivity extends AppCompatActivity {
             boolean contains = false;
             ArrayList<CoinSearchModel> filteredList = new ArrayList<>();
             for (CoinSearchModel coin : coins) {
-                if (coin.getName().toLowerCase(Locale.ENGLISH).startsWith(text.toLowerCase(Locale.ENGLISH))) {
+                if (coin.getName().toLowerCase(Locale.ENGLISH).startsWith(text.toLowerCase(Locale.ENGLISH))
+                || coin.getSymbol().toLowerCase(Locale.ENGLISH).startsWith(text.toLowerCase(Locale.ENGLISH))) {
                     filteredList.add(coin);
                     contains = true;
                 }

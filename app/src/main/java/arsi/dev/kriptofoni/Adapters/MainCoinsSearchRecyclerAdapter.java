@@ -72,6 +72,7 @@ public class MainCoinsSearchRecyclerAdapter extends RecyclerView.Adapter<MainCoi
                 } else if (coinSelectActivity != null) {
                     Intent intent = coinSelectActivity.getIntent();
                     intent.putExtra("shortCut", coin.getSymbol());
+                    intent.putExtra("id", coin.getId());
                     coinSelectActivity.setResult(1, intent);
                     coinSelectActivity.finish();
                 }

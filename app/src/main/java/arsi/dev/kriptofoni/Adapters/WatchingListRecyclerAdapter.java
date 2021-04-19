@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -28,6 +29,7 @@ public class WatchingListRecyclerAdapter extends RecyclerView.Adapter<WatchingLi
     private List<WatchingListModel> coins;
     private WatchingListFragment watchingListFragment;
     private String currencySymbol = "";
+    private boolean selectingMode = false;
 
     public WatchingListRecyclerAdapter(List<WatchingListModel> coins, WatchingListFragment watchingListFragment) {
         this.coins = coins;
@@ -50,15 +52,31 @@ public class WatchingListRecyclerAdapter extends RecyclerView.Adapter<WatchingLi
         holder.price.setTextColor(coin.getPriceChangeIn24Hours() > 0 ? Color.GREEN : coin.getPriceChangeIn24Hours() < 0 ? Color.RED : Color.BLACK);
         holder.priceChangePercent.setText(String.format(Locale.ENGLISH, "%%%.2f", coin.getPriceChangeIn24Hours()));
         holder.priceChangePercent.setTextColor(coin.getPriceChangeIn24Hours() > 0 ? Color.GREEN : coin.getPriceChangeIn24Hours() < 0 ? Color.RED : Color.BLACK);
+        holder.number.setText(String.valueOf(coin.getNumber()));
         Picasso.get().load(coin.getIcon()).into(holder.icon);
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(watchingListFragment.getActivity(), CryptoCurrencyDetailActivity.class);
-                intent.putExtra("id", coin.getId());
-                watchingListFragment.startActivity(intent);
+                if (selectingMode) {
+                    coin.setSelected(!coin.isSelected());
+                    holder.checkBox.setChecked(coin.isSelected());
+                    if (coin.isSelected()) watchingListFragment.addId(coin.getId());
+                    else watchingListFragment.removeId(coin.getId());
+                } else {
+                    Intent intent = new Intent(watchingListFragment.getActivity(), CryptoCurrencyDetailActivity.class);
+                    intent.putExtra("id", coin.getId());
+                    watchingListFragment.startActivity(intent);
+                }
             }
         });
+
+        if (selectingMode) {
+            holder.number.setVisibility(View.GONE);
+            holder.checkBox.setVisibility(View.VISIBLE);
+        } else {
+            holder.checkBox.setVisibility(View.GONE);
+            holder.number.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -68,8 +86,9 @@ public class WatchingListRecyclerAdapter extends RecyclerView.Adapter<WatchingLi
 
     public class Holder extends RecyclerView.ViewHolder {
 
-        TextView name, priceChangePercent, price;
+        TextView number, name, priceChangePercent, price;
         ImageView icon;
+        CheckBox checkBox;
         RelativeLayout card;
 
         public Holder(@NonNull View itemView) {
@@ -79,10 +98,17 @@ public class WatchingListRecyclerAdapter extends RecyclerView.Adapter<WatchingLi
             price = itemView.findViewById(R.id.watching_list_card_current_price);
             icon = itemView.findViewById(R.id.watching_list_card_icon);
             card = itemView.findViewById(R.id.watching_list_card);
+            number = itemView.findViewById(R.id.watching_list_card_number);
+            checkBox = itemView.findViewById(R.id.watching_list_card_check_box);
         }
     }
 
     public void setCurrencySymbol(String currencySymbol) {
         this.currencySymbol = currencySymbol;
+    }
+
+    public void setSelectingMode(boolean selectingMode) {
+        this.selectingMode = selectingMode;
+        notifyDataSetChanged();
     }
 }
