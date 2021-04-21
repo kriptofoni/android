@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.UnaryOperator;
 
 import arsi.dev.kriptofoni.CurrencyChooseActivity;
 import arsi.dev.kriptofoni.Fragments.MainFragments.CoinsFragment;
@@ -214,7 +215,8 @@ public class MainFragment extends Fragment {
         ArrayList<CoinSearchModel> filteredList = new ArrayList<>();
         if (!text.isEmpty()) {
             for (CoinSearchModel coin : coinModelsForSearch) {
-                if (coin.getName().toLowerCase(Locale.ENGLISH).contains(text.toLowerCase(Locale.ENGLISH))) {
+                if (coin.getName().toLowerCase(Locale.ENGLISH).contains(text.toLowerCase(Locale.ENGLISH))
+                || coin.getSymbol().toLowerCase(Locale.ENGLISH).startsWith(text.toLowerCase(Locale.ENGLISH))) {
                     filteredList.add(coin);
                     contains = true;
                 }
@@ -313,7 +315,8 @@ public class MainFragment extends Fragment {
                 }
             });
         }
-        this.coinModelsForSearch = coinModelsForSearch;
+        this.coinModelsForSearch.clear();
+        this.coinModelsForSearch.addAll(coinModelsForSearch);
     }
 
     public void setMostIncIn24List(List<CoinSearchModel> mostIncIn24List) {

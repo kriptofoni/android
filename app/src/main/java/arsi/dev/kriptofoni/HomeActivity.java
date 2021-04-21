@@ -166,6 +166,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
             @Override
             public void run() {
                 if (coinSearchModels.size() == max && max != 0) {
+                    System.out.println("run");
                     // When the data download is complete, we send the data to the required pages.
                     mainFragment.setCoinModelsForSearch(coinSearchModels);
                     mainFragment.setMostIncIn24List(coinSearchModels);
@@ -200,14 +201,10 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     @Override
-    public void onLoadFinished(@NonNull Loader<String> loader, String data) {
-
-    }
+    public void onLoadFinished(@NonNull Loader<String> loader, String data) {}
 
     @Override
-    public void onLoaderReset(@NonNull Loader<String> loader) {
-
-    }
+    public void onLoaderReset(@NonNull Loader<String> loader) {}
 
 
     private class GetTotalMarketCap extends AsyncTask<Void, Void, Void> {

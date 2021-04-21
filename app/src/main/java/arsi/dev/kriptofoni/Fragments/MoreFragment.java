@@ -14,14 +14,17 @@ import arsi.dev.kriptofoni.R;
 
 public class MoreFragment extends Fragment {
 
-    private TextView text;
+    private TextView joinCommunity, contract, cooperation, about, help;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_more, container, false);
-        text = view.findViewById(R.id.more_text);
-        text.setText("More");
+        joinCommunity = view.findViewById(R.id.more_join_group);
+        contract = view.findViewById(R.id.more_contract);
+        cooperation = view.findViewById(R.id.more_cooperation);
+        about = view.findViewById(R.id.more_about);
+        help = view.findViewById(R.id.more_help);
         return view;
     }
 }

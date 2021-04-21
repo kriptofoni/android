@@ -40,15 +40,20 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
                         int lastIndex = coins.size();
                         int difference = lastIndex % 10 == 0 ? lastIndex / 10 : lastIndex / 10 + 1;
                         // We create 10 different threads to speed up model creation and listing.
-                        for (int j = 0; j < 10; j++) {
-                            Thread thread;
-                            if  (j == 0) {
-                                thread = new HomeActivity.MyThread(coins, 0, difference, index);
-                            } else if (j == 9) {
-                                thread = new HomeActivity.MyThread(coins, difference * j, lastIndex, index);
-                            } else {
-                                thread = new HomeActivity.MyThread(coins, difference * j, difference * (j + 1), index);
+                        if (index != totalPageNumber) {
+                            for (int j = 0; j < 10; j++) {
+                                Thread thread;
+                                if  (j == 0) {
+                                    thread = new HomeActivity.MyThread(coins, 0, difference, index);
+                                } else if (j == 9) {
+                                    thread = new HomeActivity.MyThread(coins, difference * j, lastIndex, index);
+                                } else {
+                                    thread = new HomeActivity.MyThread(coins, difference * j, difference * (j + 1), index);
+                                }
+                                thread.start();
                             }
+                        } else {
+                            Thread thread = new HomeActivity.MyThread(coins, 0, lastIndex, index);
                             thread.start();
                         }
                     } else {

@@ -2,16 +2,191 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/more_text"
+    <RelativeLayout
+        android:id="@+id/detail_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="40dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_toRightOf="@+id/buy_sell_back_button"
+            android:text="Settings"
+            android:textColor="#000"
+            android:textSize="20dp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/joinTop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.10" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/contractTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.23" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/cooperationTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.36" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/aboutTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.49" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/helpTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.62" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/helpBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.75" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/buttonLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.24" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/iconLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.07" />
+
+    <TextView
+        android:id="@+id/more_join_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Join Community"
+        android:textColor="#000"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/contractTop"
+        app:layout_constraintLeft_toRightOf="@id/buttonLeft"
+        app:layout_constraintTop_toBottomOf="@id/joinTop" />
+
+    <TextView
+        android:id="@+id/more_contract"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Contract"
+        android:textColor="#000"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/cooperationTop"
+        app:layout_constraintLeft_toRightOf="@id/buttonLeft"
+        app:layout_constraintTop_toBottomOf="@id/contractTop" />
+
+    <TextView
+        android:id="@+id/more_cooperation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cooperation"
+        android:textColor="#000"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/aboutTop"
+        app:layout_constraintLeft_toRightOf="@id/buttonLeft"
+        app:layout_constraintTop_toBottomOf="@id/cooperationTop" />
+
+    <TextView
+        android:id="@+id/more_help"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Help"
+        android:textColor="#000"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/helpBottom"
+        app:layout_constraintLeft_toRightOf="@id/buttonLeft"
+        app:layout_constraintTop_toBottomOf="@id/helpTop" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_globe"
+        app:layout_constraintBottom_toTopOf="@id/contractTop"
+        app:layout_constraintEnd_toStartOf="@id/buttonLeft"
+        app:layout_constraintStart_toStartOf="@+id/iconLeft"
+        app:layout_constraintTop_toTopOf="@id/joinTop" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_globe"
+        app:layout_constraintBottom_toTopOf="@+id/cooperationTop"
+        app:layout_constraintEnd_toStartOf="@+id/buttonLeft"
+        app:layout_constraintStart_toStartOf="@+id/iconLeft"
+        app:layout_constraintTop_toTopOf="@+id/contractTop" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_globe"
+        app:layout_constraintBottom_toTopOf="@+id/helpBottom"
+        app:layout_constraintEnd_toStartOf="@+id/buttonLeft"
+        app:layout_constraintStart_toStartOf="@+id/iconLeft"
+        app:layout_constraintTop_toTopOf="@+id/helpTop" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_globe"
+        app:layout_constraintBottom_toTopOf="@+id/helpTop"
+        app:layout_constraintEnd_toStartOf="@+id/buttonLeft"
+        app:layout_constraintStart_toStartOf="@+id/iconLeft"
+        app:layout_constraintTop_toTopOf="@+id/aboutTop" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_globe"
+        app:layout_constraintBottom_toTopOf="@+id/aboutTop"
+        app:layout_constraintEnd_toStartOf="@+id/buttonLeft"
+        app:layout_constraintStart_toStartOf="@+id/iconLeft"
+        app:layout_constraintTop_toTopOf="@+id/cooperationTop" />
+
+    <TextView
+        android:id="@+id/more_about"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="About"
+        android:textColor="#000"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/helpTop"
+        app:layout_constraintLeft_toRightOf="@id/buttonLeft"
+        app:layout_constraintTop_toBottomOf="@id/aboutTop" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
