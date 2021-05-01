@@ -57,8 +57,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     private CoinGeckoApi myCoinGeckoApi;
     private CoinGeckoApiClient client;
 
-    private static List<CoinSearchModel> coinSearchModels,
-            coinSearchModelsFromMem, mostInc24HoursFromMem, mostInc7DaysFromMem;
+    private static List<CoinSearchModel> coinSearchModels;
+    private List<CoinSearchModel> coinSearchModelsFromMem, mostInc24HoursFromMem, mostInc7DaysFromMem;
 
     private String currency;
     private int max, totalPageNumber, tasksDone = 0;

@@ -3,7 +3,9 @@ package arsi.dev.kriptofoni;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -13,14 +15,24 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
+
+import arsi.dev.kriptofoni.Models.CoinSearchModel;
+import arsi.dev.kriptofoni.Models.PortfolioMemoryModel;
 
 public class BuySellActivity extends AppCompatActivity {
 
@@ -32,11 +44,26 @@ public class BuySellActivity extends AppCompatActivity {
     private DatePickerDialog.OnDateSetListener dateSetListener;
     private TimePickerDialog.OnTimeSetListener timeSetListener;
     private ImageView backButton;
+    private List<PortfolioMemoryModel> models;
+    private SharedPreferences sharedPreferences;
+    private Gson gson;
+    private String shortCut = "";
+    private double timestamp;
+
+    private int year = 0, month = 0, day = 0, hour = 0, minute = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_buy_sell);
+
+        models = new ArrayList<>();
+
+        sharedPreferences = getSharedPreferences("Preferences", 0);
+        String portfolioJson = sharedPreferences.getString("portfolio", "");
+        gson = new Gson();
+        Type type = new TypeToken<List<PortfolioMemoryModel>>() {}.getType();
+        if (!portfolioJson.isEmpty()) models = gson.fromJson(portfolioJson, type);
 
         timePickerText = findViewById(R.id.operationTime);
         priceInput = findViewById(R.id.priceInputText);
@@ -54,6 +81,7 @@ public class BuySellActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String coinShortCut = intent.getStringExtra("shortCut");
         if (coinShortCut != null) {
+            shortCut = coinShortCut;
             String text = "Total " + coinShortCut.toUpperCase(Locale.ENGLISH);
             currencies.setText(text);
         }
@@ -100,11 +128,35 @@ public class BuySellActivity extends AppCompatActivity {
         addOperation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String notes = notesInput.getText().toString();
                 String currencyAmountText = currenciesInputText.getText().toString();
                 String costInputText = costInput.getText().toString();
-                double currencyAmount = Double.parseDouble(currencyAmountText);
-                double costInput = Double.parseDouble(costInputText);
+                String priceInputText = priceInput.getText().toString();
+
+                if (!shortCut.isEmpty() && !currencyAmountText.isEmpty() && !priceInputText.isEmpty()) {
+                    double price = Double.parseDouble(priceInputText);
+                    double currencyAmount = Double.parseDouble(currencyAmountText);
+                    double costInput = !costInputText.isEmpty() ? Double.parseDouble(costInputText) : 0;
+                    String notes = notesInput.getText().toString().trim();
+
+                    boolean contains = false;
+
+                    for (PortfolioMemoryModel model : models) {
+                        if (model.getShortCut().equals(shortCut)) {
+                            contains = true;
+                            break;
+                        }
+                    }
+
+                    if (contains) {
+                        
+                    } else {
+                        PortfolioMemoryModel model = new PortfolioMemoryModel(currencyAmount, timestamp, price, costInput, notes, shortCut);
+                    }
+
+
+                } else {
+                    Toast.makeText(BuySellActivity.this, "Please fill necessary fields.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -112,39 +164,41 @@ public class BuySellActivity extends AppCompatActivity {
     }
 
     private void datePick() {
-        dateSetListener = new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-                GregorianCalendar selectedDate = new GregorianCalendar(i, i1, i2);
-                int month = i1 + 1;
-                datePickerText.setText(i2 + "/" + month + "/" + i);
-            }
+
+        dateSetListener = (datePicker, i, i1, i2) -> {
+            GregorianCalendar selectedDate = new GregorianCalendar(i, i1, i2);
+            year = i;
+            int month = i1 + 1;
+            BuySellActivity.this.month = month;
+            day = i2;
+            datePickerText.setText(i2 + "/" + month + "/" + i);
         };
 
-        timeSetListener = new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker timePicker, int i, int i1) {
-                String h, m;
-                if (i < 10) {
-                    if (i1 < 10) {
-                        h = "0" + i;
-                        m = "0" + i1;
-                    } else {
-                        h = "0" + i;
-                        m = String.valueOf(i1);
-                    }
+        timeSetListener = (timePicker, i, i1) -> {
+            String h, m;
+            if (i < 10) {
+                if (i1 < 10) {
+                    h = "0" + i;
+                    m = "0" + i1;
                 } else {
-                    if (i1 < 10) {
-                        h = String.valueOf(i);
-                        m = "0" + i1;
-                    } else {
-                        h = String.valueOf(i);
-                        m = String.valueOf(i1);
-                    }
+                    h = "0" + i;
+                    m = String.valueOf(i1);
                 }
-                String time = " " + h + "." + m;
-                timePickerText.setText(time);
+            } else {
+                if (i1 < 10) {
+                    h = String.valueOf(i);
+                    m = "0" + i1;
+                } else {
+                    h = String.valueOf(i);
+                    m = String.valueOf(i1);
+                }
             }
+            String time = " " + h + "." + m;
+            hour = Integer.parseInt(h);
+            minute = Integer.parseInt(m);
+            GregorianCalendar gregorianCalendar = new GregorianCalendar(year, month, day, hour, minute);
+            timestamp = (double) gregorianCalendar.getTimeInMillis();
+            timePickerText.setText(time);
         };
 
         datePickerClick.setOnClickListener(new View.OnClickListener() {
@@ -161,9 +215,24 @@ public class BuySellActivity extends AppCompatActivity {
 
                 TimePickerDialog dialog1 = new TimePickerDialog(BuySellActivity.this, AlertDialog.THEME_HOLO_DARK, timeSetListener, hour, minute, true);
                 dialog1.show();
+                dialog1.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialogInterface) {
+                        if (BuySellActivity.this.year != 0) {
+                            GregorianCalendar gregorianCalendar = new GregorianCalendar(BuySellActivity.this.year, BuySellActivity.this.month, BuySellActivity.this.day);
+                            timestamp = (double) gregorianCalendar.getTimeInMillis();
+                        }
+                    }
+                });
 
                 DatePickerDialog dialog = new DatePickerDialog(BuySellActivity.this, AlertDialog.THEME_HOLO_LIGHT, dateSetListener, year, month, day);
-                dialog.getDatePicker().setMinDate(new Date().getTime() - 60000);
+                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialogInterface) {
+                        timestamp = 0;
+                        dialog1.cancel();
+                    }
+                });
                 dialog.show();
             }
         });
@@ -174,6 +243,7 @@ public class BuySellActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == COIN_SELECT_REQUEST_CODE && resultCode == COIN_SELECT_REQUEST_CODE) {
             String text = "Total " + data.getStringExtra("shortCut").toUpperCase(Locale.ENGLISH);
+            shortCut = data.getStringExtra("shortCut");
             currencies.setText(text);
         }
     }

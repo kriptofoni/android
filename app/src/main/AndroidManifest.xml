@@ -12,13 +12,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FullScreenChartActivity"
-            android:screenOrientation="landscape"/>
+        <activity android:name=".MoreActivities.ToolsActivity"></activity>
+        <activity android:name=".MoreActivities.AboutActivity" />
+        <activity android:name=".MoreActivities.CooperationActivity" />
+        <activity android:name=".MoreActivities.ContractActivity" />
+        <activity
+            android:name=".FullScreenChartActivity"
+            android:screenOrientation="landscape" />
         <activity android:name=".CoinSelectActivity" />
         <activity android:name=".CurrencyChooseActivity" />
         <activity android:name=".CryptoCurrencyDetailActivity" />
         <activity android:name=".BuySellActivity" />
-        <activity android:name=".HomeActivity"
+        <activity
+            android:name=".HomeActivity"
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

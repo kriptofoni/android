@@ -33,42 +33,50 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.10" />
+        app:layout_constraintGuide_percent="0.08" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/contractTop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.23" />
+        app:layout_constraintGuide_percent="0.20" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/cooperationTop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.36" />
+        app:layout_constraintGuide_percent="0.34" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/aboutTop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.49" />
+        app:layout_constraintGuide_percent="0.46" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/helpTop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.62" />
+        app:layout_constraintGuide_percent="0.60" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/helpBottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.75" />
+        app:layout_constraintGuide_percent="0.72" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/toolsBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.86" />
+
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/buttonLeft"
@@ -133,6 +141,7 @@
         app:layout_constraintTop_toBottomOf="@id/helpTop" />
 
     <ImageView
+        android:id="@+id/more_community_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/ic_globe"
@@ -142,6 +151,7 @@
         app:layout_constraintTop_toTopOf="@id/joinTop" />
 
     <ImageView
+        android:id="@+id/more_contract_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/ic_globe"
@@ -151,6 +161,7 @@
         app:layout_constraintTop_toTopOf="@+id/contractTop" />
 
     <ImageView
+        android:id="@+id/more_help_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/ic_globe"
@@ -160,6 +171,7 @@
         app:layout_constraintTop_toTopOf="@+id/helpTop" />
 
     <ImageView
+        android:id="@+id/more_about_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/ic_globe"
@@ -169,6 +181,7 @@
         app:layout_constraintTop_toTopOf="@+id/aboutTop" />
 
     <ImageView
+        android:id="@+id/more_cooperation_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/ic_globe"
@@ -176,6 +189,16 @@
         app:layout_constraintEnd_toStartOf="@+id/buttonLeft"
         app:layout_constraintStart_toStartOf="@+id/iconLeft"
         app:layout_constraintTop_toTopOf="@+id/cooperationTop" />
+
+    <ImageView
+        android:id="@+id/more_tools_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_globe"
+        app:layout_constraintBottom_toTopOf="@+id/toolsBottom"
+        app:layout_constraintEnd_toStartOf="@+id/buttonLeft"
+        app:layout_constraintStart_toStartOf="@+id/iconLeft"
+        app:layout_constraintTop_toTopOf="@+id/helpBottom" />
 
     <TextView
         android:id="@+id/more_about"
@@ -188,5 +211,17 @@
         app:layout_constraintBottom_toTopOf="@id/helpTop"
         app:layout_constraintLeft_toRightOf="@id/buttonLeft"
         app:layout_constraintTop_toBottomOf="@id/aboutTop" />
+
+    <TextView
+        android:id="@+id/more_tools"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tools"
+        android:textColor="#000"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/toolsBottom"
+        app:layout_constraintLeft_toRightOf="@id/buttonLeft"
+        app:layout_constraintTop_toBottomOf="@id/helpBottom" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
