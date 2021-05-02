@@ -61,7 +61,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     private List<CoinSearchModel> coinSearchModelsFromMem, mostInc24HoursFromMem, mostInc7DaysFromMem;
 
     private String currency;
-    private int max, totalPageNumber, tasksDone = 0;
+    private int max, totalPageNumber;
     private boolean firstLoad = true;
 
     private SharedPreferences sharedPreferences;

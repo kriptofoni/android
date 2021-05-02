@@ -57,9 +57,7 @@ public class CoinsFragment extends Fragment {
 
     private HomeActivity homeActivity;
 
-    public CoinsFragment() {
-
-    }
+    public CoinsFragment() {}
 
     public CoinsFragment(HomeActivity homeActivity) {
         this.homeActivity = homeActivity;

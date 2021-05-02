@@ -3,16 +3,16 @@ package arsi.dev.kriptofoni.Models;
 public class PortfolioModel {
 
     private String shortCut, image;
-    private double ownedPrice, priceChange24Hours, priceChangePercentage24Hours, currentPrice, quantity;
+    private double totalPrice, priceChange24Hours, priceChangePercentage24Hours, currentPrice, quantity;
 
-    public PortfolioModel(String shortCut, String image, double ownedPrice, double priceChange24Hours, double priceChangePercentage24Hours, double currentPrice, double quantity) {
+    public PortfolioModel(String shortCut, String image, double totalPrice, double priceChange24Hours, double priceChangePercentage24Hours, double currentPrice, double quantity) {
         this.shortCut = shortCut;
         this.image = image;
-        this.ownedPrice = ownedPrice;
         this.priceChange24Hours = priceChange24Hours;
         this.priceChangePercentage24Hours = priceChangePercentage24Hours;
         this.currentPrice = currentPrice;
         this.quantity = quantity;
+        this.totalPrice = totalPrice;
     }
 
     public String getShortCut() {
@@ -21,10 +21,6 @@ public class PortfolioModel {
 
     public String getImage() {
         return image;
-    }
-
-    public double getOwnedPrice() {
-        return ownedPrice;
     }
 
     public double getPriceChange24Hours() {
@@ -47,7 +43,7 @@ public class PortfolioModel {
         this.quantity = quantity;
     }
 
-    public void setOwnedPrice(double ownedPrice) {
-        this.ownedPrice = ownedPrice;
+    public double getTotalPrice() {
+        return totalPrice;
     }
 }

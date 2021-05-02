@@ -2,6 +2,7 @@ package arsi.dev.kriptofoni.Fragments;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,23 +10,35 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import arsi.dev.kriptofoni.Adapters.PortfolioRecyclerAdapter;
 import arsi.dev.kriptofoni.BuySellActivity;
 import arsi.dev.kriptofoni.CurrencyChooseActivity;
 import arsi.dev.kriptofoni.Fragments.AlertsFragments.WatchingListFragment;
+import arsi.dev.kriptofoni.Models.PortfolioMemoryModel;
 import arsi.dev.kriptofoni.Models.PortfolioModel;
 import arsi.dev.kriptofoni.Models.WatchingListModel;
 import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
@@ -39,21 +52,28 @@ import retrofit2.Response;
 
 public class PortfolioFragment extends Fragment {
 
-    private final int BUY_SELL_ACTIVITY_CODE = 1, CURRENCY_CHOOSE_ACTIVITY_CODE = 2;
+    private final int CURRENCY_CHOOSE_ACTIVITY_CODE = 1, BUY_SELL_ACTIVITY_CODE = 2;
 
-    private TextView currency;
+    private TextView currency, principal, totalPrice, totalPriceChange;
     private RelativeLayout hasCoin, noCoin;
     private RecyclerView recyclerView;
     private Button noCoinAdd;
-    private ImageView selectCoins;
+    private ImageView selectCoins, addCoin;
+    private ProgressBar progressBar;
 
     private PortfolioRecyclerAdapter portfolioRecyclerAdapter;
     private List<PortfolioModel> models;
+    private List<PortfolioMemoryModel> memoryModels;
+    private Map<String, Double> quantities, prices;
     private List<String> ids;
-    private String coinIds, currencyText;
+    private String coinIds = "", currencyText, currencySymbol;
+    private double portfolioValue = 0, portfolioChange = 0, totalPrincipal = 0;
 
     private SortedCoinsApi sortedCoinsApi;
     private SharedPreferences sharedPreferences;
+
+    private NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
+    private CountryCodePicker countryCodePicker;
 
     @Nullable
     @Override
@@ -67,19 +87,33 @@ public class PortfolioFragment extends Fragment {
 
         sortedCoinsApi = SortedCoinsRetrofitClient.getInstance().getMyCoinGeckoApi();
 
+        recyclerView = view.findViewById(R.id.portfolio_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         portfolioRecyclerAdapter = new PortfolioRecyclerAdapter(models, this);
+        recyclerView.setAdapter(portfolioRecyclerAdapter);
 
         hasCoin = view.findViewById(R.id.portfolio_has_coin);
         noCoin = view.findViewById(R.id.portfolio_no_coin);
         noCoinAdd = view.findViewById(R.id.portfolio_no_coin_add);
         currency = view.findViewById(R.id.portfolio_currency);
         selectCoins = view.findViewById(R.id.portfolio_select_coins);
+        progressBar = view.findViewById(R.id.portfolio_progress_bar);
+        addCoin = view.findViewById(R.id.portfolio_add_coin);
+        principal = view.findViewById(R.id.portfolio_total_principal);
+        totalPrice = view.findViewById(R.id.portfolio_total_price_text);
+        totalPriceChange = view.findViewById(R.id.portfolio_price_change_text);
 
         noCoinAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), BuySellActivity.class);
-                startActivityForResult(intent, BUY_SELL_ACTIVITY_CODE);
+                intentToCoinChoose();
+            }
+        });
+
+        addCoin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                intentToCoinChoose();
             }
         });
 
@@ -102,29 +136,56 @@ public class PortfolioFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
 
         String portfolioJson = sharedPreferences.getString("portfolio", "");
-//        if (!coinIds.isEmpty()) {
-//            ids = new LinkedList<>(Arrays.asList(coinIds.split(",")));
-//        } else {
-//            ids = new LinkedList<>();
-//        }
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<PortfolioMemoryModel>>() {}.getType();
+        if (!portfolioJson.isEmpty()) memoryModels = gson.fromJson(portfolioJson, type);
+        else memoryModels = new ArrayList<>();
 
-        CountryCodePicker countryCodePicker = new CountryCodePicker();
+        countryCodePicker = new CountryCodePicker();
         String[] codes = countryCodePicker.getCountryCode(currencyText);
-        portfolioRecyclerAdapter.setCurrencySymbol(codes[1]);
+        currencySymbol = codes[1];
+        portfolioRecyclerAdapter.setCurrencySymbol(currencySymbol);
 
-//        if (!coinIds.equals(",") && !coinIds.isEmpty()) {
-//            noCoin.setVisibility(View.GONE);
-//            hasCoin.setVisibility(View.VISIBLE);
-////            add.setVisibility(View.VISIBLE);
-////            new WatchingListFragment.GetCoinInfo().execute();
-//        } else {
-////            progressBar.setVisibility(View.GONE);
-//            noCoin.setVisibility(View.VISIBLE);
-//        }
+        quantities = new HashMap<>();
+        ids = new ArrayList<>();
+
+        if (!memoryModels.isEmpty()) {
+            for (PortfolioMemoryModel model : memoryModels) {
+                totalPrincipal += model.getQuantity() * model.getPrice() + model.getFee();
+                double quantity = model.getType().equals("buy") ? model.getQuantity() : -1 * model.getQuantity();
+                if (quantities.get(model.getId()) != null) {
+                    quantities.put(model.getId(), quantities.get(model.getId()) + quantity);
+                } else {
+                    quantities.put(model.getId(), quantity);
+                }
+            }
+
+            Set<String> idList = quantities.keySet();
+            StringBuilder builder = new StringBuilder();
+            for (String id : idList) {
+                ids.add(id);
+                builder.append(id).append(",");
+            }
+
+            coinIds = builder.toString();
+
+            if (!coinIds.isEmpty()) {
+                new GetCoinInfo().execute();
+            }
+        } else {
+            progressBar.setVisibility(View.GONE);
+            noCoin.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void intentToCoinChoose() {
+        Intent intent = new Intent(getActivity(), BuySellActivity.class);
+        intent.putExtra("fromPortfolio", true);
+        startActivityForResult(intent, BUY_SELL_ACTIVITY_CODE);
     }
 
     private class GetCoinInfo extends AsyncTask<Void, Void, Void> {
@@ -143,12 +204,34 @@ public class PortfolioFragment extends Fragment {
                             for (int i = 0; i < coins.size(); i++) {
                                 CoinMarket coin = coins.get(i);
                                 String shortCut = coin.getSymbol();
+                                String icon = coin.getImage();
+                                String id = coin.getId();
+                                double currentPrice = coin.getCurrent_price();
+                                double change24h = coin.getPrice_change_24h();
+                                double changePercentage24H = coin.getPrice_change_percentage_24h_in_currency();
+                                double quantity = quantities.get(id);
+                                double change = change24h * quantity;
+                                PortfolioModel model = new PortfolioModel(shortCut, icon, quantity * currentPrice, change, changePercentage24H, currentPrice, quantity);
+                                models.add(model);
+
+                                portfolioValue += quantity * currentPrice;
                             }
 
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-
+                                    progressBar.setVisibility(View.GONE);
+                                    noCoin.setVisibility(View.GONE);
+                                    hasCoin.setVisibility(View.VISIBLE);
+                                    addCoin.setVisibility(View.VISIBLE);
+                                    totalPrice.setText(String.format("%s%s", currencySymbol, nf.format(portfolioValue)));
+                                    double priceDiff = portfolioValue - totalPrincipal;
+                                    double priceDiffPerc = priceDiff / totalPrincipal * 100;
+                                    String priceChangeText = String.format("%s%s (%%%s)", currencySymbol, nf.format(priceDiff), nf.format(priceDiffPerc));
+                                    totalPriceChange.setText(priceChangeText);
+                                    principal.setText(String.format("Total Principal: %s%s", currencySymbol, nf.format(totalPrincipal)));
+                                    totalPriceChange.setTextColor(priceDiff < 0 ? Color.RED : priceDiff > 0 ? Color.GREEN : Color.BLACK);
+                                    portfolioRecyclerAdapter.notifyDataSetChanged();
                                 }
                             });
                         } else {
@@ -169,5 +252,52 @@ public class PortfolioFragment extends Fragment {
             });
             return null;
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == CURRENCY_CHOOSE_ACTIVITY_CODE && resultCode == CURRENCY_CHOOSE_ACTIVITY_CODE) {
+            if (data != null) {
+                currencyText = data.getStringExtra("currency");
+                if (currencyText != null) {
+                    portfolioRecyclerAdapter.setCurrencySymbol(countryCodePicker.getCountryCode(currencyText)[1]);
+                    new GetCoinInfo().execute();
+                }
+            }
+        } else if (requestCode == BUY_SELL_ACTIVITY_CODE && resultCode == CURRENCY_CHOOSE_ACTIVITY_CODE) {
+            String portfolioJson = sharedPreferences.getString("portfolio", "");
+            Gson gson = new Gson();
+            Type type = new TypeToken<List<PortfolioMemoryModel>>() {}.getType();
+            if (!portfolioJson.isEmpty()) memoryModels = gson.fromJson(portfolioJson, type);
+
+            if (!memoryModels.isEmpty()) {
+                for (PortfolioMemoryModel model : memoryModels) {
+                    totalPrincipal += model.getQuantity() * model.getPrice() + model.getFee();
+                    System.out.println(model.getQuantity() + " , " + model.getPrice() + " , " + model.getFee());
+                    double quantity = model.getType().equals("buy") ? model.getQuantity() : -1 * model.getQuantity();
+                    if (quantities.get(model.getId()) != null) {
+                        quantities.put(model.getId(), quantities.get(model.getId()) + quantity);
+                    } else {
+                        quantities.put(model.getId(), quantity);
+                    }
+                }
+
+                Set<String> idList = quantities.keySet();
+                StringBuilder builder = new StringBuilder();
+                for (String id : idList) {
+                    ids.add(id);
+                    builder.append(id).append(",");
+                }
+
+                coinIds = builder.toString();
+
+                if (!coinIds.isEmpty()) {
+                    new GetCoinInfo().execute();
+                }
+            }
+        }
+
     }
 }

@@ -164,6 +164,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onClick(View view) {
                 Intent intent = new Intent(CryptoCurrencyDetailActivity.this,BuySellActivity.class);
                 intent.putExtra("shortCut", coinShortCut);
+                intent.putExtra("id", coinModelId);
                 startActivity(intent);
             }
         });

@@ -179,9 +179,6 @@ public class WatchingListFragment extends Fragment{
         watchingListRecyclerAdapter.setCurrencySymbol(codes[1]);
 
         if (!coinIds.equals(",") && !coinIds.isEmpty()) {
-            noCoin.setVisibility(View.GONE);
-            hasCoin.setVisibility(View.VISIBLE);
-            add.setVisibility(View.VISIBLE);
             new GetCoinInfo().execute();
         } else {
             progressBar.setVisibility(View.GONE);
@@ -234,8 +231,11 @@ public class WatchingListFragment extends Fragment{
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    watchingListRecyclerAdapter.notifyDataSetChanged();
                                     progressBar.setVisibility(View.GONE);
+                                    noCoin.setVisibility(View.GONE);
+                                    hasCoin.setVisibility(View.VISIBLE);
+                                    add.setVisibility(View.VISIBLE);
+                                    watchingListRecyclerAdapter.notifyDataSetChanged();
                                 }
                             });
                         } else {
@@ -262,7 +262,10 @@ public class WatchingListFragment extends Fragment{
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CURRENCY_CHOOSE_CODE && resultCode == CURRENCY_CHOOSE_CODE) {
-
+            if (data != null) {
+                currencyText = data.getStringExtra("currency");
+                new GetCoinInfo().execute();
+            }
         } else if (requestCode == COIN_CHOOSE_CODE && resultCode == CURRENCY_CHOOSE_CODE) {
             if (data != null) {
                 ids.add(data.getStringExtra("id"));

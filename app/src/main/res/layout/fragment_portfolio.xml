@@ -60,6 +60,15 @@
 
     </RelativeLayout>
 
+    <ProgressBar
+        android:id="@+id/portfolio_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <RelativeLayout
         android:id="@+id/portfolio_no_coin"
         android:layout_width="match_parent"
@@ -67,7 +76,7 @@
         app:layout_constraintTop_toBottomOf="@id/detail_header"
         app:layout_constraintBottom_toBottomOf="@id/bottom"
         app:layout_constraintStart_toStartOf="parent"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/no_coin_text"
@@ -161,7 +170,7 @@
                     android:id="@+id/portfolio_total_principal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Total Principle: $200.000"
+                    android:text="Total Principal: $200.000"
                     android:textSize="16dp"
                     android:textColor="#000"
                     android:layout_marginStart="20dp" />

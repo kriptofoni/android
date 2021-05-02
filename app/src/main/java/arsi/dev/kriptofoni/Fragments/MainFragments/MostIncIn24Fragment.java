@@ -202,8 +202,11 @@ public class MostIncIn24Fragment extends Fragment {
     }
 
     public void setCoins(List<CoinSearchModel> coins) {
-        allCoinSearchModels.clear();
-        allCoinSearchModels.addAll(coins);
+        if (allCoinSearchModels != null) {
+            allCoinSearchModels.clear();
+            allCoinSearchModels.addAll(coins);
+        }
+
         if (onScreen && !inProgress) {
             if (!firstRender) {
                 addIds();
