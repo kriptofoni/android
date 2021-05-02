@@ -6,4 +6,112 @@
     android:layout_height="match_parent"
     tools:context=".MoreActivities.ToolsActivity">
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/tools_converter_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.14" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/tools_mining_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.26" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/tools_block_chain_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.38" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/tools_block_chain_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.50" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/tools_button_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.24" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/tools_icon_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.07" />
+
+    <TextView
+        android:id="@+id/tools_converter_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fiat Converter"
+        android:textColor="#000"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toRightOf="@id/tools_button_left"
+        app:layout_constraintTop_toBottomOf="@id/tools_converter_top"
+        app:layout_constraintBottom_toTopOf="@id/tools_mining_top"/>
+
+    <ImageView
+        android:id="@+id/tools_converter_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_globe"
+        app:layout_constraintLeft_toRightOf="@id/tools_icon_left"
+        app:layout_constraintTop_toBottomOf="@id/tools_converter_top"
+        app:layout_constraintBottom_toTopOf="@id/tools_mining_top"
+        app:layout_constraintRight_toLeftOf="@id/tools_button_left"/>
+
+    <TextView
+        android:id="@+id/tools_mining_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mining Calculator (Soon)"
+        android:textColor="#000"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/tools_mining_top"
+        app:layout_constraintLeft_toRightOf="@id/tools_button_left"
+        app:layout_constraintBottom_toTopOf="@id/tools_block_chain_top"/>
+
+    <ImageView
+        android:id="@+id/tools_mining_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_globe"
+        app:layout_constraintLeft_toRightOf="@id/tools_icon_left"
+        app:layout_constraintTop_toBottomOf="@id/tools_mining_top"
+        app:layout_constraintRight_toLeftOf="@id/tools_button_left"
+        app:layout_constraintBottom_toTopOf="@id/tools_block_chain_top"/>
+
+    <TextView
+        android:id="@+id/tools_block_chain_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Blockchain Explorer Tool (Soon)"
+        android:textColor="#000"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toRightOf="@id/tools_button_left"
+        app:layout_constraintTop_toBottomOf="@id/tools_block_chain_top"
+        app:layout_constraintBottom_toTopOf="@id/tools_block_chain_bottom"/>
+
+    <ImageView
+        android:id="@+id/tools_block_chain_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_globe"
+        app:layout_constraintLeft_toRightOf="@id/tools_icon_left"
+        app:layout_constraintTop_toBottomOf="@id/tools_block_chain_top"
+        app:layout_constraintRight_toLeftOf="@id/tools_button_left"
+        app:layout_constraintBottom_toTopOf="@id/tools_block_chain_bottom"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MoreActivities.ToolsActivities.ConverterActivity">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/converter_icon_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.2" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/converter_icon_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.28" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/converter_spinners_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.15" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/converter_spinners_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.23" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/converter_texts_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.25" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/converter_texts_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.33" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/converter_crypto_spinner_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.05" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/converter_crypto_spinner_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.4" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/converter_currency_spinner_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.6" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/converter_currency_spinner_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.95" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/converter_button_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.4" />
+
+    <Spinner
+        android:id="@+id/_converter_crypto_spinner"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintLeft_toRightOf="@id/converter_crypto_spinner_left"
+        app:layout_constraintRight_toLeftOf="@id/converter_crypto_spinner_right"
+        app:layout_constraintBottom_toTopOf="@id/converter_spinners_bottom"
+        app:layout_constraintTop_toBottomOf="@id/converter_spinners_top"/>
+
+    <Spinner
+        android:id="@+id/converter_currency_spinner"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintLeft_toRightOf="@id/converter_currency_spinner_left"
+        app:layout_constraintRight_toLeftOf="@id/converter_currency_spinner_right"
+        app:layout_constraintBottom_toTopOf="@id/converter_spinners_bottom"
+        app:layout_constraintTop_toBottomOf="@id/converter_spinners_top"/>
+
+    <ImageView
+        android:background="@drawable/ic_globe"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/converter_icon_top"
+        app:layout_constraintBottom_toTopOf="@id/converter_icon_bottom"
+        app:layout_constraintLeft_toRightOf="@id/converter_crypto_spinner_right"
+        app:layout_constraintRight_toLeftOf="@id/converter_currency_spinner_left"/>
+
+
+    <EditText
+        android:id="@+id/converter_crypto_edit_text"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:inputType="numberDecimal"
+        app:layout_constraintTop_toBottomOf="@id/converter_texts_top"
+        app:layout_constraintBottom_toTopOf="@id/converter_texts_bottom"
+        app:layout_constraintLeft_toRightOf="@id/converter_crypto_spinner_left"
+        app:layout_constraintRight_toLeftOf="@id/converter_crypto_spinner_right"/>
+
+    <EditText
+        android:id="@+id/converter_currency_edit_text"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:inputType="numberDecimal"
+        app:layout_constraintTop_toBottomOf="@id/converter_texts_top"
+        app:layout_constraintBottom_toTopOf="@id/converter_texts_bottom"
+        app:layout_constraintLeft_toRightOf="@id/converter_currency_spinner_left"
+        app:layout_constraintRight_toLeftOf="@id/converter_currency_spinner_right"/>
+
+    <Button
+        android:id="@+id/converter_convert_button"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="Convert"
+        android:background="@drawable/detail_button"
+        app:layout_constraintTop_toBottomOf="@id/converter_texts_bottom"
+        app:layout_constraintLeft_toRightOf="@id/converter_crypto_spinner_left"
+        app:layout_constraintRight_toLeftOf="@id/converter_currency_spinner_right"
+        app:layout_constraintBottom_toTopOf="@id/converter_button_bottom"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

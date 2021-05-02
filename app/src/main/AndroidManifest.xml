@@ -12,7 +12,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MoreActivities.ToolsActivity"></activity>
+        <!--        <receiver android:name=".AlarmActivity" />-->
+        <activity android:name=".NotificationActivity"></activity>
+        <activity android:name=".AlarmActivity" />
+        <activity android:name=".MoreActivities.ToolsActivities.ConverterActivity" />
+        <activity android:name=".MoreActivities.ToolsActivity" />
         <activity android:name=".MoreActivities.AboutActivity" />
         <activity android:name=".MoreActivities.CooperationActivity" />
         <activity android:name=".MoreActivities.ContractActivity" />
