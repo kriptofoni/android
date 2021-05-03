@@ -152,6 +152,7 @@ public class MostIncIn7Fragment extends Fragment {
                 fetchType = "initial";
             }
             if (isInterrupted) {
+                fetchType = "update";
                 addIds();
                 isInterrupted = false;
             }

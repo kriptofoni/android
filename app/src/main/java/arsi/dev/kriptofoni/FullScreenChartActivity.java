@@ -32,6 +32,7 @@ public class FullScreenChartActivity extends AppCompatActivity {
     private ArrayList<LineChartEntryModel> lineChartEntryModels;
     private String time;
     private ImageView backButton;
+    private int chartColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +48,7 @@ public class FullScreenChartActivity extends AppCompatActivity {
         time = intent.getStringExtra("time");
         String type = intent.getStringExtra("type");
         lineChartEntryModels = intent.getParcelableArrayListExtra("lineChartModels");
+        chartColor = intent.getIntExtra("color", Color.BLACK);
 
         if (type.equals("line") && lineChartEntryModels != null)
             getLineChart();
@@ -112,8 +114,10 @@ public class FullScreenChartActivity extends AppCompatActivity {
         set.setDrawCircles(false);
         set.setValueTextSize(0f);
         set.setLineWidth(2f);
-        set.setColor(Color.BLACK);
-        set.setFillAlpha(110);
+        set.setDrawFilled(true);
+        set.setColor(chartColor);
+        set.setFillColor(chartColor);
+        set.setFillAlpha(170);
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
         dataSets.add(set);

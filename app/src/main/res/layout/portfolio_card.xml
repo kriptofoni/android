@@ -18,6 +18,13 @@
             app:layout_constraintGuide_percent="0.03" />
 
         <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/iconRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.11" />
+
+        <androidx.constraintlayout.widget.Guideline
             android:id="@+id/nameRight"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -58,14 +65,23 @@
             android:layout_height="32dp"
             app:layout_constraintLeft_toLeftOf="@id/iconLeft"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            />
+            app:layout_constraintBottom_toBottomOf="parent" />
 
+        <CheckBox
+            android:id="@+id/portfolio_card_check_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/iconRight"
+            android:clickable="false"
+            android:visibility="gone"/>
 
         <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintLeft_toRightOf="@id/portfolio_card_icon"
+            app:layout_constraintLeft_toLeftOf="@id/iconRight"
             app:layout_constraintRight_toRightOf="@id/nameRight"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">

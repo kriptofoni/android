@@ -2,10 +2,12 @@ package arsi.dev.kriptofoni.Models;
 
 public class PortfolioModel {
 
-    private String shortCut, image;
+    private String shortCut, image, id;
     private double totalPrice, priceChange24Hours, priceChangePercentage24Hours, currentPrice, quantity;
+    private boolean checked;
 
-    public PortfolioModel(String shortCut, String image, double totalPrice, double priceChange24Hours, double priceChangePercentage24Hours, double currentPrice, double quantity) {
+    public PortfolioModel(String id, String shortCut, String image, double totalPrice, double priceChange24Hours, double priceChangePercentage24Hours, double currentPrice, double quantity, boolean checked) {
+        this.id = id;
         this.shortCut = shortCut;
         this.image = image;
         this.priceChange24Hours = priceChange24Hours;
@@ -13,6 +15,7 @@ public class PortfolioModel {
         this.currentPrice = currentPrice;
         this.quantity = quantity;
         this.totalPrice = totalPrice;
+        this.checked = checked;
     }
 
     public String getShortCut() {
@@ -45,5 +48,17 @@ public class PortfolioModel {
 
     public double getTotalPrice() {
         return totalPrice;
+    }
+
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
+    }
+
+    public String getId() {
+        return id;
     }
 }

@@ -75,10 +75,10 @@ public class BuySellActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String coinShortCut = intent.getStringExtra("shortCut");
+        fromPortfolio = intent.getBooleanExtra("fromPortfolio", false);
         if (coinShortCut != null) {
             shortCut = coinShortCut;
             id = intent.getStringExtra("id");
-            fromPortfolio = intent.getBooleanExtra("fromPortfolio", false);
             String text = "Total " + coinShortCut.toUpperCase(Locale.ENGLISH);
             currencies.setText(text);
         }

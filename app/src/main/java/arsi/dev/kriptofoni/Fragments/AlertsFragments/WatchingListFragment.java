@@ -123,6 +123,7 @@ public class WatchingListFragment extends Fragment{
 
                 delete.setVisibility(View.GONE);
                 selectingMode = false;
+                deleteIds.clear();
                 watchingListRecyclerAdapter.setSelectingMode(selectingMode);
 
                 if (coinIds.isEmpty()) {

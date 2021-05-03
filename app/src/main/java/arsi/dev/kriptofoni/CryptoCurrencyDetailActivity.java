@@ -33,6 +33,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
+
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -73,8 +75,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
     private LineChart lineChart;
     private CandleStickChart candleStickChart;
     private RelativeLayout twitterRedirect, webRedirect, redditRedirect;
-    private int chartColor;
     private LineDataSet set;
+    private int chartColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -312,6 +314,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     Intent intent = new Intent(CryptoCurrencyDetailActivity.this, FullScreenChartActivity.class);
                     intent.putExtra("time", time);
                     intent.putExtra("type", chartType);
+                    intent.putExtra("color", chartColor);
                     intent.putParcelableArrayListExtra("lineChartModels", lineChartEntryModels);
                     startActivity(intent);
                 }
@@ -528,13 +531,6 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         return String.valueOf(calendar.get(Calendar.YEAR));
     }
 
-    private void setChartColor(int color) {
-        set.setFillColor(color);
-        set.setColor(color);
-        set.setFillAlpha(170);
-        lineChart.invalidate();
-    }
-
     private void getCoinInfo() {
         Call<JsonObject> call = coinGeckoApi.getCoinInfo(coinModelId,"false",false,true,false,false,false);
         call.enqueue(new Callback<JsonObject>() {
@@ -571,10 +567,6 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
 
                     JsonObject changeTwentyObject = (JsonObject) marketData.get("price_change_percentage_24h_in_currency");
                     JsonElement twentyFourHours = changeTwentyObject.isJsonNull() ? null : changeTwentyObject.get(currencyText);
-                    if (set != null)
-                        setChartColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : twentyFourHours.getAsDouble() < 0 ? Color.RED : Color.BLACK);
-                    else
-                        chartColor = twentyFourHours.getAsDouble() > 0 ? Color.GREEN : twentyFourHours.getAsDouble() < 0 ? Color.RED : Color.BLACK;
                     JsonElement changePercentageInBtc = changeTwentyObject.isJsonNull() ? null : changeTwentyObject.get("btc");
 
                     JsonObject changeSevenDaysObject = (JsonObject) marketData.get("price_change_percentage_7d_in_currency");
@@ -686,8 +678,18 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     if (result != null && !result.isJsonNull() && result.size() != 0) {
                         JsonArray prices = (JsonArray) result.get("prices");
                         ArrayList<Entry> yValue = new ArrayList<>();
+                        float firstPrice = 0, lastPrice = 0;
                         if (prices != null && !prices.isJsonNull()) {
                             for (int i = 0; i < prices.size(); i++) {
+                                if (i == 0) {
+                                    JsonArray priceValues = (JsonArray) prices.get(i);
+                                    if (priceValues != null && !priceValues.isJsonNull())
+                                        firstPrice = priceValues.get(1).getAsFloat();
+                                } else if (i == prices.size() - 1) {
+                                    JsonArray priceValues = (JsonArray) prices.get(i);
+                                    if (priceValues != null && !priceValues.isJsonNull())
+                                        lastPrice = priceValues.get(1).getAsFloat();
+                                }
                                 if (i % 4 == 0) {
                                     JsonArray priceValues = (JsonArray) prices.get(i);
                                     if (priceValues != null && !priceValues.isJsonNull()) {
@@ -699,6 +701,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                                     }
                                 }
                             }
+                            chartColor = firstPrice < lastPrice ? Color.GREEN : firstPrice > lastPrice ? Color.RED : Color.BLACK;
                             lineChart(yValue);
                         }
                     } else {

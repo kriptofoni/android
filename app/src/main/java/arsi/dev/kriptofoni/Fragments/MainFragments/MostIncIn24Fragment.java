@@ -52,13 +52,14 @@ public class MostIncIn24Fragment extends Fragment {
     private boolean reached = false, onScreen = false, startDone = false, firstRender = false,
             inProgress = false, firstOnResume = false, isInterrupted = false;
     private SortedCoinsApi myCoinGeckoApi;
-    private String currency, fetchType;
+    private String currency, fetchType, currentIds = "";
     private MainCoinsSearchRecyclerAdapter mainCoinsSearchRecyclerAdapter;
     private Handler handler;
     private Runnable runnable;
     private ProgressBar progressBar, bottomProgressBar;
 
     private HomeActivity homeActivity;
+    private GetCoinInfo getCoinInfo;
 
     public MostIncIn24Fragment() {}
 
@@ -73,6 +74,8 @@ public class MostIncIn24Fragment extends Fragment {
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
         currency = sharedPreferences.getString("currency", "usd");
+
+        getCoinInfo = new GetCoinInfo();
 
         allCoinSearchModels = new ArrayList<>();
         coinModels = new ArrayList<>();
@@ -134,7 +137,9 @@ public class MostIncIn24Fragment extends Fragment {
             // we check whether there is any data fetch process when the page
             // is stopped in order to start the data fetch process
             // from the beginning when the page is opened again.
-            if (inProgress) isInterrupted = true;
+            if (inProgress) {
+                isInterrupted = true;
+            }
         }
     }
 
@@ -151,6 +156,7 @@ public class MostIncIn24Fragment extends Fragment {
                 fetchType = "initial";
             }
             if (isInterrupted) {
+                fetchType = "update";
                 addIds();
                 isInterrupted = false;
             }
@@ -257,7 +263,6 @@ public class MostIncIn24Fragment extends Fragment {
 
             ArrayList<CoinModel> temp = new ArrayList<>();
             ArrayList<CoinModel> newPage = new ArrayList<>();
-            ArrayList<String> idList = new ArrayList<>();
             // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
             // We create a simple HTTP Request via Retrofit
             Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, ids, null, 50, 1, true, "24h,7d");
@@ -277,7 +282,6 @@ public class MostIncIn24Fragment extends Fragment {
                             String name = result.getName();
                             String shortCut = result.getSymbol();
                             String id = result.getId();
-                            idList.add(id);
                             double changeIn24Hours = result.getPrice_change_percentage_24h_in_currency();
                             double priceChangeIn24Hours = result.getPrice_change_24h();
                             double currentPrice = result.getCurrent_price();
@@ -365,6 +369,11 @@ public class MostIncIn24Fragment extends Fragment {
             });
 
             return null;
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
         }
     }
 }

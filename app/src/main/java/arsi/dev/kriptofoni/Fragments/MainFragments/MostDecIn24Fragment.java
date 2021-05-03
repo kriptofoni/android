@@ -149,6 +149,7 @@ public class MostDecIn24Fragment extends Fragment {
                 fetchType = "initial";
             }
             if (isInterrupted) {
+                fetchType = "update";
                 addIds();
                 isInterrupted = false;
             }
@@ -220,10 +221,12 @@ public class MostDecIn24Fragment extends Fragment {
         StringBuilder stringBuilder = new StringBuilder();
         String s = "";
 
+        int firstIndex = (currentPage - 1) * 50;
+        int lastIndex = firstIndex + 50;
+
         if (allCoinSearchModels != null && !allCoinSearchModels.isEmpty()) {
-            for (int i = (currentPage - 1) * 50; i < (currentPage - 1) * 50 + 50; i++) {
+            for (int i = firstIndex; i < lastIndex; i++) {
                 stringBuilder.append(this.allCoinSearchModels.get(i).getId() + ",");
-                allCoinSearchModels.get(i).setNumber(i + 1);
             }
 
             s = stringBuilder.toString();

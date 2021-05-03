@@ -58,16 +58,17 @@ public class PortfolioFragment extends Fragment {
     private RelativeLayout hasCoin, noCoin;
     private RecyclerView recyclerView;
     private Button noCoinAdd;
-    private ImageView selectCoins, addCoin;
+    private ImageView selectCoins, addCoin, delete;
     private ProgressBar progressBar;
 
     private PortfolioRecyclerAdapter portfolioRecyclerAdapter;
     private List<PortfolioModel> models;
-    private List<PortfolioMemoryModel> memoryModels;
-    private Map<String, Double> quantities, prices;
-    private List<String> ids;
+    private List<PortfolioMemoryModel> memoryModels, removeModels;
+    private List<String> deleteIds;
+    private Map<String, Double> quantities;
     private String coinIds = "", currencyText, currencySymbol;
     private double portfolioValue = 0, portfolioChange = 0, totalPrincipal = 0;
+    private boolean selectingMode = false;
 
     private SortedCoinsApi sortedCoinsApi;
     private SharedPreferences sharedPreferences;
@@ -84,6 +85,8 @@ public class PortfolioFragment extends Fragment {
         currencyText = sharedPreferences.getString("currency", "");
 
         models = new ArrayList<>();
+        deleteIds = new ArrayList<>();
+        removeModels = new ArrayList<>();
 
         sortedCoinsApi = SortedCoinsRetrofitClient.getInstance().getMyCoinGeckoApi();
 
@@ -102,6 +105,7 @@ public class PortfolioFragment extends Fragment {
         principal = view.findViewById(R.id.portfolio_total_principal);
         totalPrice = view.findViewById(R.id.portfolio_total_price_text);
         totalPriceChange = view.findViewById(R.id.portfolio_price_change_text);
+        delete = view.findViewById(R.id.portfolio_delete);
 
         noCoinAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,7 +132,38 @@ public class PortfolioFragment extends Fragment {
         selectCoins.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                selectingMode = !selectingMode;
+                portfolioRecyclerAdapter.setSelectingMode(selectingMode);
+                delete.setVisibility(selectingMode ? View.VISIBLE : View.GONE);
+                addCoin.setVisibility(selectingMode ? View.GONE : View.VISIBLE);
+            }
+        });
 
+        delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                for (PortfolioMemoryModel model : memoryModels) {
+                    if (deleteIds.contains(model.getId())) removeModels.add(model);
+                }
+
+                memoryModels.removeAll(removeModels);
+
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                String json = "";
+                if (!memoryModels.isEmpty()) {
+                    json = new Gson().toJson(memoryModels);
+                }
+
+                editor.putString("portfolio", json);
+                editor.apply();
+
+                readFromMemory();
+                deleteIds.clear();
+                removeModels.clear();
+
+                delete.setVisibility(View.GONE);
+                selectingMode = false;
+                portfolioRecyclerAdapter.setSelectingMode(selectingMode);
             }
         });
 
@@ -139,19 +174,25 @@ public class PortfolioFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
+        countryCodePicker = new CountryCodePicker();
+        String[] codes = countryCodePicker.getCountryCode(currencyText);
+        currencySymbol = codes[1];
+        portfolioRecyclerAdapter.setCurrencySymbol(currencySymbol);
+
+        readFromMemory();
+    }
+
+    private void readFromMemory() {
+        totalPrincipal = 0;
+        portfolioValue = 0;
+
         String portfolioJson = sharedPreferences.getString("portfolio", "");
         Gson gson = new Gson();
         Type type = new TypeToken<List<PortfolioMemoryModel>>() {}.getType();
         if (!portfolioJson.isEmpty()) memoryModels = gson.fromJson(portfolioJson, type);
         else memoryModels = new ArrayList<>();
 
-        countryCodePicker = new CountryCodePicker();
-        String[] codes = countryCodePicker.getCountryCode(currencyText);
-        currencySymbol = codes[1];
-        portfolioRecyclerAdapter.setCurrencySymbol(currencySymbol);
-
         quantities = new HashMap<>();
-        ids = new ArrayList<>();
 
         if (!memoryModels.isEmpty()) {
             for (PortfolioMemoryModel model : memoryModels) {
@@ -167,7 +208,6 @@ public class PortfolioFragment extends Fragment {
             Set<String> idList = quantities.keySet();
             StringBuilder builder = new StringBuilder();
             for (String id : idList) {
-                ids.add(id);
                 builder.append(id).append(",");
             }
 
@@ -178,6 +218,8 @@ public class PortfolioFragment extends Fragment {
             }
         } else {
             progressBar.setVisibility(View.GONE);
+            hasCoin.setVisibility(View.GONE);
+            addCoin.setVisibility(View.GONE);
             noCoin.setVisibility(View.VISIBLE);
         }
     }
@@ -186,6 +228,14 @@ public class PortfolioFragment extends Fragment {
         Intent intent = new Intent(getActivity(), BuySellActivity.class);
         intent.putExtra("fromPortfolio", true);
         startActivityForResult(intent, BUY_SELL_ACTIVITY_CODE);
+    }
+
+    public void addId(String id) {
+        deleteIds.add(id);
+    }
+
+    public void removeId(String id) {
+        deleteIds.remove(id);
     }
 
     private class GetCoinInfo extends AsyncTask<Void, Void, Void> {
@@ -211,7 +261,7 @@ public class PortfolioFragment extends Fragment {
                                 double changePercentage24H = coin.getPrice_change_percentage_24h_in_currency();
                                 double quantity = quantities.get(id);
                                 double change = change24h * quantity;
-                                PortfolioModel model = new PortfolioModel(shortCut, icon, quantity * currentPrice, change, changePercentage24H, currentPrice, quantity);
+                                PortfolioModel model = new PortfolioModel(id, shortCut, icon, quantity * currentPrice, change, changePercentage24H, currentPrice, quantity, false);
                                 models.add(model);
 
                                 portfolioValue += quantity * currentPrice;
@@ -267,37 +317,7 @@ public class PortfolioFragment extends Fragment {
                 }
             }
         } else if (requestCode == BUY_SELL_ACTIVITY_CODE && resultCode == CURRENCY_CHOOSE_ACTIVITY_CODE) {
-            String portfolioJson = sharedPreferences.getString("portfolio", "");
-            Gson gson = new Gson();
-            Type type = new TypeToken<List<PortfolioMemoryModel>>() {}.getType();
-            if (!portfolioJson.isEmpty()) memoryModels = gson.fromJson(portfolioJson, type);
-
-            if (!memoryModels.isEmpty()) {
-                for (PortfolioMemoryModel model : memoryModels) {
-                    totalPrincipal += model.getQuantity() * model.getPrice() + model.getFee();
-                    System.out.println(model.getQuantity() + " , " + model.getPrice() + " , " + model.getFee());
-                    double quantity = model.getType().equals("buy") ? model.getQuantity() : -1 * model.getQuantity();
-                    if (quantities.get(model.getId()) != null) {
-                        quantities.put(model.getId(), quantities.get(model.getId()) + quantity);
-                    } else {
-                        quantities.put(model.getId(), quantity);
-                    }
-                }
-
-                Set<String> idList = quantities.keySet();
-                StringBuilder builder = new StringBuilder();
-                for (String id : idList) {
-                    ids.add(id);
-                    builder.append(id).append(",");
-                }
-
-                coinIds = builder.toString();
-
-                if (!coinIds.isEmpty()) {
-                    new GetCoinInfo().execute();
-                }
-            }
+            readFromMemory();
         }
-
     }
 }

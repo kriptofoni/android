@@ -199,9 +199,9 @@ public class CoinsFragment extends Fragment {
     }
 
     private void getCoins(String type) {
-        new GetCoinInfo().execute();
         fetchType = type;
         inProgress = true;
+        new GetCoinInfo().execute();
     }
 
     public void setFirstOnResume(boolean firstOnResume) {

@@ -36,7 +36,7 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
             public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
                 if (response.isSuccessful()) {
                     List<CoinMarket> coins = response.body();
-                    if (coins != null && !coins.isEmpty()) {
+                    if (coins != null) {
                         int lastIndex = coins.size();
                         int difference = lastIndex % 10 == 0 ? lastIndex / 10 : lastIndex / 10 + 1;
                         // We create 10 different threads to speed up model creation and listing.
@@ -71,7 +71,7 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
             @Override
             public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
                 if (t instanceof SocketTimeoutException) {
-                    System.out.println(t.getMessage());
+//                    System.out.println(t.getMessage());
                     try {
                         Thread.sleep(500);
                         loadData(index);
