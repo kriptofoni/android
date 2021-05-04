@@ -137,7 +137,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         // Current time in seconds
         to = System.currentTimeMillis() / 1000;
         // 24 hours ago in seconds
-        from = System.currentTimeMillis() / 1000 - (60 * 60 * 24);
+        from = to - (60 * 60 * 24);
 
         makeProgressBarVisible();
 

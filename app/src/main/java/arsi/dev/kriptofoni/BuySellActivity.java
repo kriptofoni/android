@@ -25,6 +25,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -41,8 +42,8 @@ public class BuySellActivity extends AppCompatActivity {
 
     private final int COIN_SELECT_REQUEST_CODE = 1;
     private Button buy, sell, addOperation;
-    private TextView datePickerClick, datePickerText, timePickerText, currencies;
-    private EditText notesInput, currenciesInputText, costInput, priceInput;
+    private TextView datePickerClick, timePickerText, currencies;
+    private EditText notesInput, currenciesInputText, costInput, priceInput, datePickerText;
     private boolean buttonType = false, fromPortfolio = false;
     private DatePickerDialog.OnDateSetListener dateSetListener;
     private TimePickerDialog.OnTimeSetListener timeSetListener;
@@ -51,7 +52,7 @@ public class BuySellActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private Gson gson;
     private String shortCut = "", currency, id;
-    private double timestamp;
+    private double timestamp = 0;
 
     private Map<String, Double> quantities;
 
@@ -129,7 +130,7 @@ public class BuySellActivity extends AppCompatActivity {
                 String costInputText = costInput.getText().toString();
                 String priceInputText = priceInput.getText().toString();
 
-                if (!shortCut.isEmpty() && !currencyAmountText.isEmpty() && !priceInputText.isEmpty()) {
+                if (!shortCut.isEmpty() && !currencyAmountText.isEmpty() && !priceInputText.isEmpty() && timestamp != 0) {
 
                     double price = Double.parseDouble(priceInputText);
                     double currencyAmount = Double.parseDouble(currencyAmountText);
@@ -208,9 +209,12 @@ public class BuySellActivity extends AppCompatActivity {
     private void datePick() {
 
         dateSetListener = (datePicker, i, i1, i2) -> {
-            GregorianCalendar selectedDate = new GregorianCalendar(i, i1, i2);
             int month = i1 + 1;
             datePickerText.setText(i2 + "/" + month + "/" + i);
+            Date date = new Date(System.currentTimeMillis() - (1000 * 60 * 10));
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            GregorianCalendar selectedDate = new GregorianCalendar(i, i1, i2, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE));
             timestamp = (double) selectedDate.getTimeInMillis();
         };
 

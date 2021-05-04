@@ -37,6 +37,14 @@ public class LineChartEntryModel implements Parcelable {
         return value;
     }
 
+    public void setIndex(float index) {
+        this.index = index;
+    }
+
+    public void setValue(float value) {
+        this.value = value;
+    }
+
     @Override
     public int describeContents() {
         return 0;

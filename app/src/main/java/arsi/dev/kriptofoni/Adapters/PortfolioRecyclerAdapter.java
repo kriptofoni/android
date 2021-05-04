@@ -16,8 +16,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
 
 import java.text.NumberFormat;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import arsi.dev.kriptofoni.Fragments.PortfolioFragment;
 import arsi.dev.kriptofoni.Models.PortfolioModel;
@@ -29,10 +32,12 @@ public class PortfolioRecyclerAdapter extends RecyclerView.Adapter<PortfolioRecy
     private PortfolioFragment portfolioFragment;
     private String currencySymbol;
     private boolean selectingMode = false;
+    private Map<String, Double> timestamps;
 
     public PortfolioRecyclerAdapter(List<PortfolioModel> coins, PortfolioFragment portfolioFragment) {
         this.coins = coins;
         this.portfolioFragment = portfolioFragment;
+        timestamps = new HashMap<>();
     }
 
     @NonNull
@@ -52,12 +57,21 @@ public class PortfolioRecyclerAdapter extends RecyclerView.Adapter<PortfolioRecy
         holder.name.setText(coin.getShortCut().toUpperCase(Locale.ENGLISH));
         holder.quantity.setText(String.format(Locale.ENGLISH,"%.2f", coin.getQuantity()));
         holder.totalPrice.setText(String.format(Locale.ENGLISH,"%s%s", currencySymbol, nf.format(coin.getTotalPrice())));
-        holder.change24H.setText(String.format(Locale.ENGLISH,"%s%s", currencySymbol, nf.format(coin.getPriceChange24Hours())));
-        holder.changePercentage24H.setText(String.format(Locale.ENGLISH,"%%%s", nf.format(coin.getPriceChangePercentage24Hours())));
+        Date date = new Date();
+        double yesterdayInMillies = date.getTime() - (1000 * 60 * 60 * 24);
+        if (timestamps.get(coin.getId()) <= yesterdayInMillies) {
+            holder.changePercentage24H.setVisibility(View.VISIBLE);
+            holder.change24H.setText(String.format(Locale.ENGLISH,"%s%s", currencySymbol, nf.format(coin.getPriceChange24Hours())));
+            holder.changePercentage24H.setText(String.format(Locale.ENGLISH,"%%%s", nf.format(coin.getPriceChangePercentage24Hours())));
+            holder.change24H.setTextColor(coin.getPriceChange24Hours() < 0 ? Color.RED : coin.getPriceChange24Hours() > 0 ? Color.GREEN : Color.BLACK);
+            holder.changePercentage24H.setTextColor(coin.getPriceChangePercentage24Hours() < 0 ? Color.RED : coin.getPriceChangePercentage24Hours() > 0 ? Color.GREEN : Color.BLACK);
+        } else {
+            holder.change24H.setText("Not enough time yet");
+            holder.change24H.setTextColor(Color.BLACK);
+            holder.changePercentage24H.setVisibility(View.GONE);
+        }
         holder.price.setText(String.format(Locale.ENGLISH,"%s%s", currencySymbol, nf.format(coin.getCurrentPrice())));
 
-        holder.change24H.setTextColor(coin.getPriceChange24Hours() < 0 ? Color.RED : coin.getPriceChange24Hours() > 0 ? Color.GREEN : Color.BLACK);
-        holder.changePercentage24H.setTextColor(coin.getPriceChangePercentage24Hours() < 0 ? Color.RED : coin.getPriceChangePercentage24Hours() > 0 ? Color.GREEN : Color.BLACK);
         holder.price.setTextColor(coin.getPriceChangePercentage24Hours() < 0 ? Color.RED : coin.getPriceChangePercentage24Hours() > 0 ? Color.GREEN : Color.BLACK);
 
         holder.card.setOnClickListener(new View.OnClickListener() {
@@ -115,5 +129,7 @@ public class PortfolioRecyclerAdapter extends RecyclerView.Adapter<PortfolioRecy
         notifyDataSetChanged();
     }
 
-
+    public void setTimestamps(Map<String, Double> timestamps) {
+        this.timestamps = timestamps;
+    }
 }
