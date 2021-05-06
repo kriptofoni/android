@@ -59,7 +59,7 @@ public class PortfolioRecyclerAdapter extends RecyclerView.Adapter<PortfolioRecy
         holder.totalPrice.setText(String.format(Locale.ENGLISH,"%s%s", currencySymbol, nf.format(coin.getTotalPrice())));
         Date date = new Date();
         double yesterdayInMillies = date.getTime() - (1000 * 60 * 60 * 24);
-        if (timestamps.get(coin.getId()) <= yesterdayInMillies) {
+        if (timestamps.get(coin.getId()) != null && timestamps.get(coin.getId()) <= yesterdayInMillies) {
             holder.changePercentage24H.setVisibility(View.VISIBLE);
             holder.change24H.setText(String.format(Locale.ENGLISH,"%s%s", currencySymbol, nf.format(coin.getPriceChange24Hours())));
             holder.changePercentage24H.setText(String.format(Locale.ENGLISH,"%%%s", nf.format(coin.getPriceChangePercentage24Hours())));

@@ -168,10 +168,159 @@
                     android:layout_height="300dp"
                     android:layout_marginVertical="10dp">
 
+                    <ProgressBar
+                        android:id="@+id/portfolio_chart_progress_bar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:visibility="gone" />
+
                     <com.github.mikephil.charting.charts.LineChart
                         android:id="@+id/portfolio_chart"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="5dp">
+
+                        <androidx.constraintlayout.widget.Guideline
+                            android:id="@+id/oneHourLeft"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintGuide_percent="0.1"
+                            android:orientation="vertical" />
+
+                        <androidx.constraintlayout.widget.Guideline
+                            android:id="@+id/tfHourLeft"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintGuide_percent="0.21"
+                            android:orientation="vertical" />
+
+                        <androidx.constraintlayout.widget.Guideline
+                            android:id="@+id/oneWeekLeft"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintGuide_percent="0.33"
+                            android:orientation="vertical" />
+
+                        <androidx.constraintlayout.widget.Guideline
+                            android:id="@+id/oneMonthLeft"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintGuide_percent="0.44"
+                            android:orientation="vertical" />
+
+                        <androidx.constraintlayout.widget.Guideline
+                            android:id="@+id/threeMonthsLeft"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintGuide_percent="0.55"
+                            android:orientation="vertical" />
+
+                        <androidx.constraintlayout.widget.Guideline
+                            android:id="@+id/sixMonthsLeft"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintGuide_percent="0.66"
+                            android:orientation="vertical" />
+
+                        <androidx.constraintlayout.widget.Guideline
+                            android:id="@+id/oneYearLeft"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintGuide_percent="0.77"
+                            android:orientation="vertical" />
+
+                        <androidx.constraintlayout.widget.Guideline
+                            android:id="@+id/allLeft"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintGuide_percent="0.87"
+                            android:orientation="vertical" />
+
+                        <TextView
+                            android:id="@+id/portfolio_1h"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1 H"
+                            app:layout_constraintLeft_toLeftOf="@id/oneHourLeft"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+                        <TextView
+                            android:id="@+id/portfolio_24h"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="24 H"
+                            app:layout_constraintLeft_toLeftOf="@id/tfHourLeft"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"/>
+
+                        <TextView
+                            android:id="@+id/portfolio_1w"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1 W"
+                            app:layout_constraintLeft_toLeftOf="@id/oneWeekLeft"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"/>
+
+                        <TextView
+                            android:id="@+id/portfolio_1m"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1 M"
+                            app:layout_constraintLeft_toLeftOf="@id/oneMonthLeft"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"/>
+
+                        <TextView
+                            android:id="@+id/portfolio_3m"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="3 M"
+                            app:layout_constraintLeft_toLeftOf="@id/threeMonthsLeft"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"/>
+
+                        <TextView
+                            android:id="@+id/portfolio_6m"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="6 M"
+                            app:layout_constraintLeft_toLeftOf="@id/sixMonthsLeft"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"/>
+
+                        <TextView
+                            android:id="@+id/portfolio_1y"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1 Y"
+                            app:layout_constraintLeft_toLeftOf="@id/oneYearLeft"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"/>
+
+                        <TextView
+                            android:id="@+id/portfolio_all"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="All"
+                            app:layout_constraintLeft_toLeftOf="@id/allLeft"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
                 </RelativeLayout>
 
@@ -182,7 +331,8 @@
                     android:text="Total Principal: $200.000"
                     android:textSize="16dp"
                     android:textColor="#000"
-                    android:layout_marginStart="20dp" />
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="10dp"/>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/portfolio_recycler_view"

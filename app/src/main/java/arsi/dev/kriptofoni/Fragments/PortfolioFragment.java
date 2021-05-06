@@ -1,5 +1,6 @@
 package arsi.dev.kriptofoni.Fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -36,10 +37,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -73,22 +76,25 @@ public class PortfolioFragment extends Fragment {
 
     private final int CURRENCY_CHOOSE_ACTIVITY_CODE = 1, BUY_SELL_ACTIVITY_CODE = 2;
 
-    private TextView currency, principal, totalPrice, totalPriceChange;
+    private TextView currency, principal, totalPrice, totalPriceChange, oneHour, oneDay, oneWeek,
+                        oneMonth, threeMonths, oneYear, all, active;
     private RelativeLayout hasCoin, noCoin;
     private RecyclerView recyclerView;
     private Button noCoinAdd;
     private ImageView selectCoins, addCoin, delete;
-    private ProgressBar progressBar;
+    private ProgressBar progressBar, chartProgressBar;
     private LineChart lineChart;
 
     private PortfolioRecyclerAdapter portfolioRecyclerAdapter;
     private List<PortfolioModel> models;
     private List<PortfolioMemoryModel> memoryModels, removeModels;
     private List<String> deleteIds;
+    private List<List<Entry>> yValues = new ArrayList<>();
     private Map<String, Double> quantities, timestamps;
+    private Set<String> idList;
     private String coinIds = "", currencyText, currencySymbol;
-    private double portfolioValue = 0, portfolioChange = 0, totalPrincipal = 0;
-    private boolean selectingMode = false;
+    private double portfolioValue = 0, totalPrincipal = 0;
+    private boolean selectingMode = false, firstInitial = true;
     private int chartColor = Color.BLACK;
     private long from, to;
 
@@ -125,16 +131,26 @@ public class PortfolioFragment extends Fragment {
         currency = view.findViewById(R.id.portfolio_currency);
         selectCoins = view.findViewById(R.id.portfolio_select_coins);
         progressBar = view.findViewById(R.id.portfolio_progress_bar);
+        chartProgressBar = view.findViewById(R.id.portfolio_chart_progress_bar);
         addCoin = view.findViewById(R.id.portfolio_add_coin);
         principal = view.findViewById(R.id.portfolio_total_principal);
         totalPrice = view.findViewById(R.id.portfolio_total_price_text);
         totalPriceChange = view.findViewById(R.id.portfolio_price_change_text);
         delete = view.findViewById(R.id.portfolio_delete);
         lineChart = view.findViewById(R.id.portfolio_chart);
+        oneHour = view.findViewById(R.id.portfolio_1h);
+        oneDay = view.findViewById(R.id.portfolio_24h);
+        oneWeek = view.findViewById(R.id.portfolio_1w);
+        oneMonth = view.findViewById(R.id.portfolio_1m);
+        threeMonths = view.findViewById(R.id.portfolio_3m);
+        oneYear = view.findViewById(R.id.portfolio_1y);
+        all = view.findViewById(R.id.portfolio_all);
 
-        long oneDayInSeconds = 60 * 60 * 24;
+        long oneHourInSeconds = 60 * 60;
         to = System.currentTimeMillis() / 1000;
-        from = to - oneDayInSeconds;
+        from = to - oneHourInSeconds;
+        oneHour.setTextColor(Color.BLACK);
+        active = oneHour;
 
         noCoinAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -186,13 +202,135 @@ public class PortfolioFragment extends Fragment {
                 editor.putString("portfolio", json);
                 editor.apply();
 
+                delete.setVisibility(View.GONE);
+                hasCoin.setVisibility(View.GONE);
+                addCoin.setVisibility(View.GONE);
+                progressBar.setVisibility(View.VISIBLE);
+                selectingMode = false;
+                portfolioRecyclerAdapter.setSelectingMode(selectingMode);
+
                 readFromMemory();
                 deleteIds.clear();
                 removeModels.clear();
+            }
+        });
 
-                delete.setVisibility(View.GONE);
-                selectingMode = false;
-                portfolioRecyclerAdapter.setSelectingMode(selectingMode);
+        oneHour.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (active != oneHour) {
+                    oneHour.setTextColor(Color.parseColor("#000000"));
+                    to = System.currentTimeMillis() / 1000;
+                    from = System.currentTimeMillis() / 1000 - (60 * 60);
+                    active.setTextColor(Color.parseColor("#797676"));
+                    active = oneHour;
+                    setChartProgressBarVisible();
+                    for (String id : idList) {
+                        new GetChartInfo().execute(id);
+                    }
+                }
+            }
+        });
+
+        oneDay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (active != oneDay) {
+                    oneDay.setTextColor(Color.parseColor("#000000"));
+                    to = System.currentTimeMillis() / 1000;
+                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24);
+                    active.setTextColor(Color.parseColor("#797676"));
+                    active = oneDay;
+                    setChartProgressBarVisible();
+                    for (String id : idList) {
+                        new GetChartInfo().execute(id);
+                    }
+                }
+            }
+        });
+
+        oneWeek.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (active != oneWeek) {
+                    oneWeek.setTextColor(Color.parseColor("#000000"));
+                    to = System.currentTimeMillis() / 1000;
+                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 7);
+                    active.setTextColor(Color.parseColor("#797676"));
+                    active = oneWeek;
+                    setChartProgressBarVisible();
+                    for (String id : idList) {
+                        new GetChartInfo().execute(id);
+                    }
+                }
+            }
+        });
+
+        oneMonth.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (active != oneMonth) {
+                    oneMonth.setTextColor(Color.parseColor("#000000"));
+                    to = System.currentTimeMillis() / 1000;
+                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30);
+                    active.setTextColor(Color.parseColor("#797676"));
+                    active = oneMonth;
+                    setChartProgressBarVisible();
+                    for (String id : idList) {
+                        new GetChartInfo().execute(id);
+                    }
+                }
+            }
+        });
+
+        threeMonths.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (active != threeMonths) {
+                    threeMonths.setTextColor(Color.parseColor("#000000"));
+                    to = System.currentTimeMillis() / 1000;
+                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 90);
+                    active.setTextColor(Color.parseColor("#797676"));
+                    active = threeMonths;
+                    setChartProgressBarVisible();
+                    for (String id : idList) {
+                        new GetChartInfo().execute(id);
+                    }
+                }
+            }
+        });
+
+        oneYear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (active != oneYear) {
+                    oneYear.setTextColor(Color.parseColor("#000000"));
+                    to = System.currentTimeMillis() / 1000;
+                    from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 365);
+                    active.setTextColor(Color.parseColor("#797676"));
+                    active = oneYear;
+                    setChartProgressBarVisible();
+                    for (String id : idList) {
+                        new GetChartInfo().execute(id);
+                    }
+                }
+            }
+        });
+
+        all.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (active != all) {
+                    all.setTextColor(Color.parseColor("#000000"));
+                    to = System.currentTimeMillis() / 1000;
+                    from = 0;
+                    active.setTextColor(Color.parseColor("#797676"));
+                    active = all;
+                    setChartProgressBarVisible();
+                    for (String id : idList) {
+                        new GetChartInfo().execute(id);
+                    }
+                }
             }
         });
 
@@ -208,7 +346,10 @@ public class PortfolioFragment extends Fragment {
         currencySymbol = codes[1];
         portfolioRecyclerAdapter.setCurrencySymbol(currencySymbol);
 
-        readFromMemory();
+        if (firstInitial) {
+            readFromMemory();
+            firstInitial = false;
+        }
     }
 
     private void readFromMemory() {
@@ -226,7 +367,11 @@ public class PortfolioFragment extends Fragment {
 
         if (!memoryModels.isEmpty()) {
             for (PortfolioMemoryModel model : memoryModels) {
-                totalPrincipal += model.getQuantity() * model.getPrice() + model.getFee();
+                if (model.getType().equals("buy"))
+                    totalPrincipal += model.getQuantity() * model.getPrice() + model.getFee();
+                else
+                    totalPrincipal -= model.getQuantity() * model.getPrice() - model.getFee();
+
                 String id = model.getId();
                 double quantity = model.getType().equals("buy") ? model.getQuantity() : -1 * model.getQuantity();
                 double timestamp = model.getTimestamp();
@@ -246,11 +391,11 @@ public class PortfolioFragment extends Fragment {
 
             portfolioRecyclerAdapter.setTimestamps(timestamps);
 
-            Set<String> idList = quantities.keySet();
-            Object[] idListArr = idList.toArray();
-            new GetChartInfo().execute(Arrays.copyOf(idListArr, idListArr.length, String[].class));
+            idList = quantities.keySet();
+
             StringBuilder builder = new StringBuilder();
             for (String id : idList) {
+                new GetChartInfo().execute(id);
                 builder.append(id).append(",");
             }
 
@@ -282,20 +427,20 @@ public class PortfolioFragment extends Fragment {
 
         XAxis xAxis = lineChart.getXAxis();
         YAxis yAxisRight = lineChart.getAxisRight();
-//        xAxis.setValueFormatter(new IAxisValueFormatter() {
-//            @Override
-//            public String getFormattedValue(float value, AxisBase axis) {
-//                String result = "";
-//                if (active == oneDay) {
-//                    result = getChartXAxisHourAndMinute(value);
-//                } else if (active == allTime) {
-//                    result = getChartXAxisYears(value);
-//                } else {
-//                    result = getChartXAxisDayAndMonth(value);
-//                }
-//                return result;
-//            }
-//        });
+        xAxis.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                String result = "";
+                if (active == oneDay || active == oneHour) {
+                    result = getChartXAxisHourAndMinute(value);
+                } else if (active == all) {
+                    result = getChartXAxisYears(value);
+                } else {
+                    result = getChartXAxisDayAndMonth(value);
+                }
+                return result;
+            }
+        });
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         yAxisRight.setEnabled(false);
 
@@ -316,8 +461,71 @@ public class PortfolioFragment extends Fragment {
 
         lineChart.setData(data);
         lineChart.notifyDataSetChanged();
-//        setChartProgressBarInvisible();
+        setChartProgressBarInvisible();
         lineChart.invalidate();
+    }
+
+    private String getChartXAxisHourAndMinute(float timestamp) {
+        Date date = new Date((long) timestamp);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        String result = "";
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+        if (hour < 10) {
+            if (minute < 10) {
+                result = 0 + "" + hour + ":" + 0 + "" + minute;
+            } else {
+                result = 0 + "" + hour + ":" + minute;
+            }
+        } else {
+            if (minute < 10)  {
+                result = hour + ":" + 0 + "" + minute;
+            } else {
+                result = hour + ":" + minute;
+            }
+        }
+        return result;
+    }
+
+    private String getChartXAxisDayAndMonth(float timestamp) {
+        Date date = new Date((long) timestamp);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int month = calendar.get(Calendar.MONTH);
+        String result = "";
+        if (day < 10) {
+            if (month < 10) {
+                result = 0 + "" + day + "/" + 0 + "" + month;
+            } else {
+                result = 0 + "" + day + "/" + month;
+            }
+        } else {
+            if (month < 10) {
+                result = day + "/" + 0 + "" + month;
+            } else {
+                result = day + "/" + month;
+            }
+        }
+        return result;
+    }
+
+    private String getChartXAxisYears(float timestamp) {
+        Date date = new Date((long) timestamp);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return String.valueOf(calendar.get(Calendar.YEAR));
+    }
+
+    private void setChartProgressBarVisible() {
+        lineChart.setVisibility(View.GONE);
+        chartProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void setChartProgressBarInvisible() {
+        chartProgressBar.setVisibility(View.GONE);
+        lineChart.setVisibility(View.VISIBLE);
     }
 
     private void intentToCoinChoose() {
@@ -400,86 +608,110 @@ public class PortfolioFragment extends Fragment {
         }
     }
 
-    private class GetChartInfo extends AsyncTask<String[], Void, Void> {
+    private class GetChartInfo extends AsyncTask<String, Void, Void> {
 
         @Override
-        protected Void doInBackground(String[]... strings) {
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
 
-            String[] ids = strings[0];
-            List<List<Entry>> yValues = new ArrayList<>();
-            for (int k = 0; k < ids.length; k++) {
-                final int count = k;
+            if (yValues.size() == idList.size()) {
+
+                List<Entry> values = new ArrayList<>();
                 List<Entry> yValue = new ArrayList<>();
-                String coinModelId = ids[k];
-                Call<JsonObject> call = chartInfoApi.getMarketChart(coinModelId, currencyText, String.valueOf(from), String.valueOf(to));
-                call.enqueue(new Callback<JsonObject>() {
-                    @Override
-                    public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                        if (response.isSuccessful()) {
-                            JsonObject result = response.body();
-                            if (result != null && !result.isJsonNull() && result.size() != 0) {
-                                JsonArray prices = (JsonArray) result.get("prices");
-                                if (prices != null && !prices.isJsonNull()) {
-                                    for (int i = 0; i < prices.size(); i++) {
-                                        if (i % 4 == 0) {
-                                            JsonArray priceValues = (JsonArray) prices.get(i);
-                                            if (priceValues != null && !priceValues.isJsonNull()) {
-                                                float timestamp = priceValues.get(0).getAsFloat();
-                                                float price = priceValues.get(1).getAsFloat();
-                                                float quantityCount = 0;
-                                                for (int j = 0; j < memoryModels.size(); j++) {
-                                                    PortfolioMemoryModel model = memoryModels.get(j);
-                                                    if (model.getId().equals(coinModelId)) {
-                                                        if ((float) model.getTimestamp() < timestamp) {
-                                                            quantityCount += model.getQuantity();
-                                                        }
-                                                    }
-                                                }
+                int max = Integer.MAX_VALUE;
 
-                                                if (quantityCount > 0) {
-                                                    yValue.add(new Entry(timestamp, quantityCount * price));
-                                                } else {
-                                                    yValue.add(new Entry(timestamp, 0));
-                                                }
+                for (int i = 0; i < yValues.size(); i++) {
+                    int size = yValues.get(i).size();
+                    if (size < max) {
+                        max = size;
+                        yValue = yValues.get(i);
+                    }
+                }
+
+                for (int i = 0; i < yValue.size(); i++) {
+                    float total = 0;
+                    for (int j = 0; j < yValues.size(); j++) {
+                        total += yValues.get(j).get(i).getY();
+                    }
+                    values.add(new Entry(yValue.get(i).getX(), total));
+                }
+
+                float first = values.get(0).getY();
+                float last = values.get(values.size() - 1).getY();
+
+                chartColor = first < last ? Color.GREEN : first > last ? Color.RED : Color.BLACK;
+
+                setLineChart(values);
+                yValues.clear();
+            }
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+
+            String coinModelId = strings[0];
+
+            List<Entry> yValue = new ArrayList<>();
+
+            Call<JsonObject> call = chartInfoApi.getMarketChart(coinModelId, currencyText, String.valueOf(from), String.valueOf(to));
+            try {
+                Response<JsonObject> response = call.execute();
+                if (response.isSuccessful()) {
+                    JsonObject result = response.body();
+                    if (result != null && !result.isJsonNull() && result.size() != 0) {
+                        JsonArray prices = (JsonArray) result.get("prices");
+                        if (prices != null && !prices.isJsonNull()) {
+                            for (int i = 0; i < prices.size(); i++) {
+                                if (active != oneHour && i % 4 != 0)
+                                    continue;
+
+                                JsonArray priceValues = (JsonArray) prices.get(i);
+                                if (priceValues != null && !priceValues.isJsonNull()) {
+                                    float timestamp = priceValues.get(0).getAsFloat();
+                                    float price = priceValues.get(1).getAsFloat();
+                                    float quantityCount = 0;
+                                    for (int j = 0; j < memoryModels.size(); j++) {
+                                        PortfolioMemoryModel model = memoryModels.get(j);
+                                        if (model.getId().equals(coinModelId)) {
+                                            float modelTimestamp = (float) (model.getTimestamp() - (1000 * 60 * 20));
+                                            if (modelTimestamp < timestamp) {
+                                                if (model.getType().equals("buy"))
+                                                    quantityCount += model.getQuantity();
+                                                else
+                                                    quantityCount -= model.getQuantity();
                                             }
                                         }
                                     }
 
-                                    yValues.add(yValue);
-
-                                    if (count == ids.length - 1) {
-                                        List<Entry> values = new ArrayList<>();
-                                        for (int i = 0; i < yValue.size(); i++) {
-                                            float total = 0;
-                                            for (int j = 0; j < yValues.size(); j++) {
-                                                total += yValues.get(j).get(i).getY();
-                                            }
-                                            values.add(new Entry(yValue.get(i).getX(), total));
-                                        }
-
-                                        float first = values.get(0).getY();
-                                        float last = values.get(values.size() - 1).getY();
-
-                                        chartColor = first < last ? Color.GREEN : first > last ? Color.RED : Color.BLACK;
-
-                                        setLineChart(values);
+                                    if (quantityCount > 0) {
+                                        yValue.add(new Entry(timestamp, quantityCount * price));
+                                    } else {
+                                        yValue.add(new Entry(timestamp, 0));
                                     }
                                 }
-                            } else {
-                                System.out.println("439 " + response.code());
-                                new GetChartInfo().execute(strings);
                             }
+
+                            yValues.add(yValue);
                         }
                     }
-
-                    @Override
-                    public void onFailure(Call<JsonObject> call, Throwable t) {
-                        System.out.println("447 " + t.getMessage());
-                        new GetChartInfo().execute(strings);
-                    }
-                });
+                } else {
+                    new GetChartInfo().execute(strings);
+                    cancel(true);
+                    System.out.println("439 " + response.code());
+                }
+            } catch (IOException e) {
+                new GetChartInfo().execute(strings);
+                cancel(true);
+                System.out.println(e.getMessage());
             }
+
             return null;
+        }
+
+        @Override
+        protected void onCancelled(Void aVoid) {
+            super.onCancelled(aVoid);
+            System.out.println("cancelled");
         }
     }
 
@@ -495,7 +727,7 @@ public class PortfolioFragment extends Fragment {
                     new GetCoinInfo().execute();
                 }
             }
-        } else if (requestCode == BUY_SELL_ACTIVITY_CODE && resultCode == CURRENCY_CHOOSE_ACTIVITY_CODE) {
+        } else if (requestCode == BUY_SELL_ACTIVITY_CODE && resultCode == BUY_SELL_ACTIVITY_CODE) {
             readFromMemory();
         }
     }

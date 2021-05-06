@@ -200,10 +200,12 @@ public class BuySellActivity extends AppCompatActivity {
         editor.putString("portfolio", json);
         editor.apply();
 
-        if (fromPortfolio)
+        if (fromPortfolio) {
+            setResult(2);
             finish();
-        else
+        } else {
             Toast.makeText(this, "Your operation added your portfolio successfully.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void datePick() {
@@ -211,7 +213,7 @@ public class BuySellActivity extends AppCompatActivity {
         dateSetListener = (datePicker, i, i1, i2) -> {
             int month = i1 + 1;
             datePickerText.setText(i2 + "/" + month + "/" + i);
-            Date date = new Date(System.currentTimeMillis() - (1000 * 60 * 10));
+            Date date = new Date(System.currentTimeMillis());
             Calendar cal = Calendar.getInstance();
             cal.setTime(date);
             GregorianCalendar selectedDate = new GregorianCalendar(i, i1, i2, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE));
