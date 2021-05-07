@@ -50,7 +50,7 @@ public class CoinsFragment extends Fragment {
     private int currentPage = 1;
     private String currency, fetchType;
     private boolean reached = false, onScreen = false, firstRender = false, inProgress = false,
-            isInterrupted = false, firstOnResume = false;
+            isInterrupted = false, firstOnResume = false, firstFetch = false;
     private Handler handler;
     private Runnable runnable;
     private ProgressBar progressBar, bottomProgressBar;
@@ -268,6 +268,10 @@ public class CoinsFragment extends Fragment {
                                     mainCoinsRecyclerAdapter.notifyDataSetChanged();
                                 progressBar.setVisibility(View.GONE);
                                 bottomProgressBar.setVisibility(View.GONE);
+                                if (!firstFetch) {
+                                    homeActivity.setScreen();
+                                    firstFetch = true;
+                                }
                             }
                         });
 

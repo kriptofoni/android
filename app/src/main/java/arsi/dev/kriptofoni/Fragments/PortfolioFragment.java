@@ -203,9 +203,7 @@ public class PortfolioFragment extends Fragment {
                 editor.apply();
 
                 delete.setVisibility(View.GONE);
-                hasCoin.setVisibility(View.GONE);
-                addCoin.setVisibility(View.GONE);
-                progressBar.setVisibility(View.VISIBLE);
+
                 selectingMode = false;
                 portfolioRecyclerAdapter.setSelectingMode(selectingMode);
 
@@ -355,6 +353,10 @@ public class PortfolioFragment extends Fragment {
     private void readFromMemory() {
         totalPrincipal = 0;
         portfolioValue = 0;
+
+        hasCoin.setVisibility(View.GONE);
+        addCoin.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
 
         String portfolioJson = sharedPreferences.getString("portfolio", "");
         Gson gson = new Gson();
@@ -695,12 +697,22 @@ public class PortfolioFragment extends Fragment {
                         }
                     }
                 } else {
-                    new GetChartInfo().execute(strings);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            new GetChartInfo().execute(strings);
+                        }
+                    });
                     cancel(true);
                     System.out.println("439 " + response.code());
                 }
             } catch (IOException e) {
-                new GetChartInfo().execute(strings);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        new GetChartInfo().execute(strings);
+                    }
+                });
                 cancel(true);
                 System.out.println(e.getMessage());
             }

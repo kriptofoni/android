@@ -1,5 +1,6 @@
 package arsi.dev.kriptofoni.Adapters;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +28,7 @@ public class CurrencyChooseRecyclerAdapter extends RecyclerView.Adapter<Currency
     private String currency;
     private CountryCodePicker countryCodePicker;
     private CurrencyChooseActivity currencyChooseActivity;
+    private boolean converter;
 
     public CurrencyChooseRecyclerAdapter(ArrayList<String> currencies, SharedPreferences sharedPreferences, CurrencyChooseActivity currencyChooseActivity) {
         this.currencies = currencies;
@@ -71,12 +73,19 @@ public class CurrencyChooseRecyclerAdapter extends RecyclerView.Adapter<Currency
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("currency", text);
-                editor.apply();
-                currencyChooseActivity.setResult(1);
-                notifyDataSetChanged();
-                setCurrency(text);
+                if (!converter) {
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("currency", text);
+                    editor.apply();
+                    currencyChooseActivity.setResult(1);
+                    notifyDataSetChanged();
+                    setCurrency(text);
+                } else {
+                    Intent data = currencyChooseActivity.getIntent();
+                    data.putExtra("currencyId", text);
+                    currencyChooseActivity.setResult(1, data);
+                    currencyChooseActivity.finish();
+                }
             }
         });
     }
@@ -118,5 +127,9 @@ public class CurrencyChooseRecyclerAdapter extends RecyclerView.Adapter<Currency
             this.currencies = new ArrayList<>();
         }
         notifyDataSetChanged();
+    }
+
+    public void setConverter(boolean converter) {
+        this.converter = converter;
     }
 }

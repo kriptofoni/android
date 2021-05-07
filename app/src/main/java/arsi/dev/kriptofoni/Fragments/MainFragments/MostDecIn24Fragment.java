@@ -105,10 +105,10 @@ public class MostDecIn24Fragment extends Fragment {
             @Override
             public void run() {
                 if (onScreen && startDone && !inProgress) {
-                    addIds();
+                    addIds(1);
                     fetchType = "update";
-                    handler.postDelayed(this, 10000);
                 }
+                handler.postDelayed(this, 10000);
             }
         };
 
@@ -201,8 +201,11 @@ public class MostDecIn24Fragment extends Fragment {
     }
 
     public void setCoins(List<CoinSearchModel> coins) {
-        allCoinSearchModels.clear();
-        allCoinSearchModels.addAll(coins);
+        if (allCoinSearchModels != null) {
+            allCoinSearchModels.clear();
+            allCoinSearchModels.addAll(coins);
+        }
+
         if (onScreen && !inProgress) {
             if (!firstRender) {
                 addIds();
@@ -235,6 +238,24 @@ public class MostDecIn24Fragment extends Fragment {
         }
     }
 
+    private void addIds(int page) {
+        StringBuilder stringBuilder = new StringBuilder();
+        String s = "";
+
+        int firstIndex = (page - 1) * 50;
+        int lastIndex = firstIndex + 50;
+
+        if (allCoinSearchModels != null && !allCoinSearchModels.isEmpty()) {
+            for (int i = firstIndex; i < lastIndex; i++) {
+                stringBuilder.append(this.allCoinSearchModels.get(i).getId() + ",");
+            }
+
+            s = stringBuilder.toString();
+            inProgress = true;
+            new GetCoinInfo().execute(s, String.valueOf(page));
+        }
+    }
+
     public void setProgressBarVisibility(int visibility) {
         if (!firstOnResume)
             progressBar.setVisibility(visibility);
@@ -250,12 +271,17 @@ public class MostDecIn24Fragment extends Fragment {
         protected Void doInBackground(String... strings) {
 
             String ids = strings[0];
+            String page = null;
+
+            if (strings.length > 1)
+                page = strings[1];
 
             ArrayList<CoinModel> temp = new ArrayList<>();
             ArrayList<CoinModel> newPage = new ArrayList<>();
             // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
             // We create a simple HTTP Request via Retrofit
             Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, ids, null, 50, 1, true, "24h,7d");
+            String finalPage = page;
             call.enqueue(new Callback<List<CoinMarket>>() {
                 @Override
                 public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
@@ -298,7 +324,12 @@ public class MostDecIn24Fragment extends Fragment {
                             }
                         }
 
-                        int firstIndex = (currentPage - 1) * 50;
+                        int firstIndex;
+                        if (finalPage != null) {
+                            firstIndex = (Integer.parseInt(finalPage) - 1) * 50;
+                        } else {
+                            firstIndex = (currentPage - 1) * 50;
+                        }
 
                         if ((fetchType.equals("update") || fetchType.equals("dataReload")) && !coinModels.isEmpty()) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

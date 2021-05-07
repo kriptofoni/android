@@ -14,6 +14,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MenuItem;
+import android.view.View;
+import android.webkit.WebView;
+import android.widget.RelativeLayout;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
@@ -53,6 +56,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     private final MoreFragment moreFragment = new MoreFragment();
     private Fragment active = mainFragment;
     private FragmentManager fragmentManager;
+    private RelativeLayout splashScreen, mainScreen;
 
     private CoinGeckoApi myCoinGeckoApi;
     private CoinGeckoApiClient client;
@@ -76,6 +80,9 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         setContentView(R.layout.activity_home);
 
         loaderManager = LoaderManager.getInstance(this);
+
+        splashScreen = findViewById(R.id.splash_screen);
+        mainScreen = findViewById(R.id.main_screen);
 
         coinSearchModels = Collections.synchronizedList(new ArrayList<>());
         coinSearchModelsFromMem = Collections.synchronizedList(new ArrayList<>());
@@ -109,6 +116,20 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         fragmentManager.beginTransaction().add(R.id.fragment_container, mainFragment,"1").commit();
         bottomNavigationView.getMenu().getItem(0).setEnabled(false);
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (active == newsFragment) {
+            WebView webView = newsFragment.getWebView();
+            if (webView.canGoBack()) {
+                webView.goBack();
+            } else {
+                moveTaskToBack(true);
+            }
+        } else {
+            moveTaskToBack(true);
+        }
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener =
@@ -193,6 +214,11 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     public Fragment getActive() {
         return active;
+    }
+
+    public void setScreen() {
+        splashScreen.setVisibility(View.GONE);
+        mainScreen.setVisibility(View.VISIBLE);
     }
 
     @Override

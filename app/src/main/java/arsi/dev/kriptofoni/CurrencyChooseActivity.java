@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -58,6 +59,9 @@ public class CurrencyChooseActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         currencyChooseRecyclerAdapter = new CurrencyChooseRecyclerAdapter(currencies, sharedPreferences, this);
         recyclerView.setAdapter(currencyChooseRecyclerAdapter);
+
+        Intent intent = getIntent();
+        currencyChooseRecyclerAdapter.setConverter(intent.getBooleanExtra("converter", false));
 
         back = findViewById(R.id.currency_choose_back_button);
         search = findViewById(R.id.currency_choose_search_bar);
