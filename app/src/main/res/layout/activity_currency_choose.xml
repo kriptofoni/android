@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/bodyColor"
     tools:context=".CurrencyChooseActivity">
-
 
     <ProgressBar
         android:id="@+id/currency_choose_progress_bar"
@@ -20,6 +20,7 @@
         android:id="@+id/relative"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@color/headerColor"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:visibility="visible"
@@ -32,7 +33,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_arrow_back_black_24dp"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"/>
+            android:layout_marginVertical="10dp"/>
 
         <EditText
             android:id="@+id/currency_choose_search_bar"
@@ -43,7 +44,7 @@
             android:layout_marginTop="10dp"
             android:hint="Search"
             android:textColorHint="#797676"
-            android:textColor="#797676"
+            android:textColor="@color/textColor"
             android:background="@null"
             android:paddingVertical="5dp"
             android:paddingHorizontal="5dp"
@@ -59,7 +60,7 @@
         app:layout_constraintStart_toStartOf="parent"
         android:text="Ana para birimlerinizi seçin. Daha sonra uygulama ayarlarından değiştirebilirsiniz."
         android:textSize="18dp"
-        android:textColor="#000"
+        android:textColor="@color/textColor"
         android:layout_marginHorizontal="10dp"
         android:textAlignment="center"
         android:layout_marginTop="10dp"/>
@@ -69,6 +70,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:overScrollMode="never"
+        android:background="@color/bodyColor"
         app:layout_constraintTop_toBottomOf="@id/text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="0"

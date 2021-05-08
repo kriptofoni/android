@@ -58,8 +58,6 @@ public class MainCoinsSearchRecyclerAdapter extends RecyclerView.Adapter<MainCoi
 
         holder.name.setText(coin.getName());
         Picasso.get().load(coin.getImage()).into(holder.icon);
-        if (position % 2 == 1) holder.card.setBackgroundColor(Color.parseColor("#ededed"));
-        else holder.card.setBackgroundColor(Color.parseColor("#ffffff"));
 
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override

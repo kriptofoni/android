@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/bodyColor"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -21,8 +22,8 @@
             android:layout_marginTop="20dp"
             android:layout_marginRight="20dp"
             android:layout_toRightOf="@+id/buy_sell_back_button"
-            android:text="Settings"
-            android:textColor="#000"
+            android:text="Diğer"
+            android:textColor="#212833"
             android:textSize="20dp"
             android:textStyle="bold" />
 
@@ -77,7 +78,6 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.86" />
 
-
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/buttonLeft"
         android:layout_width="wrap_content"
@@ -96,8 +96,8 @@
         android:id="@+id/more_join_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Join Community"
-        android:textColor="#000"
+        android:text="Bizi Takipte Kalın"
+        android:textColor="@color/textColor"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/contractTop"
@@ -108,20 +108,20 @@
         android:id="@+id/more_contract"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Contract"
-        android:textColor="#000"
+        android:text="Kullanım Sözleşmesi"
+        android:textColor="@color/textColor"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/cooperationTop"
-        app:layout_constraintLeft_toRightOf="@id/buttonLeft"
-        app:layout_constraintTop_toBottomOf="@id/contractTop" />
+        app:layout_constraintBottom_toTopOf="@id/toolsBottom"
+        app:layout_constraintTop_toBottomOf="@id/helpBottom"
+        app:layout_constraintLeft_toRightOf="@id/buttonLeft" />
 
     <TextView
         android:id="@+id/more_cooperation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Cooperation"
-        android:textColor="#000"
+        android:text="Reklam Ve İş Birliği"
+        android:textColor="@color/textColor"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/aboutTop"
@@ -132,8 +132,8 @@
         android:id="@+id/more_help"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Help"
-        android:textColor="#000"
+        android:text="Yardım"
+        android:textColor="@color/textColor"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/helpBottom"
@@ -142,9 +142,9 @@
 
     <ImageView
         android:id="@+id/more_community_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_globe"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/bizi_takibe_alin"
         app:layout_constraintBottom_toTopOf="@id/contractTop"
         app:layout_constraintEnd_toStartOf="@id/buttonLeft"
         app:layout_constraintStart_toStartOf="@+id/iconLeft"
@@ -152,19 +152,20 @@
 
     <ImageView
         android:id="@+id/more_contract_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_globe"
-        app:layout_constraintBottom_toTopOf="@+id/cooperationTop"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/kullanim_sozlesmesi"
+        app:layout_constraintBottom_toTopOf="@id/toolsBottom"
+        app:layout_constraintTop_toBottomOf="@id/helpBottom"
         app:layout_constraintEnd_toStartOf="@+id/buttonLeft"
         app:layout_constraintStart_toStartOf="@+id/iconLeft"
-        app:layout_constraintTop_toTopOf="@+id/contractTop" />
+        />
 
     <ImageView
         android:id="@+id/more_help_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_globe"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/yardim"
         app:layout_constraintBottom_toTopOf="@+id/helpBottom"
         app:layout_constraintEnd_toStartOf="@+id/buttonLeft"
         app:layout_constraintStart_toStartOf="@+id/iconLeft"
@@ -172,9 +173,9 @@
 
     <ImageView
         android:id="@+id/more_about_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_globe"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/hakkimizda"
         app:layout_constraintBottom_toTopOf="@+id/helpTop"
         app:layout_constraintEnd_toStartOf="@+id/buttonLeft"
         app:layout_constraintStart_toStartOf="@+id/iconLeft"
@@ -192,20 +193,21 @@
 
     <ImageView
         android:id="@+id/more_tools_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_globe"
-        app:layout_constraintBottom_toTopOf="@+id/toolsBottom"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/kripto_para_araclari"
+        app:layout_constraintTop_toTopOf="@+id/contractTop"
+        app:layout_constraintBottom_toTopOf="@+id/cooperationTop"
         app:layout_constraintEnd_toStartOf="@+id/buttonLeft"
         app:layout_constraintStart_toStartOf="@+id/iconLeft"
-        app:layout_constraintTop_toTopOf="@+id/helpBottom" />
+         />
 
     <TextView
         android:id="@+id/more_about"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="About"
-        android:textColor="#000"
+        android:text="Hakkımızda"
+        android:textColor="@color/textColor"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/helpTop"
@@ -216,12 +218,12 @@
         android:id="@+id/more_tools"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Tools"
-        android:textColor="#000"
+        android:text="Kripto Para Araçları"
+        android:textColor="@color/textColor"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/toolsBottom"
+        app:layout_constraintBottom_toTopOf="@id/cooperationTop"
         app:layout_constraintLeft_toRightOf="@id/buttonLeft"
-        app:layout_constraintTop_toBottomOf="@id/helpBottom" />
+        app:layout_constraintTop_toBottomOf="@id/contractTop" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

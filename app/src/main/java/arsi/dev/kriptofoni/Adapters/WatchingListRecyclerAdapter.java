@@ -12,6 +12,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
@@ -30,6 +31,7 @@ public class WatchingListRecyclerAdapter extends RecyclerView.Adapter<WatchingLi
     private WatchingListFragment watchingListFragment;
     private String currencySymbol = "";
     private boolean selectingMode = false;
+    private ViewGroup parent;
 
     public WatchingListRecyclerAdapter(List<WatchingListModel> coins, WatchingListFragment watchingListFragment) {
         this.coins = coins;
@@ -39,6 +41,7 @@ public class WatchingListRecyclerAdapter extends RecyclerView.Adapter<WatchingLi
     @NonNull
     @Override
     public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        this.parent = parent;
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.watching_list_card, null);
         return new Holder(view);
@@ -47,11 +50,18 @@ public class WatchingListRecyclerAdapter extends RecyclerView.Adapter<WatchingLi
     @Override
     public void onBindViewHolder(@NonNull Holder holder, int position) {
         WatchingListModel coin = coins.get(position);
+
+        int red = Color.parseColor("#f6465d");
+        int green = Color.parseColor("#2ebd85");
+        int defaultColor = ContextCompat.getColor(parent.getContext(), R.color.textColor);
+
         holder.name.setText(coin.getName());
         holder.price.setText(String.format(Locale.ENGLISH, "%s%.2f", currencySymbol, coin.getPrice()));
-        holder.price.setTextColor(coin.getPriceChangeIn24Hours() > 0 ? Color.GREEN : coin.getPriceChangeIn24Hours() < 0 ? Color.RED : Color.BLACK);
         holder.priceChangePercent.setText(String.format(Locale.ENGLISH, "%%%.2f", coin.getPriceChangeIn24Hours()));
-        holder.priceChangePercent.setTextColor(coin.getPriceChangeIn24Hours() > 0 ? Color.GREEN : coin.getPriceChangeIn24Hours() < 0 ? Color.RED : Color.BLACK);
+
+        holder.price.setTextColor(coin.getPriceChangeIn24Hours() > 0 ? green : coin.getPriceChangeIn24Hours() < 0 ? red : defaultColor);
+        holder.priceChangePercent.setTextColor(coin.getPriceChangeIn24Hours() > 0 ? green : coin.getPriceChangeIn24Hours() < 0 ? red : defaultColor);
+
         holder.number.setText(String.valueOf(coin.getNumber()));
         Picasso.get().load(coin.getIcon()).into(holder.icon);
         holder.card.setOnClickListener(new View.OnClickListener() {

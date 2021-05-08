@@ -4,12 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/bodyColor"
     tools:context=".CryptoCurrencyDetailActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
     android:id="@+id/detail_header"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/headerColor"
     app:layout_constraintTop_toTopOf="parent"
     app:layout_constraintLeft_toLeftOf="parent">
 
@@ -47,7 +49,7 @@
             android:id="@+id/coinName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#000"
+            android:textColor="@color/textColor"
             android:textSize="20dp"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
@@ -59,7 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:textColor="#000"
+            android:textColor="@color/textColor"
             android:textSize="15dp"
             app:layout_constraintTop_toBottomOf="@id/coinName"
             app:layout_constraintStart_toEndOf="@id/coinIcon"
@@ -71,6 +73,7 @@
         android:id="@+id/crypto_currency_detail_progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:indeterminateTint="@color/textColor"
         android:layout_centerInParent="true" />
 
   <ScrollView
@@ -96,7 +99,7 @@
                   android:layout_height="wrap_content"
                   android:textSize="25dp"
                   android:textStyle="bold"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   android:text="$55.934,69"
                   android:layout_alignParentLeft="true"
                   android:layout_marginLeft="20dp"
@@ -108,7 +111,7 @@
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:textSize="25sp"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   android:layout_alignParentRight="true"
                   android:text="%8,01"
                   android:layout_marginEnd="20dp"
@@ -127,6 +130,7 @@
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:layout_centerInParent="true"
+                  android:indeterminateTint="@color/textColor"
                   android:visibility="gone"/>
 
               <com.github.mikephil.charting.charts.LineChart
@@ -152,147 +156,116 @@
                   android:layout_height="wrap_content"
                   android:layout_marginVertical="5dp">
 
-                  <androidx.constraintlayout.widget.Guideline
-                      android:id="@+id/expandLeft"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      app:layout_constraintGuide_percent="0.05"
-                      android:orientation="vertical" />
-
-                  <androidx.constraintlayout.widget.Guideline
-                      android:id="@+id/chartIconLeft"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      app:layout_constraintGuide_percent="0.15"
-                      android:orientation="vertical" />
-
-                  <androidx.constraintlayout.widget.Guideline
-                      android:id="@+id/tfHourLeft"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      app:layout_constraintGuide_percent="0.25"
-                      android:orientation="vertical" />
-
-                  <androidx.constraintlayout.widget.Guideline
-                      android:id="@+id/oneWeekLeft"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      app:layout_constraintGuide_percent="0.35"
-                      android:orientation="vertical" />
-
-                  <androidx.constraintlayout.widget.Guideline
-                      android:id="@+id/oneMonthLeft"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      app:layout_constraintGuide_percent="0.45"
-                      android:orientation="vertical" />
-
-                  <androidx.constraintlayout.widget.Guideline
-                      android:id="@+id/threeMonthsLeft"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      app:layout_constraintGuide_percent="0.55"
-                      android:orientation="vertical" />
-
-                  <androidx.constraintlayout.widget.Guideline
-                      android:id="@+id/sixMonthsLeft"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      app:layout_constraintGuide_percent="0.65"
-                      android:orientation="vertical" />
-
-                  <androidx.constraintlayout.widget.Guideline
-                      android:id="@+id/oneYearLeft"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      app:layout_constraintGuide_percent="0.75"
-                      android:orientation="vertical" />
-
-                  <androidx.constraintlayout.widget.Guideline
-                      android:id="@+id/allLeft"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      app:layout_constraintGuide_percent="0.85"
-                      android:orientation="vertical" />
-
                   <ImageView
                       android:id="@+id/crypto_currency_detail_expand"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      app:layout_constraintTop_toTopOf="parent"
-                      app:layout_constraintStart_toStartOf="@id/expandLeft"
-                      android:src="@drawable/ic_resize" />
+                      android:src="@drawable/ic_resize"
+                      app:layout_constraintEnd_toStartOf="@+id/crypto_currency_detail_chart_icon"
+                      app:layout_constraintHorizontal_bias="0.5"
+                      app:layout_constraintStart_toStartOf="parent"
+                      app:layout_constraintTop_toTopOf="parent" />
 
                   <ImageView
                       android:id="@+id/crypto_currency_detail_chart_icon"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      app:layout_constraintTop_toTopOf="parent"
-                      app:layout_constraintStart_toStartOf="@id/chartIconLeft"
-                      android:src="@drawable/ic_candlestickchart" />
+                      android:src="@drawable/ic_candlestickchart"
+                      app:layout_constraintEnd_toStartOf="@+id/cryto_currency_detail_24h"
+                      app:layout_constraintHorizontal_bias="0.5"
+                      app:layout_constraintStart_toEndOf="@+id/crypto_currency_detail_expand"
+                      app:layout_constraintTop_toTopOf="parent" />
 
                   <TextView
                       android:id="@+id/cryto_currency_detail_24h"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      android:text="24 H"
-                      app:layout_constraintLeft_toLeftOf="@id/tfHourLeft"
-                      app:layout_constraintTop_toTopOf="parent"
-                      app:layout_constraintBottom_toBottomOf="parent"/>
+                      android:text="24 s"
+                      android:textColor="@color/textColor"
+                      android:padding="5dp"
+                      app:layout_constraintBottom_toBottomOf="parent"
+                      app:layout_constraintEnd_toStartOf="@+id/cryto_currency_detail_1w"
+                      app:layout_constraintHorizontal_bias="0.5"
+                      app:layout_constraintStart_toEndOf="@+id/crypto_currency_detail_chart_icon"
+                      app:layout_constraintTop_toTopOf="parent" />
 
                   <TextView
                       android:id="@+id/cryto_currency_detail_1w"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      android:text="1 W"
-                      app:layout_constraintLeft_toLeftOf="@id/oneWeekLeft"
-                      app:layout_constraintTop_toTopOf="parent"
-                      app:layout_constraintBottom_toBottomOf="parent"/>
+                      android:text="1 H"
+                      android:textColor="@color/textColor"
+                      android:padding="5dp"
+                      app:layout_constraintBottom_toBottomOf="parent"
+                      app:layout_constraintEnd_toStartOf="@+id/cryto_currency_detail_1m"
+                      app:layout_constraintHorizontal_bias="0.5"
+                      app:layout_constraintStart_toEndOf="@+id/cryto_currency_detail_24h"
+                      app:layout_constraintTop_toTopOf="parent" />
 
                   <TextView
                       android:id="@+id/cryto_currency_detail_1m"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      android:text="1 M"
-                      app:layout_constraintLeft_toLeftOf="@id/oneMonthLeft"
-                      app:layout_constraintTop_toTopOf="parent"
-                      app:layout_constraintBottom_toBottomOf="parent"/>
+                      android:text="1 A"
+                      android:textColor="@color/textColor"
+                      android:padding="5dp"
+                      app:layout_constraintBottom_toBottomOf="parent"
+                      app:layout_constraintEnd_toStartOf="@+id/cryto_currency_detail_3m"
+                      app:layout_constraintHorizontal_bias="0.5"
+                      app:layout_constraintStart_toEndOf="@+id/cryto_currency_detail_1w"
+                      app:layout_constraintTop_toTopOf="parent" />
 
                   <TextView
                       android:id="@+id/cryto_currency_detail_3m"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      android:text="3 M"
-                      app:layout_constraintLeft_toLeftOf="@id/threeMonthsLeft"
-                      app:layout_constraintTop_toTopOf="parent"
-                      app:layout_constraintBottom_toBottomOf="parent"/>
+                      android:text="3 A"
+                      android:textColor="@color/textColor"
+                      android:padding="5dp"
+                      app:layout_constraintBottom_toBottomOf="parent"
+                      app:layout_constraintEnd_toStartOf="@+id/cryto_currency_detail_6m"
+                      app:layout_constraintHorizontal_bias="0.5"
+                      app:layout_constraintStart_toEndOf="@+id/cryto_currency_detail_1m"
+                      app:layout_constraintTop_toTopOf="parent" />
 
                   <TextView
                       android:id="@+id/cryto_currency_detail_6m"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      android:text="6 M"
-                      app:layout_constraintLeft_toLeftOf="@id/sixMonthsLeft"
-                      app:layout_constraintTop_toTopOf="parent"
-                      app:layout_constraintBottom_toBottomOf="parent"/>
+                      android:text="6 A"
+                      android:textColor="@color/textColor"
+                      android:padding="5dp"
+                      app:layout_constraintBottom_toBottomOf="parent"
+                      app:layout_constraintEnd_toStartOf="@+id/cryto_currency_detail_1y"
+                      app:layout_constraintHorizontal_bias="0.5"
+                      app:layout_constraintStart_toEndOf="@+id/cryto_currency_detail_3m"
+                      app:layout_constraintTop_toTopOf="parent" />
 
                   <TextView
                       android:id="@+id/cryto_currency_detail_1y"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:text="1 Y"
-                      app:layout_constraintLeft_toLeftOf="@id/oneYearLeft"
-                      app:layout_constraintTop_toTopOf="parent"
-                      app:layout_constraintBottom_toBottomOf="parent"/>
+                      android:textColor="@color/textColor"
+                      android:padding="5dp"
+                      app:layout_constraintBottom_toBottomOf="parent"
+                      app:layout_constraintEnd_toStartOf="@+id/cryto_currency_detail_all"
+                      app:layout_constraintHorizontal_bias="0.5"
+                      app:layout_constraintStart_toEndOf="@+id/cryto_currency_detail_6m"
+                      app:layout_constraintTop_toTopOf="parent" />
 
                   <TextView
                       android:id="@+id/cryto_currency_detail_all"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      android:text="All"
-                      app:layout_constraintLeft_toLeftOf="@id/allLeft"
-                      app:layout_constraintTop_toTopOf="parent"
-                      app:layout_constraintBottom_toBottomOf="parent"/>
+                      android:text="Tümü"
+                      android:textColor="@color/textColor"
+                      android:padding="5dp"
+                      app:layout_constraintBottom_toBottomOf="parent"
+                      app:layout_constraintEnd_toEndOf="parent"
+                      app:layout_constraintHorizontal_bias="0.5"
+                      app:layout_constraintStart_toEndOf="@+id/cryto_currency_detail_1y"
+                      app:layout_constraintTop_toTopOf="parent" />
 
               </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -309,9 +282,9 @@
                   android:layout_height="wrap_content"
                   android:layout_alignParentLeft="true"
                   android:layout_marginLeft="20dp"
-                  android:textColor="#797676"
+                  android:textColor="@color/textColor"
                   android:textSize="20dp"
-                  android:text="Price"
+                  android:text="Fiyat ve 24s Değişim"
                   android:layout_marginVertical="10dp"/>
 
               <TextView
@@ -321,7 +294,7 @@
                   android:layout_alignParentRight="true"
                   android:layout_marginRight="20dp"
                   android:layout_marginVertical="5dp"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   android:text="%8,01"/>
 
               <TextView
@@ -331,7 +304,7 @@
                   android:layout_alignParentRight="true"
                   android:layout_below="@id/coin_price_change"
                   android:layout_marginRight="20dp"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   android:layout_marginBottom="5dp"
                   android:text="$55.934,69"/>
 
@@ -348,9 +321,9 @@
                   android:layout_height="wrap_content"
                   android:layout_alignParentLeft="true"
                   android:layout_marginLeft="20dp"
-                  android:textColor="#797676"
+                  android:textColor="@color/textColor"
                   android:textSize="20dp"
-                  android:text="Price BTC"
+                  android:text="BTC Değeri"
                   android:layout_marginVertical="10dp"/>
 
               <TextView
@@ -360,7 +333,7 @@
                   android:layout_alignParentRight="true"
                   android:layout_marginRight="20dp"
                   android:layout_marginVertical="5dp"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   android:text="%8,01"/>
 
               <TextView
@@ -370,7 +343,7 @@
                   android:layout_alignParentRight="true"
                   android:layout_below="@id/coin_price_in_btc_change"
                   android:layout_marginRight="20dp"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   android:layout_marginBottom="5dp"
                   android:text="$55.934,69"/>
 
@@ -387,9 +360,9 @@
                   android:layout_height="wrap_content"
                   android:layout_alignParentLeft="true"
                   android:layout_marginLeft="20dp"
-                  android:textColor="#797676"
+                  android:textColor="@color/textColor"
                   android:textSize="20dp"
-                  android:text="1 Hour Change"
+                  android:text="1 Saatteki Değişim"
                   android:layout_marginVertical="10dp"/>
 
               <TextView
@@ -399,7 +372,7 @@
                   android:layout_alignParentRight="true"
                   android:layout_marginRight="20dp"
                   android:layout_centerVertical="true"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   android:text="%3,99"/>
 
           </RelativeLayout>
@@ -416,9 +389,9 @@
                   android:layout_alignParentLeft="true"
                   android:layout_marginLeft="20dp"
                   android:layout_marginVertical="10dp"
-                  android:textColor="#797676"
+                  android:textColor="@color/textColor"
                   android:textSize="20dp"
-                  android:text="24 Hours Change" />
+                  android:text="24 Saatteki Değişim" />
 
               <TextView
                   android:id="@+id/twentyFourHoursChange"
@@ -427,7 +400,7 @@
                   android:layout_alignParentRight="true"
                   android:layout_marginRight="20dp"
                   android:layout_centerVertical="true"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   android:text="%8,01"/>
 
           </RelativeLayout>
@@ -444,9 +417,9 @@
                   android:layout_alignParentLeft="true"
                   android:layout_marginLeft="20dp"
                   android:layout_marginVertical="10dp"
-                  android:textColor="#797676"
+                  android:textColor="@color/textColor"
                   android:textSize="20dp"
-                  android:text="7 Days Change" />
+                  android:text="7 Gündeki Değişim" />
 
               <TextView
                   android:id="@+id/sevenDaysChange"
@@ -455,7 +428,7 @@
                   android:layout_alignParentRight="true"
                   android:layout_marginRight="20dp"
                   android:layout_centerVertical="true"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   android:text="%12,23"/>
 
           </RelativeLayout>
@@ -472,9 +445,9 @@
                   android:layout_alignParentLeft="true"
                   android:layout_marginLeft="20dp"
                   android:layout_marginVertical="10dp"
-                  android:textColor="#797676"
+                  android:textColor="@color/textColor"
                   android:textSize="20dp"
-                  android:text="Market Value" />
+                  android:text="Piyasa Değeri" />
 
               <TextView
                   android:id="@+id/marketValue"
@@ -483,7 +456,7 @@
                   android:layout_alignParentRight="true"
                   android:layout_marginRight="20dp"
                   android:layout_centerVertical="true"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   android:text="$1.043.429.773.603,56"/>
 
           </RelativeLayout>
@@ -500,9 +473,9 @@
                   android:layout_alignParentLeft="true"
                   android:layout_marginLeft="20dp"
                   android:layout_marginVertical="10dp"
-                  android:textColor="#797676"
+                  android:textColor="@color/textColor"
                   android:textSize="20dp"
-                  android:text="24 Hours Vol" />
+                  android:text="24 Saatteki Hacim" />
 
               <TextView
                   android:id="@+id/twentyFoursHoursMarketVolume"
@@ -511,7 +484,7 @@
                   android:layout_alignParentRight="true"
                   android:layout_marginRight="20dp"
                   android:layout_centerVertical="true"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   />
 
           </RelativeLayout>
@@ -528,9 +501,9 @@
                   android:layout_alignParentLeft="true"
                   android:layout_marginLeft="20dp"
                   android:layout_marginVertical="10dp"
-                  android:textColor="#797676"
+                  android:textColor="@color/textColor"
                   android:textSize="20dp"
-                  android:text="Circulating Supply" />
+                  android:text="Dolaşımdaki Arz" />
 
               <TextView
                   android:id="@+id/circulatingSupply"
@@ -539,7 +512,7 @@
                   android:layout_alignParentRight="true"
                   android:layout_centerVertical="true"
                   android:layout_marginRight="20dp"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   android:text="18.654.431"/>
 
           </RelativeLayout>
@@ -556,9 +529,9 @@
                   android:layout_alignParentLeft="true"
                   android:layout_marginLeft="20dp"
                   android:layout_marginVertical="10dp"
-                  android:textColor="#797676"
+                  android:textColor="@color/textColor"
                   android:textSize="20dp"
-                  android:text="Total Supply" />
+                  android:text="Toplam Arz" />
 
               <TextView
                   android:id="@+id/totalSupply"
@@ -567,7 +540,7 @@
                   android:layout_alignParentRight="true"
                   android:layout_centerVertical="true"
                   android:layout_marginRight="20dp"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   android:text="21.000.000"/>
 
           </RelativeLayout>
@@ -592,10 +565,10 @@
                   android:layout_height="wrap_content"
                   android:layout_toRightOf="@id/webIcon"
                   android:layout_marginStart="40dp"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   android:layout_centerVertical="true"
                   android:textSize="20dp"
-                  android:text="Web Page"/>
+                  android:text="Websitesi"/>
 
           </RelativeLayout>
 
@@ -621,7 +594,7 @@
                   android:layout_marginStart="40dp"
                   android:layout_centerVertical="true"
                   android:textSize="20dp"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   android:text="Reddit"/>
 
           </RelativeLayout>
@@ -646,7 +619,7 @@
                   android:layout_height="wrap_content"
                   android:layout_toRightOf="@id/twitterIcon"
                   android:layout_marginStart="40dp"
-                  android:textColor="#000"
+                  android:textColor="@color/textColor"
                   android:layout_centerVertical="true"
                   android:textSize="20dp"
                   android:text="Twitter"/>
@@ -676,7 +649,9 @@
                       android:layout_width="0dp"
                       android:layout_height="wrap_content"
                       android:background="@drawable/detail_button"
-                      android:text="Add watching list"
+                      android:textColor="@color/buttonTextColor"
+                      android:text="İzleme Listeme Ekle"
+                      android:backgroundTint="@color/buttonColor"
                       android:layout_marginVertical="10dp"
                       app:layout_constraintTop_toTopOf="parent"
                       app:layout_constraintStart_toStartOf="parent"
@@ -687,7 +662,9 @@
                       android:id="@+id/addToProt"
                       android:layout_width="0dp"
                       android:layout_height="wrap_content"
-                      android:text="Add to port"
+                      android:text="Portföye Ekle"
+                      android:backgroundTint="@color/buttonColor"
+                      android:textColor="@color/buttonTextColor"
                       android:background="@drawable/detail_button"
                       android:layout_marginVertical="10dp"
                       app:layout_constraintTop_toTopOf="parent"
@@ -701,7 +678,9 @@
                       android:layout_width="0dp"
                       android:layout_height="wrap_content"
                       android:background="@drawable/detail_button"
-                      android:text="Set Alarm"
+                      android:text="Fiyat Alarmı Kur"
+                      android:backgroundTint="@color/buttonColor"
+                      android:textColor="@color/buttonTextColor"
                       android:layout_marginVertical="10dp"
                       app:layout_constraintTop_toBottomOf="@id/addToProt"
                       app:layout_constraintStart_toStartOf="parent"

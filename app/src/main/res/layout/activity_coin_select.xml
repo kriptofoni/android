@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/box_inset_layout_padding"
+    android:background="@color/bodyColor"
     tools:context=".CoinSelectActivity"
     android:focusableInTouchMode="true">
 
@@ -12,6 +12,7 @@
         android:id="@+id/detail_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/headerColor"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent">
 
@@ -28,7 +29,7 @@
             android:id="@+id/coinName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#000"
+            android:textColor="@color/textColor"
             android:textSize="20dp"
             android:text="Select Coin"
             android:layout_marginStart="40dp"
@@ -43,13 +44,16 @@
         android:id="@+id/coin_select_search_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Search"
+        android:hint="Aramak İçin Dokunun"
+        android:textColorHint="#797676"
+        android:textColor="@color/textColor"
         android:layout_below="@id/detail_header"
         android:layout_marginHorizontal="10dp"
         android:paddingHorizontal="5dp"
         android:layout_marginVertical="5dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
+        android:background="@color/bodyColor"
         android:id="@+id/coin_select_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

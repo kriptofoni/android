@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/bodyColor"
     tools:context=".MoreActivities.CooperationActivity">
 
     <androidx.constraintlayout.widget.Guideline
@@ -60,7 +61,8 @@
         android:id="@+id/coop_subject_input"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Please enter subject"
+        android:hint="Konu Giriniz"
+        android:textColor="@color/textColor"
         android:inputType="textMultiLine"
         app:layout_constraintBottom_toTopOf="@id/coop_subject_bottom"
         app:layout_constraintLeft_toRightOf="@id/coop_input_left"
@@ -70,7 +72,8 @@
         android:id="@+id/coop_main_input"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Please enter main"
+        android:hint="Ana Mesajı Giriniz"
+        android:textColor="@color/textColor"
         android:inputType="textMultiLine"
         app:layout_constraintBottom_toTopOf="@id/coop_main_bottom"
         app:layout_constraintLeft_toRightOf="@id/coop_input_left"
@@ -84,9 +87,10 @@
         app:layout_constraintRight_toLeftOf="@id/coop_input_right"
         app:layout_constraintTop_toBottomOf="@id/coop_button_top"
         app:layout_constraintBottom_toTopOf="@id/coop_button_bottom"
+        android:background="@drawable/detail_button"
         android:text="SEND"
-        android:backgroundTint="#bf0505"
-        android:textColor="#fafafa"/>
+        android:backgroundTint="@color/buttonColor"
+        android:textColor="@color/textColor"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

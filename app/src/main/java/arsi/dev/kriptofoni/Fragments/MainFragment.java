@@ -21,6 +21,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -89,7 +90,7 @@ public class MainFragment extends Fragment {
         setupViewPager();
 
         tabs = view.findViewById(R.id.main_tabs);
-        tabs.setSelectedTabIndicatorColor(Color.parseColor("#f2a900"));
+        tabs.setSelectedTabIndicatorColor(ContextCompat.getColor(getContext(), R.color.buttonColor));
         tabs.setupWithViewPager(viewPager);
 
         search = view.findViewById(R.id.main_search);
@@ -245,11 +246,11 @@ public class MainFragment extends Fragment {
         mostDecIn24Fragment = new MostDecIn24Fragment(homeActivity);
         mostIncIn7Fragment = new MostIncIn7Fragment(homeActivity);
         mostDecIn7Fragment = new MostDecIn7Fragment(homeActivity);
-        adapter.addFragment(coinsFragment, "Coins");
-        adapter.addFragment(mostIncIn24Fragment, "Most Inc In 24 Hours");
-        adapter.addFragment(mostDecIn24Fragment, "Most Dec In 24 Hours");
-        adapter.addFragment(mostIncIn7Fragment, "Most Inc In 7 Days");
-        adapter.addFragment(mostDecIn7Fragment, "Most Dec In 7 Days");
+        adapter.addFragment(coinsFragment, "Kripto Paralar");
+        adapter.addFragment(mostIncIn24Fragment, "24 Saatin Yükselenleri");
+        adapter.addFragment(mostDecIn24Fragment, "24 Saatin Düşenleri");
+        adapter.addFragment(mostIncIn7Fragment, "7 Günün Yükselenleri");
+        adapter.addFragment(mostDecIn7Fragment, "7 Günün Düşenleri");
         viewPager.setOffscreenPageLimit(5);
         viewPager.setAdapter(adapter);
     }
@@ -266,7 +267,7 @@ public class MainFragment extends Fragment {
         @NonNull
         @Override
         public Fragment getItem(int position) {
-            tabs.setTabTextColors(Color.parseColor("#797676"), Color.parseColor("#f2a900"));
+            tabs.setTabTextColors(ContextCompat.getColor(getContext(), R.color.textColor), ContextCompat.getColor(getContext(), R.color.buttonColor));
             return fragments.get(position);
         }
 
@@ -383,7 +384,7 @@ public class MainFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CURRENCY_CHOOSE_REQUEST_CODE && resultCode == CURRENCY_CHOOSE_REQUEST_CODE) {
             currencyText = sharedPreferences.getString("currency", "usd");
-            homeActivity.getTotalMarketCap();
+            homeActivity.getTotalMarketCap(false);
             // Refreshing coinsFragment
             coinsFragment.setCurrency(currencyText);
             coinsFragment.setCurrentPage(1);

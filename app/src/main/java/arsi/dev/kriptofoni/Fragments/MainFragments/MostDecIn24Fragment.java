@@ -257,7 +257,7 @@ public class MostDecIn24Fragment extends Fragment {
     }
 
     public void setProgressBarVisibility(int visibility) {
-        if (!firstOnResume)
+        if (!firstOnResume && progressBar != null)
             progressBar.setVisibility(visibility);
     }
 

@@ -1,6 +1,7 @@
 package arsi.dev.kriptofoni;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -133,7 +134,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         chartType = "line";
         time = "oneDay";
         active = oneDay;
-        oneDay.setTextColor(Color.parseColor("#000000"));
+        oneDay.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
         // Current time in seconds
         to = System.currentTimeMillis() / 1000;
         // 24 hours ago in seconds
@@ -199,7 +200,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 if (active != oneDay) {
-                    oneDay.setTextColor(Color.parseColor("#000000"));
+                    oneDay.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24);
                     active.setTextColor(Color.parseColor("#797676"));
@@ -215,10 +216,10 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 if (active != oneWeek) {
-                    oneWeek.setTextColor(Color.parseColor("#000000"));
+                    oneWeek.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 7);
-                    active.setTextColor(Color.parseColor("#797676"));
+                    active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
                     active = oneWeek;
                     time = "oneWeek";
                     setChartProgressBarVisible();
@@ -231,10 +232,10 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 if (active != oneMonth) {
-                    oneMonth.setTextColor(Color.parseColor("#000000"));
+                    oneMonth.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30);
-                    active.setTextColor(Color.parseColor("#797676"));
+                    active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
                     active = oneMonth;
                     time = "oneMonth";
                     setChartProgressBarVisible();
@@ -247,10 +248,10 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 if (active != threeMonths) {
-                    threeMonths.setTextColor(Color.parseColor("#000000"));
+                    threeMonths.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30 * 3);
-                    active.setTextColor(Color.parseColor("#797676"));
+                    active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
                     active = threeMonths;
                     time = "threeMonths";
                     setChartProgressBarVisible();
@@ -263,10 +264,10 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 if (active != sixMonths) {
-                    sixMonths.setTextColor(Color.parseColor("#000000"));
+                    sixMonths.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30 * 6);
-                    active.setTextColor(Color.parseColor("#797676"));
+                    active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
                     active = sixMonths;
                     time = "sixMonths";
                     setChartProgressBarVisible();
@@ -279,10 +280,10 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 if (active != oneYear) {
-                    oneYear.setTextColor(Color.parseColor("#000000"));
+                    oneYear.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 365);
-                    active.setTextColor(Color.parseColor("#797676"));
+                    active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
                     active = oneYear;
                     time = "oneYear";
                     setChartProgressBarVisible();
@@ -295,10 +296,10 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 if (active != allTime) {
-                    allTime.setTextColor(Color.parseColor("#000000"));
+                    allTime.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
                     from = 0;
                     to = System.currentTimeMillis() / 1000;
-                    active.setTextColor(Color.parseColor("#797676"));
+                    active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
                     active = allTime;
                     time = "allTime";
                     setChartProgressBarVisible();
@@ -426,6 +427,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
     private void lineChart(ArrayList<Entry> yValue) {
 
         chartType = "line";
+        int textColor = ContextCompat.getColor(getApplicationContext(), R.color.textColor);
 
         if (lineChart.getData() != null) {
             lineChart.clearValues();
@@ -439,7 +441,9 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         lineChart.setDescription(null);
 
         XAxis xAxis = lineChart.getXAxis();
+        xAxis.setTextColor(textColor);
         YAxis yAxisRight = lineChart.getAxisRight();
+        lineChart.getAxisLeft().setTextColor(textColor);
         xAxis.setValueFormatter(new IAxisValueFormatter() {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
@@ -457,7 +461,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         yAxisRight.setEnabled(false);
 
-        set = new LineDataSet(yValue, "Prices");
+        set = new LineDataSet(yValue, "Fiyatlar");
         set.setDrawCircleHole(false);
         set.setDrawCircles(false);
         set.setValueTextSize(0f);
@@ -619,17 +623,21 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     circulatingSupply.setText(circulatingSupplyText);
                     totalSupply.setText(totalSupplyText);
 
+                    int red = Color.parseColor("#f6465d");
+                    int green = Color.parseColor("#2ebd85");
+                    int defaultColor = ContextCompat.getColor(getApplicationContext(), R.color.textColor);
+
                     if (oneHours != null && !oneHours.isJsonNull())
-                        oneHourChange.setTextColor(oneHours.getAsDouble() > 0 ? Color.GREEN : oneHours.getAsDouble() < 0 ? Color.RED : Color.parseColor("#797676"));
+                        oneHourChange.setTextColor(oneHours.getAsDouble() > 0 ? green : oneHours.getAsDouble() < 0 ? red : defaultColor);
                     if (twentyFourHours != null && !twentyFourHours.isJsonNull()) {
-                        twentyFourHoursChange.setTextColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : twentyFourHours.getAsDouble() < 0 ? Color.RED : Color.parseColor("#797676"));
-                        currentPriceChange.setTextColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : twentyFourHours.getAsDouble() < 0 ? Color.RED : Color.parseColor("#797676"));
-                        currentChange.setTextColor(twentyFourHours.getAsDouble() > 0 ? Color.GREEN : twentyFourHours.getAsDouble() < 0 ? Color.RED : Color.parseColor("#797676"));
+                        twentyFourHoursChange.setTextColor(twentyFourHours.getAsDouble() > 0 ? green : twentyFourHours.getAsDouble() < 0 ? red : defaultColor);
+                        currentPriceChange.setTextColor(twentyFourHours.getAsDouble() > 0 ? green : twentyFourHours.getAsDouble() < 0 ? red : defaultColor);
+                        currentChange.setTextColor(twentyFourHours.getAsDouble() > 0 ? green : twentyFourHours.getAsDouble() < 0 ? red : defaultColor);
                     }
                     if (changePercentageInBtc != null && !changePercentageInBtc.isJsonNull())
-                        priceChangeInBtc.setTextColor(changePercentageInBtc.getAsDouble() > 0 ? Color.GREEN : changePercentageInBtc.getAsDouble() < 0 ? Color.RED : Color.parseColor("#797676"));
+                        priceChangeInBtc.setTextColor(changePercentageInBtc.getAsDouble() > 0 ? green : changePercentageInBtc.getAsDouble() < 0 ? red : defaultColor);
                     if (sevenDays != null && !sevenDays.isJsonNull())
-                        sevenDaysChange.setTextColor(sevenDays.getAsDouble() > 0 ? Color.GREEN : sevenDays.getAsDouble() < 0 ? Color.RED : Color.parseColor("#797676"));
+                        sevenDaysChange.setTextColor(sevenDays.getAsDouble() > 0 ? green : sevenDays.getAsDouble() < 0 ? red : defaultColor);
 
                     makeProgressBarInvisible();
                 }
@@ -701,7 +709,12 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                                     }
                                 }
                             }
-                            chartColor = firstPrice < lastPrice ? Color.GREEN : firstPrice > lastPrice ? Color.RED : Color.BLACK;
+
+                            int red = Color.parseColor("#f6465d");
+                            int green = Color.parseColor("#2ebd85");
+                            int defaultColor = ContextCompat.getColor(getApplicationContext(), R.color.textColor);
+
+                            chartColor = firstPrice < lastPrice ? green : firstPrice > lastPrice ? red : defaultColor;
                             lineChart(yValue);
                         }
                     } else {

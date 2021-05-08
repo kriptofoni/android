@@ -1,6 +1,7 @@
 package arsi.dev.kriptofoni;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -32,12 +33,14 @@ public class FullScreenChartActivity extends AppCompatActivity {
     private ArrayList<LineChartEntryModel> lineChartEntryModels;
     private String time;
     private ImageView backButton;
-    private int chartColor;
+    private int chartColor, textColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_full_screen_chart);
+
+        textColor = ContextCompat.getColor(getApplicationContext(), R.color.textColor);
 
         lineChart = findViewById(R.id.full_screen_chart_line_chart);
         candleStickChart = findViewById(R.id.full_screen_chart_candlestick_chart);
@@ -48,7 +51,7 @@ public class FullScreenChartActivity extends AppCompatActivity {
         time = intent.getStringExtra("time");
         String type = intent.getStringExtra("type");
         lineChartEntryModels = intent.getParcelableArrayListExtra("lineChartModels");
-        chartColor = intent.getIntExtra("color", Color.BLACK);
+        chartColor = intent.getIntExtra("color", textColor);
 
         if (type.equals("line") && lineChartEntryModels != null)
             getLineChart();
@@ -90,7 +93,9 @@ public class FullScreenChartActivity extends AppCompatActivity {
         lineChart.setDescription(null);
 
         XAxis xAxis = lineChart.getXAxis();
+        xAxis.setTextColor(textColor);
         YAxis yAxisRight = lineChart.getAxisRight();
+        lineChart.getAxisLeft().setTextColor(textColor);
         xAxis.setValueFormatter(new IAxisValueFormatter() {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
@@ -118,6 +123,7 @@ public class FullScreenChartActivity extends AppCompatActivity {
         set.setColor(chartColor);
         set.setFillColor(chartColor);
         set.setFillAlpha(170);
+        set.setValueTextColor(textColor);
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
         dataSets.add(set);

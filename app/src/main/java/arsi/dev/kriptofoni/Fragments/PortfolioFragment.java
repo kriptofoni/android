@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -74,9 +75,9 @@ import retrofit2.Response;
 
 public class PortfolioFragment extends Fragment {
 
-    private final int CURRENCY_CHOOSE_ACTIVITY_CODE = 1, BUY_SELL_ACTIVITY_CODE = 2;
+    private final int BUY_SELL_ACTIVITY_CODE = 2;
 
-    private TextView currency, principal, totalPrice, totalPriceChange, oneHour, oneDay, oneWeek,
+    private TextView principal, totalPrice, totalPriceChange, oneDay, oneWeek,
                         oneMonth, threeMonths, oneYear, all, active;
     private RelativeLayout hasCoin, noCoin;
     private RecyclerView recyclerView;
@@ -128,7 +129,6 @@ public class PortfolioFragment extends Fragment {
         hasCoin = view.findViewById(R.id.portfolio_has_coin);
         noCoin = view.findViewById(R.id.portfolio_no_coin);
         noCoinAdd = view.findViewById(R.id.portfolio_no_coin_add);
-        currency = view.findViewById(R.id.portfolio_currency);
         selectCoins = view.findViewById(R.id.portfolio_select_coins);
         progressBar = view.findViewById(R.id.portfolio_progress_bar);
         chartProgressBar = view.findViewById(R.id.portfolio_chart_progress_bar);
@@ -138,7 +138,6 @@ public class PortfolioFragment extends Fragment {
         totalPriceChange = view.findViewById(R.id.portfolio_price_change_text);
         delete = view.findViewById(R.id.portfolio_delete);
         lineChart = view.findViewById(R.id.portfolio_chart);
-        oneHour = view.findViewById(R.id.portfolio_1h);
         oneDay = view.findViewById(R.id.portfolio_24h);
         oneWeek = view.findViewById(R.id.portfolio_1w);
         oneMonth = view.findViewById(R.id.portfolio_1m);
@@ -146,11 +145,13 @@ public class PortfolioFragment extends Fragment {
         oneYear = view.findViewById(R.id.portfolio_1y);
         all = view.findViewById(R.id.portfolio_all);
 
-        long oneHourInSeconds = 60 * 60;
+        long oneDayInSeconds = 60 * 60 * 24;
         to = System.currentTimeMillis() / 1000;
-        from = to - oneHourInSeconds;
-        oneHour.setTextColor(Color.BLACK);
-        active = oneHour;
+        oneDay.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.buttonColor));
+        oneDay.setTextColor(ContextCompat.getColor(getContext(), R.color.buttonTextColor));
+        from = to - oneDayInSeconds;
+
+        active = oneDay;
 
         noCoinAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -163,14 +164,6 @@ public class PortfolioFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 intentToCoinChoose();
-            }
-        });
-
-        currency.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), CurrencyChooseActivity.class);
-                startActivityForResult(intent, CURRENCY_CHOOSE_ACTIVITY_CODE);
             }
         });
 
@@ -213,31 +206,16 @@ public class PortfolioFragment extends Fragment {
             }
         });
 
-        oneHour.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (active != oneHour) {
-                    oneHour.setTextColor(Color.parseColor("#000000"));
-                    to = System.currentTimeMillis() / 1000;
-                    from = System.currentTimeMillis() / 1000 - (60 * 60);
-                    active.setTextColor(Color.parseColor("#797676"));
-                    active = oneHour;
-                    setChartProgressBarVisible();
-                    for (String id : idList) {
-                        new GetChartInfo().execute(id);
-                    }
-                }
-            }
-        });
-
         oneDay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (active != oneDay) {
-                    oneDay.setTextColor(Color.parseColor("#000000"));
+                    oneDay.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.buttonColor));
+                    oneDay.setTextColor(ContextCompat.getColor(getContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24);
-                    active.setTextColor(Color.parseColor("#797676"));
+                    active.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.bodyColor));
+                    active.setTextColor(ContextCompat.getColor(getContext(), R.color.textColor));
                     active = oneDay;
                     setChartProgressBarVisible();
                     for (String id : idList) {
@@ -251,10 +229,12 @@ public class PortfolioFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (active != oneWeek) {
-                    oneWeek.setTextColor(Color.parseColor("#000000"));
+                    oneWeek.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.buttonColor));
+                    oneWeek.setTextColor(ContextCompat.getColor(getContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 7);
-                    active.setTextColor(Color.parseColor("#797676"));
+                    active.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.bodyColor));
+                    active.setTextColor(ContextCompat.getColor(getContext(), R.color.textColor));
                     active = oneWeek;
                     setChartProgressBarVisible();
                     for (String id : idList) {
@@ -268,10 +248,12 @@ public class PortfolioFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (active != oneMonth) {
-                    oneMonth.setTextColor(Color.parseColor("#000000"));
+                    oneMonth.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.buttonColor));
+                    oneMonth.setTextColor(ContextCompat.getColor(getContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30);
-                    active.setTextColor(Color.parseColor("#797676"));
+                    active.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.bodyColor));
+                    active.setTextColor(ContextCompat.getColor(getContext(), R.color.textColor));
                     active = oneMonth;
                     setChartProgressBarVisible();
                     for (String id : idList) {
@@ -285,10 +267,12 @@ public class PortfolioFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (active != threeMonths) {
-                    threeMonths.setTextColor(Color.parseColor("#000000"));
+                    threeMonths.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.buttonColor));
+                    threeMonths.setTextColor(ContextCompat.getColor(getContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 90);
-                    active.setTextColor(Color.parseColor("#797676"));
+                    active.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.bodyColor));
+                    active.setTextColor(ContextCompat.getColor(getContext(), R.color.textColor));
                     active = threeMonths;
                     setChartProgressBarVisible();
                     for (String id : idList) {
@@ -302,10 +286,12 @@ public class PortfolioFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (active != oneYear) {
-                    oneYear.setTextColor(Color.parseColor("#000000"));
+                    oneYear.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.buttonColor));
+                    oneYear.setTextColor(ContextCompat.getColor(getContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 365);
-                    active.setTextColor(Color.parseColor("#797676"));
+                    active.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.bodyColor));
+                    active.setTextColor(ContextCompat.getColor(getContext(), R.color.textColor));
                     active = oneYear;
                     setChartProgressBarVisible();
                     for (String id : idList) {
@@ -319,10 +305,12 @@ public class PortfolioFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (active != all) {
-                    all.setTextColor(Color.parseColor("#000000"));
+                    all.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.buttonColor));
+                    all.setTextColor(ContextCompat.getColor(getContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = 0;
-                    active.setTextColor(Color.parseColor("#797676"));
+                    active.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.bodyColor));
+                    active.setTextColor(ContextCompat.getColor(getContext(), R.color.textColor));
                     active = all;
                     setChartProgressBarVisible();
                     for (String id : idList) {
@@ -416,6 +404,8 @@ public class PortfolioFragment extends Fragment {
 
     private void setLineChart(List<Entry> yValue) {
 
+        int textColor = ContextCompat.getColor(getContext(), R.color.textColor);
+
         if (lineChart.getData() != null) {
             lineChart.clearValues();
             lineChart.notifyDataSetChanged();
@@ -428,12 +418,14 @@ public class PortfolioFragment extends Fragment {
         lineChart.setDescription(null);
 
         XAxis xAxis = lineChart.getXAxis();
+        xAxis.setTextColor(textColor);
         YAxis yAxisRight = lineChart.getAxisRight();
+        lineChart.getAxisLeft().setTextColor(textColor);
         xAxis.setValueFormatter(new IAxisValueFormatter() {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
                 String result = "";
-                if (active == oneDay || active == oneHour) {
+                if (active == oneDay) {
                     result = getChartXAxisHourAndMinute(value);
                 } else if (active == all) {
                     result = getChartXAxisYears(value);
@@ -586,7 +578,12 @@ public class PortfolioFragment extends Fragment {
                                     String priceChangeText = String.format("%s%s (%%%s)", currencySymbol, nf.format(priceDiff), nf.format(priceDiffPerc));
                                     totalPriceChange.setText(priceChangeText);
                                     principal.setText(String.format("Total Principal: %s%s", currencySymbol, nf.format(totalPrincipal)));
-                                    totalPriceChange.setTextColor(priceDiff < 0 ? Color.RED : priceDiff > 0 ? Color.GREEN : Color.BLACK);
+
+                                    int red = Color.parseColor("#f6465d");
+                                    int green = Color.parseColor("#2ebd85");
+                                    int defaultColor = ContextCompat.getColor(getContext(), R.color.textColor);
+
+                                    totalPriceChange.setTextColor(priceDiff < 0 ? red : priceDiff > 0 ? green : defaultColor);
                                     portfolioRecyclerAdapter.notifyDataSetChanged();
                                 }
                             });
@@ -641,7 +638,11 @@ public class PortfolioFragment extends Fragment {
                 float first = values.get(0).getY();
                 float last = values.get(values.size() - 1).getY();
 
-                chartColor = first < last ? Color.GREEN : first > last ? Color.RED : Color.BLACK;
+                int red = Color.parseColor("#f6465d");
+                int green = Color.parseColor("#2ebd85");
+                int defaultColor = ContextCompat.getColor(getContext(), R.color.textColor);
+
+                chartColor = first < last ? green : first > last ? red : defaultColor;
 
                 setLineChart(values);
                 yValues.clear();
@@ -655,6 +656,8 @@ public class PortfolioFragment extends Fragment {
 
             List<Entry> yValue = new ArrayList<>();
 
+            System.out.println(from + " , " + to + " , " + coinModelId + " , " + currencyText);
+
             Call<JsonObject> call = chartInfoApi.getMarketChart(coinModelId, currencyText, String.valueOf(from), String.valueOf(to));
             try {
                 Response<JsonObject> response = call.execute();
@@ -664,31 +667,30 @@ public class PortfolioFragment extends Fragment {
                         JsonArray prices = (JsonArray) result.get("prices");
                         if (prices != null && !prices.isJsonNull()) {
                             for (int i = 0; i < prices.size(); i++) {
-                                if (active != oneHour && i % 4 != 0)
-                                    continue;
-
-                                JsonArray priceValues = (JsonArray) prices.get(i);
-                                if (priceValues != null && !priceValues.isJsonNull()) {
-                                    float timestamp = priceValues.get(0).getAsFloat();
-                                    float price = priceValues.get(1).getAsFloat();
-                                    float quantityCount = 0;
-                                    for (int j = 0; j < memoryModels.size(); j++) {
-                                        PortfolioMemoryModel model = memoryModels.get(j);
-                                        if (model.getId().equals(coinModelId)) {
-                                            float modelTimestamp = (float) (model.getTimestamp() - (1000 * 60 * 20));
-                                            if (modelTimestamp < timestamp) {
-                                                if (model.getType().equals("buy"))
-                                                    quantityCount += model.getQuantity();
-                                                else
-                                                    quantityCount -= model.getQuantity();
+                                if (i % 4 == 0) {
+                                    JsonArray priceValues = (JsonArray) prices.get(i);
+                                    if (priceValues != null && !priceValues.isJsonNull()) {
+                                        float timestamp = priceValues.get(0).getAsFloat();
+                                        float price = priceValues.get(1).getAsFloat();
+                                        float quantityCount = 0;
+                                        for (int j = 0; j < memoryModels.size(); j++) {
+                                            PortfolioMemoryModel model = memoryModels.get(j);
+                                            if (model.getId().equals(coinModelId)) {
+                                                float modelTimestamp = (float) (model.getTimestamp() - (1000 * 60 * 20));
+                                                if (modelTimestamp < timestamp) {
+                                                    if (model.getType().equals("buy"))
+                                                        quantityCount += model.getQuantity();
+                                                    else
+                                                        quantityCount -= model.getQuantity();
+                                                }
                                             }
                                         }
-                                    }
 
-                                    if (quantityCount > 0) {
-                                        yValue.add(new Entry(timestamp, quantityCount * price));
-                                    } else {
-                                        yValue.add(new Entry(timestamp, 0));
+                                        if (quantityCount > 0) {
+                                            yValue.add(new Entry(timestamp, quantityCount * price));
+                                        } else {
+                                            yValue.add(new Entry(timestamp, 0));
+                                        }
                                     }
                                 }
                             }
@@ -731,16 +733,10 @@ public class PortfolioFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == CURRENCY_CHOOSE_ACTIVITY_CODE && resultCode == CURRENCY_CHOOSE_ACTIVITY_CODE) {
-            if (data != null) {
-                currencyText = data.getStringExtra("currency");
-                if (currencyText != null) {
-                    portfolioRecyclerAdapter.setCurrencySymbol(countryCodePicker.getCountryCode(currencyText)[1]);
-                    new GetCoinInfo().execute();
-                }
-            }
-        } else if (requestCode == BUY_SELL_ACTIVITY_CODE && resultCode == BUY_SELL_ACTIVITY_CODE) {
+        if (requestCode == BUY_SELL_ACTIVITY_CODE && resultCode == BUY_SELL_ACTIVITY_CODE) {
+            noCoin.setVisibility(View.GONE);
             readFromMemory();
         }
+
     }
 }

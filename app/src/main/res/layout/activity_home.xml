@@ -9,12 +9,13 @@
     <RelativeLayout
         android:id="@+id/splash_screen"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="visible">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/icon"
+            android:layout_width="192dp"
+            android:layout_height="192dp"
+            android:src="@drawable/splash_screen"
             android:layout_centerInParent="true" />
 
     </RelativeLayout>
@@ -33,7 +34,7 @@
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_navigation"
-            android:background="#ffffff"
+            android:background="@color/navigationColor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -43,7 +44,5 @@
             />
 
     </RelativeLayout>
-
-
 
 </RelativeLayout>

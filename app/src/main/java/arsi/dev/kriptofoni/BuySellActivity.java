@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -97,8 +98,8 @@ public class BuySellActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (buttonType) {
-                    buy.setTextColor(Color.parseColor("#5b8d65"));
-                    sell.setTextColor(Color.parseColor("#797676"));
+                    buy.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
+                    sell.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
                     buttonType = false;
                 }
             }
@@ -108,8 +109,8 @@ public class BuySellActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!buttonType) {
-                    sell.setTextColor(Color.parseColor("#ea768c"));
-                    buy.setTextColor(Color.parseColor("#797676"));
+                    sell.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
+                    buy.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
                     buttonType = true;
                 }
             }

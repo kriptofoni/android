@@ -3,6 +3,7 @@ package arsi.dev.kriptofoni;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.loader.app.LoaderManager;
@@ -80,6 +81,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         setContentView(R.layout.activity_home);
 
         loaderManager = LoaderManager.getInstance(this);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
 
         splashScreen = findViewById(R.id.splash_screen);
         mainScreen = findViewById(R.id.main_screen);
@@ -91,7 +93,13 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
         myCoinGeckoApi = CoinGeckoRetrofitClient.getInstance().getMyCoinGeckoApi();
         sharedPreferences = getSharedPreferences("Preferences", 0);
-        currency = sharedPreferences.getString("currency", "usd");
+        currency = sharedPreferences.getString("currency", "");
+        if (currency.isEmpty()) {
+            currency = "usd";
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("currency", currency);
+            editor.apply();
+        }
         Gson gson = new Gson();
 
         String coinSearchModelsJson = sharedPreferences.getString("coinModelsForSearch", "");
@@ -104,7 +112,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
         client = new CoinGeckoApiClientImpl();
 
-        getTotalMarketCap();
+        getTotalMarketCap(true);
         
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(navigationItemSelectedListener);
@@ -115,6 +123,15 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         fragmentManager.beginTransaction().add(R.id.fragment_container, portfolioFragment,"2").hide(portfolioFragment).commit();
         fragmentManager.beginTransaction().add(R.id.fragment_container, mainFragment,"1").commit();
         bottomNavigationView.getMenu().getItem(0).setEnabled(false);
+
+        Handler handler = new Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                setScreen();
+            }
+        };
+        handler.postDelayed(runnable, 3000);
 
     }
 
@@ -208,8 +225,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         handler.postDelayed(runnable, 250);
     }
 
-    public void getTotalMarketCap() {
-        new GetTotalMarketCap().execute();
+    public void getTotalMarketCap(boolean getAllCoins) {
+        new GetTotalMarketCap().execute(getAllCoins);
     }
 
     public Fragment getActive() {
@@ -233,11 +250,11 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onLoaderReset(@NonNull Loader<String> loader) {}
 
 
-    private class GetTotalMarketCap extends AsyncTask<Void, Void, Void> {
+    private class GetTotalMarketCap extends AsyncTask<Boolean, Void, Boolean> {
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+        protected void onPostExecute(Boolean bool) {
+            super.onPostExecute(bool);
             // At the first opening of the application, if there is data stored in memory,
             // we send this data to the required pages.
             if (firstLoad) {
@@ -251,12 +268,14 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                     mainFragment.setMostIncIn7List(mostInc7DaysFromMem);
                     mainFragment.setMostDecIn7List(mostInc7DaysFromMem);
                 }
-                getAllCoins();
+
+                if (bool)
+                    getAllCoins();
             }
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected Boolean doInBackground(Boolean... booleans) {
 
             try {
                 Global global = client.getGlobal();
@@ -272,10 +291,15 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                     });
                 }
             } catch (CoinGeckoApiException ex) {
-                new GetTotalMarketCap().execute();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        new GetTotalMarketCap().execute();
+                    }
+                });
                 cancel(true);
             }
-            return null;
+            return booleans[0];
         }
     }
 

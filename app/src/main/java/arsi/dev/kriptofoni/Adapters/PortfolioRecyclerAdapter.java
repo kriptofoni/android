@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
@@ -33,6 +34,7 @@ public class PortfolioRecyclerAdapter extends RecyclerView.Adapter<PortfolioRecy
     private String currencySymbol;
     private boolean selectingMode = false;
     private Map<String, Double> timestamps;
+    private ViewGroup parent;
 
     public PortfolioRecyclerAdapter(List<PortfolioModel> coins, PortfolioFragment portfolioFragment) {
         this.coins = coins;
@@ -43,6 +45,7 @@ public class PortfolioRecyclerAdapter extends RecyclerView.Adapter<PortfolioRecy
     @NonNull
     @Override
     public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        this.parent = parent;
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = inflater.inflate(R.layout.portfolio_card, null);
         return new Holder(view);
@@ -53,26 +56,22 @@ public class PortfolioRecyclerAdapter extends RecyclerView.Adapter<PortfolioRecy
         NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
         PortfolioModel coin = coins.get(position);
 
+        int red = Color.parseColor("#f6465d");
+        int green = Color.parseColor("#2ebd85");
+        int defaultColor = ContextCompat.getColor(parent.getContext(), R.color.textColor);
+
         Picasso.get().load(coin.getImage()).into(holder.icon);
         holder.name.setText(coin.getShortCut().toUpperCase(Locale.ENGLISH));
         holder.quantity.setText(String.format(Locale.ENGLISH,"%.2f", coin.getQuantity()));
         holder.totalPrice.setText(String.format(Locale.ENGLISH,"%s%s", currencySymbol, nf.format(coin.getTotalPrice())));
-        Date date = new Date();
-        double yesterdayInMillies = date.getTime() - (1000 * 60 * 60 * 24);
-        if (timestamps.get(coin.getId()) != null && timestamps.get(coin.getId()) <= yesterdayInMillies) {
-            holder.changePercentage24H.setVisibility(View.VISIBLE);
-            holder.change24H.setText(String.format(Locale.ENGLISH,"%s%s", currencySymbol, nf.format(coin.getPriceChange24Hours())));
-            holder.changePercentage24H.setText(String.format(Locale.ENGLISH,"%%%s", nf.format(coin.getPriceChangePercentage24Hours())));
-            holder.change24H.setTextColor(coin.getPriceChange24Hours() < 0 ? Color.RED : coin.getPriceChange24Hours() > 0 ? Color.GREEN : Color.BLACK);
-            holder.changePercentage24H.setTextColor(coin.getPriceChangePercentage24Hours() < 0 ? Color.RED : coin.getPriceChangePercentage24Hours() > 0 ? Color.GREEN : Color.BLACK);
-        } else {
-            holder.change24H.setText("Not enough time yet");
-            holder.change24H.setTextColor(Color.BLACK);
-            holder.changePercentage24H.setVisibility(View.GONE);
-        }
+
+        holder.change24H.setText(String.format(Locale.ENGLISH,"%s%s", currencySymbol, nf.format(coin.getPriceChange24Hours())));
+        holder.changePercentage24H.setText(String.format(Locale.ENGLISH,"%%%s", nf.format(coin.getPriceChangePercentage24Hours())));
         holder.price.setText(String.format(Locale.ENGLISH,"%s%s", currencySymbol, nf.format(coin.getCurrentPrice())));
 
-        holder.price.setTextColor(coin.getPriceChangePercentage24Hours() < 0 ? Color.RED : coin.getPriceChangePercentage24Hours() > 0 ? Color.GREEN : Color.BLACK);
+        holder.change24H.setTextColor(coin.getPriceChange24Hours() < 0 ? red : coin.getPriceChange24Hours() > 0 ? green : defaultColor);
+        holder.changePercentage24H.setTextColor(coin.getPriceChangePercentage24Hours() < 0 ? red : coin.getPriceChangePercentage24Hours() > 0 ? green : defaultColor);
+        holder.price.setTextColor(coin.getPriceChangePercentage24Hours() < 0 ? red : coin.getPriceChangePercentage24Hours() > 0 ? green : defaultColor);
 
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -203,8 +203,11 @@ public class MostDecIn7Fragment extends Fragment {
     }
 
     public void setCoins(List<CoinSearchModel> coins) {
-        allCoinSearchModels.clear();
-        allCoinSearchModels.addAll(coins);
+        if (allCoinSearchModels != null) {
+            allCoinSearchModels.clear();
+            allCoinSearchModels.addAll(coins);
+        }
+
         if (onScreen && !inProgress) {
             if (!firstRender) {
                 addIds();
@@ -256,7 +259,7 @@ public class MostDecIn7Fragment extends Fragment {
     }
 
     public void setProgressBarVisibility(int visibility) {
-        if (!firstOnResume)
+        if (!firstOnResume && progressBar != null)
             progressBar.setVisibility(visibility);
     }
 

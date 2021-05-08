@@ -11,6 +11,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -55,20 +56,23 @@ public class MainCoinsRecyclerAdapter extends RecyclerView.Adapter<MainCoinsRecy
         Picasso.get().load(coin.getImageUri()).into(holder.icon);
         String name = coin.getName() + "\n#" + coin.getNumber() + " - " + coin.getShortCut().toUpperCase(Locale.ENGLISH);
         holder.name.setText(name);
+
+        int red = Color.parseColor("#f6465d");
+        int green = Color.parseColor("#2ebd85");
+        int defaultColor = ContextCompat.getColor(parent.getContext(), R.color.textColor);
+
         if (type.equals("24")) {
-            holder.changeIn24Hours.setText(String.format("%%%.2f", coin.getChangeIn24Hours()));
-            holder.changeIn24Hours.setTextColor(coin.getChangeIn24Hours() > 0 ? Color.GREEN : Color.RED);
-            holder.priceChangeIn24Hours.setText(String.format("%s%.2f", currencySymbol, coin.getPriceChangeIn24Hours()));
-            holder.priceChangeIn24Hours.setTextColor(coin.getChangeIn24Hours() > 0 ? Color.GREEN : Color.RED);
+            holder.changeIn24Hours.setText(String.format(Locale.ENGLISH, "%%%.2f", coin.getChangeIn24Hours()));
+            holder.changeIn24Hours.setTextColor(coin.getChangeIn24Hours() > 0 ? green : coin.getChangeIn24Hours() < 0 ? red : defaultColor);
+            holder.priceChangeIn24Hours.setText(String.format(Locale.ENGLISH, "%s%.2f", currencySymbol, coin.getPriceChangeIn24Hours()));
+            holder.priceChangeIn24Hours.setTextColor(coin.getChangeIn24Hours() > 0 ? green : coin.getChangeIn24Hours() < 0 ? red : defaultColor);
         } else {
-            holder.changeIn24Hours.setText(String.format("%%%.2f", coin.getChangeIn7Days()));
-            holder.changeIn24Hours.setTextColor(coin.getChangeIn7Days() > 0 ? Color.GREEN : Color.RED);
-            holder.priceChangeIn24Hours.setText(String.format("%s%.2f", currencySymbol, coin.getPriceChangeIn7Days()));
-            holder.priceChangeIn24Hours.setTextColor(coin.getChangeIn7Days() > 0 ? Color.GREEN : Color.RED);
+            holder.changeIn24Hours.setText(String.format(Locale.ENGLISH,"%%%.2f", coin.getChangeIn7Days()));
+            holder.changeIn24Hours.setTextColor(coin.getChangeIn7Days() > 0 ? green : coin.getChangeIn7Days() < 0 ? red : defaultColor);
+            holder.priceChangeIn24Hours.setText(String.format(Locale.ENGLISH,"%s%.2f", currencySymbol, coin.getPriceChangeIn7Days()));
+            holder.priceChangeIn24Hours.setTextColor(coin.getChangeIn7Days() > 0 ? green : coin.getChangeIn7Days() < 0 ? red : defaultColor);
         }
-        holder.currentPrice.setText(String.format("%s%.2f", currencySymbol, coin.getCurrentPrice()));
-        if (position % 2 == 1) holder.card.setBackgroundColor(Color.parseColor("#ededed"));
-        else holder.card.setBackgroundColor(Color.parseColor("#ffffff"));
+        holder.currentPrice.setText(String.format(Locale.ENGLISH, "%s%.2f", currencySymbol, coin.getCurrentPrice()));
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

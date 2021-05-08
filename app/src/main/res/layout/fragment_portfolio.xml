@@ -2,6 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/bodyColor"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -16,6 +18,7 @@
         android:id="@+id/detail_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/headerColor"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -28,18 +31,6 @@
             android:layout_marginStart="10dp"
             android:visibility="gone"/>
 
-        <TextView
-            android:id="@+id/portfolio_currency"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="USD"
-            android:textSize="20dp"
-            android:textColor="#000"
-            android:layout_marginVertical="10dp"
-            android:layout_toLeftOf="@id/portfolio_select_coins"
-            android:layout_marginRight="30dp"
-            />
-
         <ImageView
             android:id="@+id/portfolio_select_coins"
             android:layout_width="30dp"
@@ -47,7 +38,8 @@
             android:src="@drawable/ic_baseline_more_vert_24"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="20dp"
-            android:layout_centerVertical="true"/>
+            android:layout_centerVertical="true"
+            android:layout_marginVertical="10dp"/>
 
         <ImageView
             android:id="@+id/portfolio_delete"
@@ -64,6 +56,7 @@
         android:id="@+id/portfolio_progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:indeterminateTint="@color/textColor"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -82,18 +75,18 @@
             android:id="@+id/no_coin_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add Manuel Operation"
+            android:text="Manuel İşlem Ekle"
             android:textSize="20dp"
-            android:textColor="#000"
+            android:textColor="@color/textColor"
             android:layout_centerHorizontal="true" />
 
         <TextView
             android:id="@+id/not_sync_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="(Not Synchronized)"
+            android:text="(Senkronize Edilmedi)"
             android:textSize="16dp"
-            android:textColor="#797676"
+            android:textColor="@color/textColor"
             android:layout_below="@id/no_coin_text"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp" />
@@ -103,8 +96,8 @@
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:background="@drawable/detail_button"
-            android:text="Add Manuel Operation"
-            android:textColor="#f2a900"
+            android:text="Manuel İşlem Ekle"
+            android:textColor="@color/buttonTextColor"
             android:layout_below="@id/not_sync_text"
             android:layout_marginTop="20dp"
             android:layout_marginHorizontal="20dp" />
@@ -136,8 +129,8 @@
                     android:id="@+id/my_portfolio_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="My Portfolio"
-                    android:textColor="#000"
+                    android:text="Portföyüm"
+                    android:textColor="@color/textColor"
                     android:textSize="16dp"
                     android:layout_marginTop="5dp"
                     android:layout_marginStart="20dp"/>
@@ -146,9 +139,9 @@
                     android:id="@+id/portfolio_total_price_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="$ 282.300,86"
+                    android:text="3$ 282.00,86"
                     android:textSize="20dp"
-                    android:textColor="#000"
+                    android:textColor="@color/textColor"
                     android:layout_marginTop="5dp"
                     android:layout_marginStart="20dp"/>
 
@@ -158,7 +151,7 @@
                     android:layout_height="wrap_content"
                     android:text="-$213,22 (-%0,08)"
                     android:textSize="15dp"
-                    android:textColor="#ff0000"
+                    android:textColor="@color/textColor"
                     android:layout_marginTop="5dp"
                     android:layout_marginStart="20dp"/>
 
@@ -173,6 +166,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerInParent="true"
+                        android:indeterminateTint="@color/textColor"
                         android:visibility="gone" />
 
                     <com.github.mikephil.charting.charts.LineChart
@@ -191,134 +185,89 @@
                         android:layout_height="wrap_content"
                         android:layout_marginVertical="5dp">
 
-                        <androidx.constraintlayout.widget.Guideline
-                            android:id="@+id/oneHourLeft"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:layout_constraintGuide_percent="0.1"
-                            android:orientation="vertical" />
-
-                        <androidx.constraintlayout.widget.Guideline
-                            android:id="@+id/tfHourLeft"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:layout_constraintGuide_percent="0.21"
-                            android:orientation="vertical" />
-
-                        <androidx.constraintlayout.widget.Guideline
-                            android:id="@+id/oneWeekLeft"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:layout_constraintGuide_percent="0.33"
-                            android:orientation="vertical" />
-
-                        <androidx.constraintlayout.widget.Guideline
-                            android:id="@+id/oneMonthLeft"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:layout_constraintGuide_percent="0.44"
-                            android:orientation="vertical" />
-
-                        <androidx.constraintlayout.widget.Guideline
-                            android:id="@+id/threeMonthsLeft"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:layout_constraintGuide_percent="0.55"
-                            android:orientation="vertical" />
-
-                        <androidx.constraintlayout.widget.Guideline
-                            android:id="@+id/sixMonthsLeft"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:layout_constraintGuide_percent="0.66"
-                            android:orientation="vertical" />
-
-                        <androidx.constraintlayout.widget.Guideline
-                            android:id="@+id/oneYearLeft"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:layout_constraintGuide_percent="0.77"
-                            android:orientation="vertical" />
-
-                        <androidx.constraintlayout.widget.Guideline
-                            android:id="@+id/allLeft"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:layout_constraintGuide_percent="0.87"
-                            android:orientation="vertical" />
-
-                        <TextView
-                            android:id="@+id/portfolio_1h"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="1 H"
-                            app:layout_constraintLeft_toLeftOf="@id/oneHourLeft"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent"/>
-
-
                         <TextView
                             android:id="@+id/portfolio_24h"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="24 H"
-                            app:layout_constraintLeft_toLeftOf="@id/tfHourLeft"
+                            android:text="24 S"
+                            android:textColor="@color/textColor"
+                            android:padding="5dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/portfolio_1w"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent"/>
+                            app:layout_constraintVertical_bias="0.0" />
 
                         <TextView
                             android:id="@+id/portfolio_1w"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="1 W"
-                            app:layout_constraintLeft_toLeftOf="@id/oneWeekLeft"
+                            android:text="1 H"
+                            android:textColor="@color/textColor"
+                            android:padding="5dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/portfolio_1m"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/portfolio_24h"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent"/>
+                            app:layout_constraintVertical_bias="0.0" />
 
                         <TextView
                             android:id="@+id/portfolio_1m"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="1 M"
-                            app:layout_constraintLeft_toLeftOf="@id/oneMonthLeft"
+                            android:text="1 A"
+                            android:textColor="@color/textColor"
+                            android:padding="5dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/portfolio_3m"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/portfolio_1w"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent"/>
+                            app:layout_constraintVertical_bias="0.0" />
 
                         <TextView
                             android:id="@+id/portfolio_3m"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="3 M"
-                            app:layout_constraintLeft_toLeftOf="@id/threeMonthsLeft"
+                            android:text="3 A"
+                            android:textColor="@color/textColor"
+                            android:padding="5dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/portfolio_1y"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/portfolio_1m"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent"/>
-
-                        <TextView
-                            android:id="@+id/portfolio_6m"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="6 M"
-                            app:layout_constraintLeft_toLeftOf="@id/sixMonthsLeft"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent"/>
+                            app:layout_constraintVertical_bias="0.0" />
 
                         <TextView
                             android:id="@+id/portfolio_1y"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="1 Y"
-                            app:layout_constraintLeft_toLeftOf="@id/oneYearLeft"
+                            android:textColor="@color/textColor"
+                            android:padding="5dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/portfolio_all"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/portfolio_3m"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent"/>
+                            app:layout_constraintVertical_bias="0.0" />
 
                         <TextView
                             android:id="@+id/portfolio_all"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="All"
-                            app:layout_constraintLeft_toLeftOf="@id/allLeft"
+                            android:text="Tümü"
+                            android:textColor="@color/textColor"
+                            android:padding="5dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_bias="0.5"
+                            app:layout_constraintStart_toEndOf="@+id/portfolio_1y"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent"/>
+                            app:layout_constraintVertical_bias="0.0" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -330,7 +279,7 @@
                     android:layout_height="wrap_content"
                     android:text="Total Principal: $200.000"
                     android:textSize="16dp"
-                    android:textColor="#000"
+                    android:textColor="@color/textColor"
                     android:layout_marginStart="20dp"
                     android:layout_marginTop="10dp"/>
 

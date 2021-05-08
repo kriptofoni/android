@@ -3,18 +3,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/bodyColor"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/alert_app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white">
+        android:background="@color/headerColor"
+        android:backgroundTint="@color/headerColor">
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/alerts_tab_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@color/headerColor"
+            android:backgroundTint="@color/headerColor">
 
         </com.google.android.material.tabs.TabLayout>
 
@@ -22,6 +26,8 @@
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/alerts_view_pager"
+        android:background="#ffffff"
+        android:backgroundTint="#ffffff"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/bodyColor"
     tools:context=".MoreActivities.ToolsActivity">
 
     <androidx.constraintlayout.widget.Guideline
@@ -39,7 +40,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.24" />
+        app:layout_constraintGuide_percent="0.3" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/tools_icon_left"
@@ -52,8 +53,8 @@
         android:id="@+id/tools_converter_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Fiat Converter"
-        android:textColor="#000"
+        android:text="Fiyat Dönüştürücü"
+        android:textColor="@color/textColor"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintLeft_toRightOf="@id/tools_button_left"
@@ -62,9 +63,9 @@
 
     <ImageView
         android:id="@+id/tools_converter_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_globe"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/hesaplama_araci"
         app:layout_constraintLeft_toRightOf="@id/tools_icon_left"
         app:layout_constraintTop_toBottomOf="@id/tools_converter_top"
         app:layout_constraintBottom_toTopOf="@id/tools_mining_top"
@@ -74,8 +75,8 @@
         android:id="@+id/tools_mining_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Mining Calculator (Soon)"
-        android:textColor="#000"
+        android:text="Madencilik Hesaplayıcı (Yakında)"
+        android:textColor="@color/textColor"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/tools_mining_top"
@@ -84,9 +85,9 @@
 
     <ImageView
         android:id="@+id/tools_mining_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_globe"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/hesaplama_araci"
         app:layout_constraintLeft_toRightOf="@id/tools_icon_left"
         app:layout_constraintTop_toBottomOf="@id/tools_mining_top"
         app:layout_constraintRight_toLeftOf="@id/tools_button_left"
@@ -96,8 +97,8 @@
         android:id="@+id/tools_block_chain_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Blockchain Explorer Tool (Soon)"
-        android:textColor="#000"
+        android:text="Blockchain Kaşif Aracı (Yakında)"
+        android:textColor="@color/textColor"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintLeft_toRightOf="@id/tools_button_left"
@@ -106,9 +107,9 @@
 
     <ImageView
         android:id="@+id/tools_block_chain_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_globe"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/hesaplama_araci"
         app:layout_constraintLeft_toRightOf="@id/tools_icon_left"
         app:layout_constraintTop_toBottomOf="@id/tools_block_chain_top"
         app:layout_constraintRight_toLeftOf="@id/tools_button_left"
