@@ -86,8 +86,8 @@ public class AlertsFragment extends Fragment {
 
         alertFragment = new AlertFragment();
         watchingListFragment = new WatchingListFragment();
-        adapter.addFragment(alertFragment, "Alerts");
-        adapter.addFragment(watchingListFragment, "Watching List");
+        adapter.addFragment(alertFragment, "Alarmlar");
+        adapter.addFragment(watchingListFragment, "İzleme Listesi");
 
         viewPager.setAdapter(adapter);
     }

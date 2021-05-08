@@ -69,7 +69,9 @@ public class MostDecIn7Fragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main_most_dec_7, container, false);
 
-        allCoinSearchModels = new ArrayList<>();
+        if (allCoinSearchModels == null)
+            allCoinSearchModels = new ArrayList<>();
+
         coinModels = new ArrayList<>();
         allCoins = new ArrayList<>();
         coinModelsForSearch = new ArrayList<>();
@@ -205,8 +207,11 @@ public class MostDecIn7Fragment extends Fragment {
     public void setCoins(List<CoinSearchModel> coins) {
         if (allCoinSearchModels != null) {
             allCoinSearchModels.clear();
-            allCoinSearchModels.addAll(coins);
+        } else {
+            allCoinSearchModels = new ArrayList<>();
         }
+
+        allCoinSearchModels.addAll(coins);
 
         if (onScreen && !inProgress) {
             if (!firstRender) {

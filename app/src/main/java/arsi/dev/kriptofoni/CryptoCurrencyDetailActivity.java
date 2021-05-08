@@ -135,6 +135,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         time = "oneDay";
         active = oneDay;
         oneDay.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
+        oneDay.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonTextColor));
         // Current time in seconds
         to = System.currentTimeMillis() / 1000;
         // 24 hours ago in seconds
@@ -201,9 +202,11 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onClick(View view) {
                 if (active != oneDay) {
                     oneDay.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
+                    oneDay.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24);
-                    active.setTextColor(Color.parseColor("#797676"));
+                    active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
+                    active.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
                     active = oneDay;
                     time = "oneDay";
                     setChartProgressBarVisible();
@@ -217,9 +220,11 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onClick(View view) {
                 if (active != oneWeek) {
                     oneWeek.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
+                    oneWeek.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 7);
                     active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
+                    active.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
                     active = oneWeek;
                     time = "oneWeek";
                     setChartProgressBarVisible();
@@ -233,9 +238,11 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onClick(View view) {
                 if (active != oneMonth) {
                     oneMonth.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
+                    oneMonth.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30);
                     active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
+                    active.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
                     active = oneMonth;
                     time = "oneMonth";
                     setChartProgressBarVisible();
@@ -249,9 +256,11 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onClick(View view) {
                 if (active != threeMonths) {
                     threeMonths.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
+                    threeMonths.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30 * 3);
                     active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
+                    active.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
                     active = threeMonths;
                     time = "threeMonths";
                     setChartProgressBarVisible();
@@ -265,9 +274,11 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onClick(View view) {
                 if (active != sixMonths) {
                     sixMonths.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
+                    sixMonths.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30 * 6);
                     active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
+                    active.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
                     active = sixMonths;
                     time = "sixMonths";
                     setChartProgressBarVisible();
@@ -281,9 +292,11 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onClick(View view) {
                 if (active != oneYear) {
                     oneYear.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
+                    oneYear.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 365);
                     active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
+                    active.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
                     active = oneYear;
                     time = "oneYear";
                     setChartProgressBarVisible();
@@ -297,9 +310,11 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onClick(View view) {
                 if (active != allTime) {
                     allTime.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonColor));
+                    allTime.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonTextColor));
                     from = 0;
                     to = System.currentTimeMillis() / 1000;
                     active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
+                    active.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
                     active = allTime;
                     time = "allTime";
                     setChartProgressBarVisible();

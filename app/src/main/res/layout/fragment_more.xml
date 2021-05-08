@@ -183,9 +183,9 @@
 
     <ImageView
         android:id="@+id/more_cooperation_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_globe"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/reklam_ve_isbirligi"
         app:layout_constraintBottom_toTopOf="@+id/aboutTop"
         app:layout_constraintEnd_toStartOf="@+id/buttonLeft"
         app:layout_constraintStart_toStartOf="@+id/iconLeft"

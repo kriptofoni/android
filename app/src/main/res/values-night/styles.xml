@@ -4,7 +4,7 @@
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">#797676</item>
+        <item name="colorPrimaryDark">#202630</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColorPrimary">#ffffff</item>
     </style>

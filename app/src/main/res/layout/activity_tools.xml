@@ -7,47 +7,62 @@
     android:background="@color/bodyColor"
     tools:context=".MoreActivities.ToolsActivity">
 
+    <RelativeLayout
+        android:id="@+id/detail_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/headerColor"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Araçlar"
+            android:layout_toRightOf="@+id/buy_sell_back_button"
+            android:layout_marginVertical="20dp"
+            android:textColor="@color/textColor"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            android:layout_centerHorizontal="true"/>
+
+    </RelativeLayout>
+
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/tools_converter_top"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.14" />
+        app:layout_constraintGuide_percent="0.1" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/tools_mining_top"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.26" />
+        app:layout_constraintGuide_percent="0.22" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/tools_block_chain_top"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.38" />
+        app:layout_constraintGuide_percent="0.34" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/tools_block_chain_bottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.50" />
+        app:layout_constraintGuide_percent="0.46" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/tools_button_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.3" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/tools_icon_left"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.07" />
+        app:layout_constraintGuide_percent="0.25" />
 
     <TextView
         android:id="@+id/tools_converter_text"
@@ -66,7 +81,7 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:background="@drawable/hesaplama_araci"
-        app:layout_constraintLeft_toRightOf="@id/tools_icon_left"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tools_converter_top"
         app:layout_constraintBottom_toTopOf="@id/tools_mining_top"
         app:layout_constraintRight_toLeftOf="@id/tools_button_left"/>
@@ -88,7 +103,7 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:background="@drawable/hesaplama_araci"
-        app:layout_constraintLeft_toRightOf="@id/tools_icon_left"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tools_mining_top"
         app:layout_constraintRight_toLeftOf="@id/tools_button_left"
         app:layout_constraintBottom_toTopOf="@id/tools_block_chain_top"/>
@@ -110,7 +125,7 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:background="@drawable/hesaplama_araci"
-        app:layout_constraintLeft_toRightOf="@id/tools_icon_left"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tools_block_chain_top"
         app:layout_constraintRight_toLeftOf="@id/tools_button_left"
         app:layout_constraintBottom_toTopOf="@id/tools_block_chain_bottom"/>

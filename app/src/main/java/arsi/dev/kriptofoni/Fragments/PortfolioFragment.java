@@ -324,6 +324,15 @@ public class PortfolioFragment extends Fragment {
     }
 
     @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+        if (!hidden) {
+            readFromMemory();
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
@@ -577,7 +586,7 @@ public class PortfolioFragment extends Fragment {
                                     double priceDiffPerc = priceDiff / totalPrincipal * 100;
                                     String priceChangeText = String.format("%s%s (%%%s)", currencySymbol, nf.format(priceDiff), nf.format(priceDiffPerc));
                                     totalPriceChange.setText(priceChangeText);
-                                    principal.setText(String.format("Total Principal: %s%s", currencySymbol, nf.format(totalPrincipal)));
+                                    principal.setText(String.format("Ana para: %s%s", currencySymbol, nf.format(totalPrincipal)));
 
                                     int red = Color.parseColor("#f6465d");
                                     int green = Color.parseColor("#2ebd85");

@@ -1,5 +1,7 @@
 package arsi.dev.kriptofoni.Fragments;
 
+import android.app.AlertDialog;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +14,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -106,6 +109,17 @@ public class MainFragment extends Fragment {
 
         coinModelsForSearch = new ArrayList<>();
 
+        searchBar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Service.INPUT_METHOD_SERVICE);
+                if (hasFocus) {
+                    imm.showSoftInput(searchBar, 0);
+                } else {
+                    imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
+                }
+            }
+        });
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -113,6 +127,7 @@ public class MainFragment extends Fragment {
                 // making search tab visible
                 header.setVisibility(View.INVISIBLE);
                 searchTab.setVisibility(View.VISIBLE);
+                searchBar.requestFocus();
             }
         });
 
@@ -123,11 +138,6 @@ public class MainFragment extends Fragment {
                 // making header which holds total market cap etc. visible
                 searchBar.setText("");
                 searchBar.clearFocus();
-                View focusView = getActivity().getCurrentFocus();
-                if (focusView != null) {
-                    InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                }
                 searchTab.setVisibility(View.INVISIBLE);
                 header.setVisibility(View.VISIBLE);
                 // When we close the search bar we need to reset our fragments'
@@ -289,22 +299,20 @@ public class MainFragment extends Fragment {
     }
 
     public void setTotalMarketValue(double totalMarketValue) {
-        try {
-            CountryCodePicker countryCodePicker = new CountryCodePicker();
-            String[] arr = countryCodePicker.getCountryCode(currencyText);
-            coinsFragment.setCurrencySymbol(arr[1]);
-            mostIncIn24Fragment.setCurrencySymbol(arr[1]);
-            mostDecIn24Fragment.setCurrencySymbol(arr[1]);
-            mostIncIn7Fragment.setCurrencySymbol(arr[1]);
-            mostDecIn7Fragment.setCurrencySymbol(arr[1]);
-            // Formatting number with decimal points
-            // Ex. 123456 -> 123.456
-            NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
-            String text = !arr[1].isEmpty() ? arr[1] + " " + nf.format(totalMarketValue) : nf.format(totalMarketValue);
-            totalMarketVal.setText(text);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        System.out.println(totalMarketValue);
+        CountryCodePicker countryCodePicker = new CountryCodePicker();
+        String[] arr = countryCodePicker.getCountryCode(currencyText);
+        coinsFragment.setCurrencySymbol(arr[1]);
+        mostIncIn24Fragment.setCurrencySymbol(arr[1]);
+        mostDecIn24Fragment.setCurrencySymbol(arr[1]);
+        mostIncIn7Fragment.setCurrencySymbol(arr[1]);
+        mostDecIn7Fragment.setCurrencySymbol(arr[1]);
+        // Formatting number with decimal points
+        // Ex. 123456 -> 123.456
+        NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
+        String text = !arr[1].isEmpty() ? arr[1] + " " + nf.format(totalMarketValue) : nf.format(totalMarketValue);
+        System.out.println(text);
+        totalMarketVal.setText(text);
     }
 
     public void setCoinModelsForSearch(List<CoinSearchModel> coinModelsForSearch) {
@@ -384,7 +392,7 @@ public class MainFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CURRENCY_CHOOSE_REQUEST_CODE && resultCode == CURRENCY_CHOOSE_REQUEST_CODE) {
             currencyText = sharedPreferences.getString("currency", "usd");
-            homeActivity.getTotalMarketCap(false);
+            homeActivity.getTotalMarketCap();
             // Refreshing coinsFragment
             coinsFragment.setCurrency(currencyText);
             coinsFragment.setCurrentPage(1);

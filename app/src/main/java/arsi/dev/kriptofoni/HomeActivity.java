@@ -50,12 +50,12 @@ import retrofit2.Response;
 public class HomeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
 
     private BottomNavigationView bottomNavigationView;
-    private final MainFragment mainFragment = new MainFragment(this);
-    private final PortfolioFragment portfolioFragment = new PortfolioFragment();
-    private final AlertsFragment alertsFragment = new AlertsFragment(this);
-    private final NewsFragment newsFragment = new NewsFragment();
-    private final MoreFragment moreFragment = new MoreFragment();
-    private Fragment active = mainFragment;
+    private MainFragment mainFragment;
+    private PortfolioFragment portfolioFragment;
+    private AlertsFragment alertsFragment;
+    private NewsFragment newsFragment;
+    private MoreFragment moreFragment;
+    private Fragment active;
     private FragmentManager fragmentManager;
     private RelativeLayout splashScreen, mainScreen;
 
@@ -82,6 +82,14 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
         loaderManager = LoaderManager.getInstance(this);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+
+        mainFragment = new MainFragment(this);
+        portfolioFragment = new PortfolioFragment();
+        alertsFragment = new AlertsFragment(this);
+        newsFragment = new NewsFragment();
+        moreFragment = new MoreFragment();
+
+        active = mainFragment;
 
         splashScreen = findViewById(R.id.splash_screen);
         mainScreen = findViewById(R.id.main_screen);
@@ -112,7 +120,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
         client = new CoinGeckoApiClientImpl();
 
-        getTotalMarketCap(true);
+        getTotalMarketCap();
         
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(navigationItemSelectedListener);
@@ -225,8 +233,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         handler.postDelayed(runnable, 250);
     }
 
-    public void getTotalMarketCap(boolean getAllCoins) {
-        new GetTotalMarketCap().execute(getAllCoins);
+    public void getTotalMarketCap() {
+        new GetTotalMarketCap().execute();
     }
 
     public Fragment getActive() {
@@ -250,11 +258,11 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onLoaderReset(@NonNull Loader<String> loader) {}
 
 
-    private class GetTotalMarketCap extends AsyncTask<Boolean, Void, Boolean> {
+    private class GetTotalMarketCap extends AsyncTask<Void, Void, Void> {
 
         @Override
-        protected void onPostExecute(Boolean bool) {
-            super.onPostExecute(bool);
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
             // At the first opening of the application, if there is data stored in memory,
             // we send this data to the required pages.
             if (firstLoad) {
@@ -269,13 +277,13 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                     mainFragment.setMostDecIn7List(mostInc7DaysFromMem);
                 }
 
-                if (bool)
-                    getAllCoins();
+                getAllCoins();
+
             }
         }
 
         @Override
-        protected Boolean doInBackground(Boolean... booleans) {
+        protected Void doInBackground(Void... voids) {
 
             try {
                 Global global = client.getGlobal();
@@ -284,6 +292,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                         @Override
                         public void run() {
                             currency = sharedPreferences.getString("currency", "usd");
+                            System.out.println(global.getData().getTotalMarketCap().get(currency));
                             mainFragment.setTotalMarketValue(global.getData().getTotalMarketCap().get(currency));
                             max = (int) global.getData().getActiveCryptocurrencies();
                             totalPageNumber = max / 250 + 1;
@@ -299,7 +308,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                 });
                 cancel(true);
             }
-            return booleans[0];
+            return null;
         }
     }
 

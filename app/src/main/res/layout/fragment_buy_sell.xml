@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bodyColor" >
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/buyButtonLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.08" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/buyButtonRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.4" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/notesRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.92" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/sellButtonLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.42" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/sellButtonRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.74" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/totalMoneyTextBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.2" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/editTextLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.44" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/addButtonRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.92" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/addButtonUp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.85" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/addButtonBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.91" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/priceTextGuide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.45" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/costTextGuide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.54" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/notesGuide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.75" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/operationDateGuide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.35" />
+
+    <TextView
+        android:id="@+id/currencies"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Toplam"
+        android:textColor="@color/textColor"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/totalMoneyTextBottom"
+        app:layout_constraintStart_toStartOf="@+id/buyButtonLeft" />
+
+    <EditText
+        android:id="@+id/currenciesInputText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Kripto Para Miktarı"
+        android:textColorHint="#797676"
+        android:inputType="numberDecimal"
+        android:textCursorDrawable="@null"
+        android:textColor="@color/textColor"
+        android:textSize="20sp"
+        android:backgroundTint="@color/buttonColor"
+        app:layout_constraintBottom_toTopOf="@+id/totalMoneyTextBottom"
+        app:layout_constraintEnd_toEndOf="@id/notesRight"
+        app:layout_constraintLeft_toRightOf="@id/editTextLeft"
+        app:layout_constraintStart_toStartOf="@+id/editTextLeft" />
+
+    <Button
+        android:id="@+id/addOperation"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="Portföyüme Ekle"
+        android:background="@drawable/detail_button"
+        app:layout_constraintBottom_toBottomOf="@id/addButtonBottom"
+        app:layout_constraintEnd_toStartOf="@+id/addButtonRight"
+        app:layout_constraintStart_toStartOf="@+id/buyButtonLeft"
+        app:layout_constraintTop_toTopOf="@+id/addButtonUp"
+        android:textSize="18dp"
+        android:textColor="@color/buttonTextColor"
+        />
+
+    <EditText
+        android:id="@+id/priceInputText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Ücret Giriniz"
+        android:inputType="numberDecimal"
+        android:textColorHint="#797676"
+        android:textCursorDrawable="@null"
+        android:textColor="@color/textColor"
+        android:textSize="20sp"
+        android:backgroundTint="@color/buttonColor"
+        app:layout_constraintBottom_toTopOf="@+id/priceTextGuide"
+        app:layout_constraintStart_toStartOf="@+id/editTextLeft"
+        app:layout_constraintEnd_toEndOf="@id/notesRight" />
+
+    <EditText
+        android:id="@+id/editCostInputText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Kesinti Giriniz"
+        android:textColorHint="#797676"
+        android:textColor="@color/textColor"
+        android:inputType="numberDecimal"
+        android:textCursorDrawable="@null"
+        android:backgroundTint="@color/buttonColor"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/costTextGuide"
+        app:layout_constraintStart_toStartOf="@+id/editTextLeft"
+        app:layout_constraintEnd_toEndOf="@id/notesRight"/>
+
+    <TextView
+        android:id="@+id/operationDateClick"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:text="Tarih"
+        android:textColor="@color/textColor"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/operationDate"
+        app:layout_constraintStart_toStartOf="@+id/buyButtonLeft" />
+
+    <EditText
+        android:id="@+id/operationDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="17sp"
+        android:textColor="@color/textColor"
+        android:backgroundTint="@color/buttonColor"
+        app:layout_constraintBottom_toTopOf="@+id/operationDateGuide"
+        app:layout_constraintStart_toStartOf="@+id/buyButtonLeft"
+        app:layout_constraintEnd_toEndOf="@id/notesRight"
+        android:focusable="false" />
+
+    <TextView
+        android:id="@+id/operationTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="17sp"
+        app:layout_constraintBottom_toTopOf="@id/operationDateGuide"
+        app:layout_constraintLeft_toRightOf="@+id/operationDate"
+        android:layout_marginLeft="2dp"/>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Ücret $"
+        android:textColor="@color/textColor"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/priceTextGuide"
+        app:layout_constraintStart_toStartOf="@+id/buyButtonLeft" />
+
+    <TextView
+        android:id="@+id/costText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Kesinti $"
+        android:textColor="@color/textColor"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/costTextGuide"
+        app:layout_constraintStart_toStartOf="@+id/buyButtonLeft" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:text="Notlar"
+        android:textColor="@color/textColor"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/notesEditText"
+        app:layout_constraintStart_toStartOf="@+id/buyButtonLeft" />
+
+    <EditText
+        android:id="@+id/notesEditText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Not Giriniz"
+        android:textColorHint="#797676"
+        android:textColor="@color/textColor"
+        android:textSize="20sp"
+        android:backgroundTint="@color/buttonColor"
+        android:textCursorDrawable="@null"
+        app:layout_constraintBottom_toTopOf="@+id/notesGuide"
+        app:layout_constraintStart_toStartOf="@+id/buyButtonLeft"
+        app:layout_constraintEnd_toEndOf="@id/notesRight"
+        />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

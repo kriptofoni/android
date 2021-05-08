@@ -13,23 +13,35 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <!--        <receiver android:name=".AlarmActivity" />-->
-        <activity android:name=".NotificationActivity"></activity>
-        <activity android:name=".AlarmActivity" />
-        <activity android:name=".MoreActivities.ToolsActivities.ConverterActivity" />
-        <activity android:name=".MoreActivities.ToolsActivity" />
-        <activity android:name=".MoreActivities.AboutActivity" />
-        <activity android:name=".MoreActivities.CooperationActivity" />
-        <activity android:name=".MoreActivities.ContractActivity" />
+        <activity android:name=".NotificationActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".AlarmActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".MoreActivities.ToolsActivities.ConverterActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".MoreActivities.ToolsActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".MoreActivities.AboutActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".MoreActivities.CooperationActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".MoreActivities.ContractActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".FullScreenChartActivity"
             android:screenOrientation="landscape" />
-        <activity android:name=".CoinSelectActivity" />
-        <activity android:name=".CurrencyChooseActivity" />
-        <activity android:name=".CryptoCurrencyDetailActivity" />
-        <activity android:name=".BuySellActivity" />
+        <activity android:name=".CoinSelectActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".CurrencyChooseActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".CryptoCurrencyDetailActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".BuySellActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".HomeActivity"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustPan">
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
