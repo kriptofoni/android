@@ -195,7 +195,8 @@ public class MostDecIn7Fragment extends Fragment {
     }
 
     public void setCurrencySymbol(String symbol) {
-        mainCoinsRecyclerAdapter.setCurrencySymbol(symbol);
+        if (mainCoinsRecyclerAdapter != null)
+            mainCoinsRecyclerAdapter.setCurrencySymbol(symbol);
     }
 
     public void emptyAllCoinModels() {

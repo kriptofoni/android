@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -21,8 +22,12 @@ import android.widget.Toast;
 import com.github.mikephil.charting.charts.CandleStickChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.CandleData;
+import com.github.mikephil.charting.data.CandleDataSet;
+import com.github.mikephil.charting.data.CandleEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -46,6 +51,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import arsi.dev.kriptofoni.Models.CandleStickChartEntryModel;
 import arsi.dev.kriptofoni.Models.LineChartEntryModel;
 import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
 import arsi.dev.kriptofoni.Retrofit.CoinInfoApi;
@@ -73,11 +79,13 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
     private long from, to;
     private TextView active;
     private ArrayList<LineChartEntryModel> lineChartEntryModels;
+    private ArrayList<CandleStickChartEntryModel> candleStickChartEntryModels;
+    private ArrayList<String> timestamps;
     private LineChart lineChart;
     private CandleStickChart candleStickChart;
     private RelativeLayout twitterRedirect, webRedirect, redditRedirect;
     private LineDataSet set;
-    private int chartColor;
+    private int chartColor, days;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +98,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         List<String> watchingCoins = new LinkedList<>(Arrays.asList(watchingList.split(",")));
 
         lineChartEntryModels = new ArrayList<>();
+        candleStickChartEntryModels = new ArrayList<>();
+        timestamps = new ArrayList<>();
 
         coinIcon = findViewById(R.id.coinIcon);
         coinName = findViewById(R.id.coinName);
@@ -124,6 +134,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         expand = findViewById(R.id.crypto_currency_detail_expand);
         chartIcon = findViewById(R.id.crypto_currency_detail_chart_icon);
         lineChart = findViewById(R.id.chart);
+        candleStickChart = findViewById(R.id.candleStickChart);
         webRedirect = findViewById(R.id.crypto_currency_detail_web_redirect);
         redditRedirect = findViewById(R.id.crypto_currency_detail_reddit_redirect);
         twitterRedirect = findViewById(R.id.crypto_currency_detail_twitter_redirect);
@@ -140,6 +151,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         to = System.currentTimeMillis() / 1000;
         // 24 hours ago in seconds
         from = to - (60 * 60 * 24);
+        days = 1;
 
         makeProgressBarVisible();
 
@@ -148,7 +160,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         coinGeckoApi = CoinInfoRetrofitClient.getInstance().getMyCoinGeckoApi();
 
         // We use different threads to speed up data fetch.
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
             Thread thread = new MyThread(i);
             thread.start();
         }
@@ -205,12 +217,14 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     oneDay.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24);
+                    days = 1;
                     active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
                     active.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
                     active = oneDay;
                     time = "oneDay";
                     setChartProgressBarVisible();
                     getMarketChart();
+                    getOHLC();
                 }
             }
         });
@@ -223,12 +237,14 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     oneWeek.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 7);
+                    days = 7;
                     active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
                     active.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
                     active = oneWeek;
                     time = "oneWeek";
                     setChartProgressBarVisible();
                     getMarketChart();
+                    getOHLC();
                 }
             }
         });
@@ -241,12 +257,14 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     oneMonth.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30);
+                    days = 30;
                     active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
                     active.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
                     active = oneMonth;
                     time = "oneMonth";
                     setChartProgressBarVisible();
                     getMarketChart();
+                    getOHLC();
                 }
             }
         });
@@ -259,12 +277,14 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     threeMonths.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30 * 3);
+                    days = 90;
                     active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
                     active.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
                     active = threeMonths;
                     time = "threeMonths";
                     setChartProgressBarVisible();
                     getMarketChart();
+                    getOHLC();
                 }
             }
         });
@@ -277,12 +297,14 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     sixMonths.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 30 * 6);
+                    days = 180;
                     active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
                     active.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
                     active = sixMonths;
                     time = "sixMonths";
                     setChartProgressBarVisible();
                     getMarketChart();
+                    getOHLC();
                 }
             }
         });
@@ -295,12 +317,14 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     oneYear.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.buttonTextColor));
                     to = System.currentTimeMillis() / 1000;
                     from = System.currentTimeMillis() / 1000 - (60 * 60 * 24 * 365);
+                    days = 365;
                     active.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.bodyColor));
                     active.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
                     active = oneYear;
                     time = "oneYear";
                     setChartProgressBarVisible();
                     getMarketChart();
+                    getOHLC();
                 }
             }
         });
@@ -319,6 +343,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     time = "allTime";
                     setChartProgressBarVisible();
                     getMarketChart();
+                    getOHLC();
                 }
             }
         });
@@ -332,6 +357,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     intent.putExtra("type", chartType);
                     intent.putExtra("color", chartColor);
                     intent.putParcelableArrayListExtra("lineChartModels", lineChartEntryModels);
+                    intent.putParcelableArrayListExtra("candleStickChartModels", candleStickChartEntryModels);
+                    intent.putStringArrayListExtra("timestamps", timestamps);
                     startActivity(intent);
                 }
             }
@@ -340,7 +367,17 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         chartIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if (chartType.equals("line")) {
+                    chartType = "candleStick";
+                    lineChart.setVisibility(View.GONE);
+                    candleStickChart.setVisibility(View.VISIBLE);
+                    chartIcon.setImageResource(R.drawable.ic_linechart);
+                } else {
+                    chartType = "line";
+                    candleStickChart.setVisibility(View.GONE);
+                    lineChart.setVisibility(View.VISIBLE);
+                    chartIcon.setImageResource(R.drawable.ic_candlestickchart);
+                }
             }
         });
 
@@ -409,39 +446,60 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         scrollView.setVisibility(View.VISIBLE);
     }
 
-    private void candleStickChart() {
-//        chartType = "candlestick";
-//
-//        candleStickChart.setDragEnabled(true);
-//        candleStickChart.setScaleEnabled(false);
-//
-//        ArrayList<CandleEntry> ceList = new ArrayList<>();
-//        ceList.add(new CandleEntry(0, 4.62f, 2.02f, 2.70f, 4.13f));
-//        ceList.add(new CandleEntry(1, 5.50f, 2.70f, 3.35f, 4.96f));
-//        ceList.add(new CandleEntry(2, 5.25f, 3.02f, 3.50f, 4.50f));
-//        ceList.add(new CandleEntry(3, 6f,    3.25f, 4.40f, 5.0f));
-//        ceList.add(new CandleEntry(4, 5.57f, 2f,    2.80f, 4.5f));
-//
-//        CandleDataSet cds = new CandleDataSet(ceList, "Entries");
-//        cds.setColor(Color.rgb(80, 80, 80));
-//        cds.setShadowColor(Color.DKGRAY);
-//        cds.setShadowWidth(0.7f);
-//        cds.setDecreasingColor(Color.RED);
-//        cds.setDecreasingPaintStyle(Style.FILL);
-//        cds.setIncreasingColor(Color.rgb(122, 242, 84));
-//        cds.setIncreasingPaintStyle(Style.STROKE);
-//        cds.setNeutralColor(Color.BLUE);
-//        cds.setValueTextColor(Color.RED);
-//        CandleData cd = new CandleData(cds);
-//
-//        candleStickChart.setData(cd);
-//        candleStickChart.invalidate();
-//        candleStickChart.setVisibility(View.GONE);
+    private void setCandleStickChart(List<CandleEntry> candleEntries) {
+
+        int red = Color.parseColor("#f6465d");
+        int green = Color.parseColor("#2ebd85");
+        int defaultColor = ContextCompat.getColor(getApplicationContext(), R.color.textColor);
+
+        candleStickChart.setDragEnabled(true);
+        candleStickChart.setScaleEnabled(true);
+        candleStickChart.setDescription(null);
+
+        XAxis xAxis = candleStickChart.getXAxis();
+        xAxis.setTextColor(defaultColor);
+        YAxis yAxisRight = candleStickChart.getAxisRight();
+        candleStickChart.getAxisLeft().setTextColor(defaultColor);
+        xAxis.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                String result = "";
+                if (active == oneDay) {
+                    result = getChartXAxisHourAndMinute(Float.parseFloat(timestamps.get((int) value)));
+                } else if (active == allTime) {
+                    result = getChartXAxisYears(Float.parseFloat(timestamps.get((int) value)));
+                } else {
+                    result = getChartXAxisDayAndMonth(Float.parseFloat(timestamps.get((int) value)));
+                }
+                return result;
+            }
+        });
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        yAxisRight.setEnabled(false);
+        candleStickChart.getLegend().setEnabled(false);
+
+        CandleDataSet cds = new CandleDataSet(candleEntries, "Fiyatlar");
+        cds.setAxisDependency(YAxis.AxisDependency.LEFT);
+        cds.setShadowWidth(0.8f);
+        cds.setBarSpace(0.15f);
+        cds.setShadowColorSameAsCandle(true);
+        cds.setDecreasingColor(red);
+        cds.setDecreasingPaintStyle(Paint.Style.FILL_AND_STROKE);
+        cds.setIncreasingColor(green);
+        cds.setIncreasingPaintStyle(Paint.Style.FILL_AND_STROKE);
+        cds.setNeutralColor(defaultColor);
+        cds.setDrawValues(false);
+
+        CandleData cd = new CandleData(cds);
+
+        candleStickChart.setData(cd);
+        candleStickChart.notifyDataSetChanged();
+        setChartProgressBarInvisible();
+        candleStickChart.invalidate();
     }
 
     private void lineChart(ArrayList<Entry> yValue) {
 
-        chartType = "line";
         int textColor = ContextCompat.getColor(getApplicationContext(), R.color.textColor);
 
         if (lineChart.getData() != null) {
@@ -451,7 +509,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
 
         // Customizing chart appearance
         lineChart.setDragEnabled(true);
-        lineChart.setScaleEnabled(false);
+        lineChart.setScaleEnabled(true);
         lineChart.setDrawGridBackground(false);
         lineChart.setDescription(null);
 
@@ -475,6 +533,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         });
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         yAxisRight.setEnabled(false);
+        lineChart.getLegend().setEnabled(false);
 
         set = new LineDataSet(yValue, "Fiyatlar");
         set.setDrawCircleHole(false);
@@ -485,6 +544,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         set.setDrawFilled(true);
         set.setColor(chartColor);
         set.setFillColor(chartColor);
+        set.setDrawValues(false);
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
         dataSets.add(set);
@@ -745,6 +805,55 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         });
     }
 
+    private void getOHLC() {
+        candleStickChartEntryModels.clear();
+        timestamps.clear();
+        Call<JsonArray> call;
+        if (active == allTime)
+            call = coinGeckoApi.getOHLC(coinModelId, currencyText, "max");
+        else
+            call = coinGeckoApi.getOHLC(coinModelId, currencyText, days);
+
+        call.enqueue(new Callback<JsonArray>() {
+            @Override
+            public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
+                if (response.isSuccessful()) {
+                    JsonArray body = response.body();
+                    if (body != null) {
+                        List<CandleEntry> candleEntries = new ArrayList<>();
+                        for (int i = 0; i < body.size(); i++) {
+                            JsonArray values = body.get(i).getAsJsonArray();
+                            float timestamp = values.get(0).getAsFloat();
+                            float open = values.get(1).getAsFloat();
+                            float high = values.get(2).getAsFloat();
+                            float low = values.get(3).getAsFloat();
+                            float close = values.get(4).getAsFloat();
+
+                            CandleStickChartEntryModel model = new CandleStickChartEntryModel(i, high, low, open, close);
+                            candleStickChartEntryModels.add(model);
+                            timestamps.add(String.valueOf(timestamp));
+                            candleEntries.add(new CandleEntry(i, high, low, open, close));
+                        }
+
+                        setCandleStickChart(candleEntries);
+
+                    } else {
+                        getOHLC();
+                    }
+                } else {
+                    System.out.println(response.code());
+                    getOHLC();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonArray> call, Throwable t) {
+                getOHLC();
+            }
+        });
+
+    }
+
     private class MyThread extends Thread {
 
         private int type;
@@ -765,6 +874,9 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     break;
                 case 2:
                     getMarketChart();
+                    break;
+                case 3:
+                    getOHLC();
                     break;
             }
         }

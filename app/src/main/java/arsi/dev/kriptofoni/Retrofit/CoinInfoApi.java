@@ -1,5 +1,6 @@
 package arsi.dev.kriptofoni.Retrofit;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.util.List;
@@ -27,4 +28,12 @@ public interface CoinInfoApi {
     @GET("coins/{id}/market_chart/range")
     Call<JsonObject> getMarketChart(@Path("id") String id, @Query("vs_currency") String vsCurrency,
                                     @Query("from") String from, @Query("to") String to);
+
+    @GET("coins/{id}/ohlc")
+    Call<JsonArray> getOHLC(@Path("id") String id, @Query ("vs_currency") String vsCurrency,
+                            @Query("days") Integer days);
+
+    @GET("coins/{id}/ohlc")
+    Call<JsonArray> getOHLC(@Path("id") String id, @Query ("vs_currency") String vsCurrency,
+                             @Query("days") String days);
 }

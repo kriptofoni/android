@@ -5,6 +5,8 @@ import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -14,6 +16,9 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.CandleData;
+import com.github.mikephil.charting.data.CandleDataSet;
+import com.github.mikephil.charting.data.CandleEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -23,7 +28,9 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
+import arsi.dev.kriptofoni.Models.CandleStickChartEntryModel;
 import arsi.dev.kriptofoni.Models.LineChartEntryModel;
 
 public class FullScreenChartActivity extends AppCompatActivity {
@@ -31,6 +38,8 @@ public class FullScreenChartActivity extends AppCompatActivity {
     private LineChart lineChart;
     private CandleStickChart candleStickChart;
     private ArrayList<LineChartEntryModel> lineChartEntryModels;
+    private ArrayList<CandleStickChartEntryModel> candleStickChartEntryModels;
+    private ArrayList<String> timestamps;
     private String time;
     private ImageView backButton;
     private int chartColor, textColor;
@@ -51,6 +60,8 @@ public class FullScreenChartActivity extends AppCompatActivity {
         time = intent.getStringExtra("time");
         String type = intent.getStringExtra("type");
         lineChartEntryModels = intent.getParcelableArrayListExtra("lineChartModels");
+        candleStickChartEntryModels = intent.getParcelableArrayListExtra("candleStickChartModels");
+        timestamps = intent.getStringArrayListExtra("timestamps");
         chartColor = intent.getIntExtra("color", textColor);
 
         if (type.equals("line") && lineChartEntryModels != null)
@@ -64,12 +75,65 @@ public class FullScreenChartActivity extends AppCompatActivity {
                 finish();
             }
         });
-
     }
 
     private void getCandleStickChart() {
         lineChart.setVisibility(View.GONE);
         candleStickChart.setVisibility(View.VISIBLE);
+
+        int red = Color.parseColor("#f6465d");
+        int green = Color.parseColor("#2ebd85");
+        int defaultColor = ContextCompat.getColor(getApplicationContext(), R.color.textColor);
+
+        candleStickChart.setDragEnabled(true);
+        candleStickChart.setScaleEnabled(true);
+        candleStickChart.setDescription(null);
+
+        ArrayList<CandleEntry> candleEntries = new ArrayList<>();
+
+        for (CandleStickChartEntryModel model : candleStickChartEntryModels) {
+            candleEntries.add(new CandleEntry(model.getIndex(), model.getHigh(), model.getLow(), model.getOpen(), model.getClose()));
+        }
+
+        XAxis xAxis = candleStickChart.getXAxis();
+        xAxis.setTextColor(defaultColor);
+        YAxis yAxisRight = candleStickChart.getAxisRight();
+        candleStickChart.getAxisLeft().setTextColor(defaultColor);
+        xAxis.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                String result = "";
+                if (time.equals("oneDay")) {
+                    result = getChartXAxisHourAndMinute(Float.parseFloat(timestamps.get((int) value)));
+                } else if (time.equals("allTime")) {
+                    result = getChartXAxisYears(Float.parseFloat(timestamps.get((int) value)));
+                } else {
+                    result = getChartXAxisDayAndMonth(Float.parseFloat(timestamps.get((int) value)));
+                }
+                return result;
+            }
+        });
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        yAxisRight.setEnabled(false);
+        candleStickChart.getLegend().setEnabled(false);
+
+        CandleDataSet cds = new CandleDataSet(candleEntries, "Fiyatlar");
+        cds.setAxisDependency(YAxis.AxisDependency.LEFT);
+        cds.setShadowWidth(0.8f);
+        cds.setBarSpace(0.15f);
+        cds.setShadowColorSameAsCandle(true);
+        cds.setDecreasingColor(red);
+        cds.setDecreasingPaintStyle(Paint.Style.FILL_AND_STROKE);
+        cds.setIncreasingColor(green);
+        cds.setIncreasingPaintStyle(Paint.Style.FILL_AND_STROKE);
+        cds.setNeutralColor(defaultColor);
+        cds.setDrawValues(false);
+
+        CandleData cd = new CandleData(cds);
+
+        candleStickChart.setData(cd);
+        candleStickChart.notifyDataSetChanged();
+        candleStickChart.invalidate();
     }
 
     private void getLineChart() {
