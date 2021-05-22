@@ -77,11 +77,16 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
         loaderManager = LoaderManager.getInstance(this);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+
+        if (savedInstanceState != null) {
+            System.out.println("savedInstance");
+        }
 
         mainFragment = new MainFragment(this);
         portfolioFragment = new PortfolioFragment();

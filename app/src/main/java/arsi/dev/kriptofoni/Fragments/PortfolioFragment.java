@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -180,29 +181,33 @@ public class PortfolioFragment extends Fragment {
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                for (PortfolioMemoryModel model : memoryModels) {
-                    if (deleteIds.contains(model.getId())) removeModels.add(model);
+                if (!deleteIds.isEmpty()) {
+                    for (PortfolioMemoryModel model : memoryModels) {
+                        if (deleteIds.contains(model.getId())) removeModels.add(model);
+                    }
+
+                    memoryModels.removeAll(removeModels);
+
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    String json = "";
+                    if (!memoryModels.isEmpty()) {
+                        json = new Gson().toJson(memoryModels);
+                    }
+
+                    editor.putString("portfolio", json);
+                    editor.apply();
+
+                    delete.setVisibility(View.GONE);
+
+                    selectingMode = false;
+                    portfolioRecyclerAdapter.setSelectingMode(selectingMode);
+
+                    readFromMemory();
+                    deleteIds.clear();
+                    removeModels.clear();
+                } else {
+                    Toast.makeText(getContext(), "Lütfen silmek istediğiniz kripto paraları seçin", Toast.LENGTH_SHORT).show();
                 }
-
-                memoryModels.removeAll(removeModels);
-
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                String json = "";
-                if (!memoryModels.isEmpty()) {
-                    json = new Gson().toJson(memoryModels);
-                }
-
-                editor.putString("portfolio", json);
-                editor.apply();
-
-                delete.setVisibility(View.GONE);
-
-                selectingMode = false;
-                portfolioRecyclerAdapter.setSelectingMode(selectingMode);
-
-                readFromMemory();
-                deleteIds.clear();
-                removeModels.clear();
             }
         });
 
@@ -417,7 +422,7 @@ public class PortfolioFragment extends Fragment {
 
         if (lineChart.getData() != null) {
             lineChart.clearValues();
-            lineChart.notifyDataSetChanged();
+            lineChart.invalidate();
         }
 
         // Customizing chart appearance
@@ -425,6 +430,7 @@ public class PortfolioFragment extends Fragment {
         lineChart.setScaleEnabled(false);
         lineChart.setDrawGridBackground(false);
         lineChart.setDescription(null);
+        lineChart.getLegend().setEnabled(false);
 
         XAxis xAxis = lineChart.getXAxis();
         xAxis.setTextColor(textColor);
@@ -447,7 +453,7 @@ public class PortfolioFragment extends Fragment {
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         yAxisRight.setEnabled(false);
 
-        LineDataSet set = new LineDataSet(yValue, "Prices");
+        LineDataSet set = new LineDataSet(yValue, "Fiyatlar");
         set.setDrawCircleHole(false);
         set.setDrawCircles(false);
         set.setValueTextSize(0f);
@@ -464,8 +470,8 @@ public class PortfolioFragment extends Fragment {
 
         lineChart.setData(data);
         lineChart.notifyDataSetChanged();
-        setChartProgressBarInvisible();
         lineChart.invalidate();
+        setChartProgressBarInvisible();
     }
 
     private String getChartXAxisHourAndMinute(float timestamp) {
@@ -664,8 +670,6 @@ public class PortfolioFragment extends Fragment {
             String coinModelId = strings[0];
 
             List<Entry> yValue = new ArrayList<>();
-
-            System.out.println(from + " , " + to + " , " + coinModelId + " , " + currencyText);
 
             Call<JsonObject> call = chartInfoApi.getMarketChart(coinModelId, currencyText, String.valueOf(from), String.valueOf(to));
             try {

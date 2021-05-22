@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -101,41 +102,46 @@ public class WatchingListFragment extends Fragment{
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                for (String id : deleteIds) {
-                    ids.remove(id);
-                }
+                if (!deleteIds.isEmpty()) {
+                    ids.removeAll(deleteIds);
 
-                SharedPreferences.Editor editor = sharedPreferences.edit();
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
 
-                if (ids.isEmpty()) {
-                    coinIds = "";
-                } else {
-                    StringBuilder res = new StringBuilder();
-                    for (String id : ids) {
-                        if (!id.isEmpty())
-                            res.append(id).append(",");
+                    if (ids.isEmpty()) {
+                        coinIds = "";
+                    } else {
+                        StringBuilder res = new StringBuilder();
+                        for (String id : ids) {
+                            if (!id.isEmpty())
+                                res.append(id).append(",");
+                        }
+                        coinIds = res.toString();
                     }
-                    coinIds = res.toString();
-                }
 
-                editor.putString("watchingList", coinIds);
-                editor.apply();
+                    editor.putString("watchingList", coinIds);
+                    editor.apply();
 
-                delete.setVisibility(View.GONE);
-                selectingMode = false;
-                deleteIds.clear();
-                watchingListRecyclerAdapter.setSelectingMode(selectingMode);
+                    delete.setVisibility(View.GONE);
+                    selectingMode = false;
+                    deleteIds.clear();
+                    watchingListRecyclerAdapter.setSelectingMode(selectingMode);
 
-                if (coinIds.isEmpty()) {
-                    hasCoin.setVisibility(View.GONE);
-                    noCoin.setVisibility(View.VISIBLE);
-                } else {
-                    add.setVisibility(View.VISIBLE);
-                    for (WatchingListModel model : models) {
-                        if (!ids.contains(model.getId())) models.remove(model);
+                    if (coinIds.isEmpty()) {
+                        hasCoin.setVisibility(View.GONE);
+                        noCoin.setVisibility(View.VISIBLE);
+                    } else {
+                        add.setVisibility(View.VISIBLE);
+                        List<WatchingListModel> modelsToRemove = new ArrayList<>();
+                        for (WatchingListModel model : models) {
+                            if (!ids.contains(model.getId())) modelsToRemove.add(model);
+                        }
+                        models.removeAll(modelsToRemove);
+                        watchingListRecyclerAdapter.notifyDataSetChanged();
                     }
-                    watchingListRecyclerAdapter.notifyDataSetChanged();
+                } else {
+                    Toast.makeText(getContext(), "Lütfen silmek istediğiniz kripto paraları seçin", Toast.LENGTH_SHORT).show();
                 }
+
             }
         });
 
@@ -269,23 +275,27 @@ public class WatchingListFragment extends Fragment{
             }
         } else if (requestCode == COIN_CHOOSE_CODE && resultCode == CURRENCY_CHOOSE_CODE) {
             if (data != null) {
-                ids.add(data.getStringExtra("id"));
-                noCoin.setVisibility(View.GONE);
-                hasCoin.setVisibility(View.GONE);
-                progressBar.setVisibility(View.VISIBLE);
-                add.setVisibility(View.VISIBLE);
+                if (!ids.contains(data.getStringExtra("id"))) {
+                    ids.add(data.getStringExtra("id"));
+                    noCoin.setVisibility(View.GONE);
+                    hasCoin.setVisibility(View.GONE);
+                    progressBar.setVisibility(View.VISIBLE);
+                    add.setVisibility(View.VISIBLE);
 
-                StringBuilder stringBuilder = new StringBuilder();
-                for (String id : ids) {
-                    if (!id.isEmpty())
-                        stringBuilder.append(id).append(",");
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for (String id : ids) {
+                        if (!id.isEmpty())
+                            stringBuilder.append(id).append(",");
+                    }
+
+                    coinIds = stringBuilder.toString();
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("watchingList", coinIds);
+                    editor.apply();
+                    new GetCoinInfo().execute();
+                } else {
+                    Toast.makeText(getContext(), "Seçtiğiniz kripto para zaten izleme listenizde mevcut.", Toast.LENGTH_SHORT).show();
                 }
-
-                coinIds = stringBuilder.toString();
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("watchingList", coinIds);
-                editor.apply();
-                new GetCoinInfo().execute();
             }
         }
     }

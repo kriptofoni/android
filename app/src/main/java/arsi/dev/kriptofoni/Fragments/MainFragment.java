@@ -397,27 +397,22 @@ public class MainFragment extends Fragment {
             coinsFragment.setCurrency(currencyText);
             coinsFragment.setCurrentPage(1);
             coinsFragment.emptyAllCoinModels();
-            coinsFragment.setFirstOnResume(false);
             // Refreshing mostIncIn24HFragment
             mostIncIn24Fragment.setCurrency(currencyText);
             mostIncIn24Fragment.setCurrentPage(1);
             mostIncIn24Fragment.emptyAllCoinModels();
-            mostIncIn24Fragment.setFirstOnResume(false);
             // Refreshing mostDecIn24HFragment
             mostDecIn24Fragment.setCurrency(currencyText);
             mostDecIn24Fragment.setCurrentPage(1);
             mostDecIn24Fragment.emptyAllCoinModels();
-            mostDecIn24Fragment.setFirstOnResume(false);
             // Refreshing mostIncIn7HFragment
             mostIncIn7Fragment.setCurrency(currencyText);
             mostIncIn7Fragment.setCurrentPage(1);
             mostIncIn7Fragment.emptyAllCoinModels();
-            mostIncIn7Fragment.setFirstOnResume(false);
             // Refreshing mostDecIn7HFragment
             mostDecIn7Fragment.setCurrency(currencyText);
             mostDecIn7Fragment.setCurrentPage(1);
             mostDecIn7Fragment.emptyAllCoinModels();
-            mostDecIn7Fragment.setFirstOnResume(false);
         }
     }
 }

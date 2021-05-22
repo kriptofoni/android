@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -86,6 +87,10 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
     private RelativeLayout twitterRedirect, webRedirect, redditRedirect;
     private LineDataSet set;
     private int chartColor, days;
+    private boolean firstFetch = true;
+
+    private Handler handler;
+    private Runnable runnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,6 +169,16 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             Thread thread = new MyThread(i);
             thread.start();
         }
+
+        handler = new Handler();
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                getCoinInfo();
+                System.out.println("called");
+                handler.postDelayed(this, 10000);
+            }
+        };
 
         countryCodePicker = new CountryCodePicker();
         currencySymbols = countryCodePicker.getCountryCode(currencyText);
@@ -424,6 +439,19 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         });
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        handler.removeCallbacks(runnable);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!firstFetch)
+            handler.postDelayed(runnable, 10000);
+    }
+
     private void setChartProgressBarVisible() {
         if (chartType.equals("line")) lineChart.setVisibility(View.GONE);
         else candleStickChart.setVisibility(View.GONE);
@@ -464,12 +492,15 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
                 String result = "";
-                if (active == oneDay) {
-                    result = getChartXAxisHourAndMinute(Float.parseFloat(timestamps.get((int) value)));
-                } else if (active == allTime) {
-                    result = getChartXAxisYears(Float.parseFloat(timestamps.get((int) value)));
-                } else {
-                    result = getChartXAxisDayAndMonth(Float.parseFloat(timestamps.get((int) value)));
+                int v = (int) value;
+                if (v < timestamps.size()) {
+                    if (active == oneDay) {
+                        result = getChartXAxisHourAndMinute(Float.parseFloat(timestamps.get(v)));
+                    } else if (active == allTime) {
+                        result = getChartXAxisYears(Float.parseFloat(timestamps.get(v)));
+                    } else {
+                        result = getChartXAxisDayAndMonth(Float.parseFloat(timestamps.get(v)));
+                    }
                 }
                 return result;
             }
@@ -494,18 +525,12 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
 
         candleStickChart.setData(cd);
         candleStickChart.notifyDataSetChanged();
-        setChartProgressBarInvisible();
         candleStickChart.invalidate();
     }
 
     private void lineChart(ArrayList<Entry> yValue) {
 
         int textColor = ContextCompat.getColor(getApplicationContext(), R.color.textColor);
-
-        if (lineChart.getData() != null) {
-            lineChart.clearValues();
-            lineChart.notifyDataSetChanged();
-        }
 
         // Customizing chart appearance
         lineChart.setDragEnabled(true);
@@ -553,8 +578,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
 
         lineChart.setData(data);
         lineChart.notifyDataSetChanged();
-        setChartProgressBarInvisible();
         lineChart.invalidate();
+        setChartProgressBarInvisible();
     }
 
     private String getChartXAxisHourAndMinute(float timestamp) {
@@ -715,6 +740,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                         sevenDaysChange.setTextColor(sevenDays.getAsDouble() > 0 ? green : sevenDays.getAsDouble() < 0 ? red : defaultColor);
 
                     makeProgressBarInvisible();
+                    if (firstFetch) firstFetch = false;
+                    handler.postDelayed(runnable, 10000);
                 }
             }
 

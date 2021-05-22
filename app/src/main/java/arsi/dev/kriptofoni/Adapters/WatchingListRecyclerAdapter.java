@@ -62,7 +62,7 @@ public class WatchingListRecyclerAdapter extends RecyclerView.Adapter<WatchingLi
         holder.price.setTextColor(coin.getPriceChangeIn24Hours() > 0 ? green : coin.getPriceChangeIn24Hours() < 0 ? red : defaultColor);
         holder.priceChangePercent.setTextColor(coin.getPriceChangeIn24Hours() > 0 ? green : coin.getPriceChangeIn24Hours() < 0 ? red : defaultColor);
 
-        holder.number.setText(String.valueOf(coin.getNumber()));
+        holder.number.setText(String.valueOf(position + 1));
         Picasso.get().load(coin.getIcon()).into(holder.icon);
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,6 +84,7 @@ public class WatchingListRecyclerAdapter extends RecyclerView.Adapter<WatchingLi
             holder.number.setVisibility(View.GONE);
             holder.checkBox.setVisibility(View.VISIBLE);
         } else {
+            holder.checkBox.setChecked(false);
             holder.checkBox.setVisibility(View.GONE);
             holder.number.setVisibility(View.VISIBLE);
         }

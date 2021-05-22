@@ -87,6 +87,7 @@ public class PortfolioRecyclerAdapter extends RecyclerView.Adapter<PortfolioRecy
             holder.icon.setVisibility(View.GONE);
             holder.checkBox.setVisibility(View.VISIBLE);
         } else {
+            holder.checkBox.setChecked(false);
             holder.checkBox.setVisibility(View.GONE);
             holder.icon.setVisibility(View.VISIBLE);
         }

@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -50,7 +51,8 @@ public class ConverterActivity extends AppCompatActivity {
     private Button convertButton;
     private RelativeLayout cryptoSelect, currencySelect;
     private TextView cryptoText, currencyText;
-    private ImageView back;
+    private ImageView back, reload;
+    private ProgressBar progressBar;
 
     private boolean isCryptoChancing, isCurrencyChancing;
     private String coinId, currencyId;
@@ -70,6 +72,8 @@ public class ConverterActivity extends AppCompatActivity {
         cryptoText = findViewById(R.id.converter_crypto_text);
         currencyText = findViewById(R.id.converter_currency_text);
         back = findViewById(R.id.converter_back_button);
+        progressBar = findViewById(R.id.converter_progress_bar);
+        reload = findViewById(R.id.converter_reload);
 
         cryptoSelect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,6 +99,8 @@ public class ConverterActivity extends AppCompatActivity {
                     Toast.makeText(ConverterActivity.this, "Please enter the price that you want to convert", Toast.LENGTH_SHORT).show();
                 } else {
                     convertButton.setClickable(false);
+                    reload.setVisibility(View.GONE);
+                    progressBar.setVisibility(View.VISIBLE);
                     convert();
                 }
             }
@@ -134,6 +140,8 @@ public class ConverterActivity extends AppCompatActivity {
                             reset();
 
                             convertButton.setClickable(true);
+                            progressBar.setVisibility(View.GONE);
+                            reload.setVisibility(View.VISIBLE);
                         }
                     }
                 } else {

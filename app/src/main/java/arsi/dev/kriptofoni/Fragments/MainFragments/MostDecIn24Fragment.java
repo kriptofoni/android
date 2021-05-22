@@ -46,7 +46,7 @@ public class MostDecIn24Fragment extends Fragment {
     private MainCoinsRecyclerAdapter mainCoinsRecyclerAdapter;
     private int currentPage = 1;
     private boolean reached = false, onScreen = false, firstRender = false, startDone = false,
-            inProgress = false, firstOnResume = false, isInterrupted = false;
+            inProgress = false, isInterrupted = false;
     private SortedCoinsApi myCoinGeckoApi;
     private String currency, fetchType;
     private MainCoinsSearchRecyclerAdapter mainCoinsSearchRecyclerAdapter;
@@ -94,8 +94,8 @@ public class MostDecIn24Fragment extends Fragment {
                         reached = true;
                         currentPage++;
                         bottomProgressBar.setVisibility(View.VISIBLE);
-                        addIds();
                         fetchType = "newPage";
+                        addIds();
                         recyclerView.scrollToPosition((currentPage - 1) * 50 - 4);
                     }
                 }
@@ -107,8 +107,8 @@ public class MostDecIn24Fragment extends Fragment {
             @Override
             public void run() {
                 if (onScreen && startDone && !inProgress) {
-                    addIds(1);
                     fetchType = "update";
+                    addIds();
                 }
                 handler.postDelayed(this, 10000);
             }
@@ -141,15 +141,9 @@ public class MostDecIn24Fragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (homeActivity.getActive() instanceof MainFragment) {
+        if (homeActivity != null && homeActivity.getActive() != null && homeActivity.getActive() instanceof MainFragment) {
             onScreen = true;
             handler.postDelayed(runnable, 10000);
-            if (!firstOnResume) {
-                progressBar.setVisibility(View.VISIBLE);
-                firstOnResume = true;
-                addIds();
-                fetchType = "initial";
-            }
             if (isInterrupted) {
                 fetchType = "update";
                 addIds();
@@ -212,13 +206,13 @@ public class MostDecIn24Fragment extends Fragment {
 
         allCoinSearchModels.addAll(coins);
 
-        if (onScreen && !inProgress) {
+        if (!inProgress) {
             if (!firstRender) {
-                addIds();
                 fetchType = "initial";
-            } else {
                 addIds();
+            } else {
                 fetchType = "dataReload";
+                addIds();
             }
         }
 
@@ -230,8 +224,15 @@ public class MostDecIn24Fragment extends Fragment {
         StringBuilder stringBuilder = new StringBuilder();
         String s = "";
 
-        int firstIndex = (currentPage - 1) * 50;
-        int lastIndex = firstIndex + 50;
+        int firstIndex, lastIndex;
+
+        if (fetchType.equals("newPage")) {
+            firstIndex = (currentPage - 1) * 50;
+        } else {
+            firstIndex = 0;
+        }
+
+        lastIndex = firstIndex + 50;
 
         if (allCoinSearchModels != null && !allCoinSearchModels.isEmpty()) {
             for (int i = firstIndex; i < lastIndex; i++) {
@@ -244,31 +245,9 @@ public class MostDecIn24Fragment extends Fragment {
         }
     }
 
-    private void addIds(int page) {
-        StringBuilder stringBuilder = new StringBuilder();
-        String s = "";
-
-        int firstIndex = (page - 1) * 50;
-        int lastIndex = firstIndex + 50;
-
-        if (allCoinSearchModels != null && !allCoinSearchModels.isEmpty()) {
-            for (int i = firstIndex; i < lastIndex; i++) {
-                stringBuilder.append(this.allCoinSearchModels.get(i).getId() + ",");
-            }
-
-            s = stringBuilder.toString();
-            inProgress = true;
-            new GetCoinInfo().execute(s, String.valueOf(page));
-        }
-    }
-
     public void setProgressBarVisibility(int visibility) {
-        if (!firstOnResume && progressBar != null)
+        if (progressBar != null)
             progressBar.setVisibility(visibility);
-    }
-
-    public void setFirstOnResume(boolean firstOnResume) {
-        this.firstOnResume = firstOnResume;
     }
 
     private class GetCoinInfo extends AsyncTask<String, Void, Void> {
@@ -277,17 +256,12 @@ public class MostDecIn24Fragment extends Fragment {
         protected Void doInBackground(String... strings) {
 
             String ids = strings[0];
-            String page = null;
-
-            if (strings.length > 1)
-                page = strings[1];
 
             ArrayList<CoinModel> temp = new ArrayList<>();
             ArrayList<CoinModel> newPage = new ArrayList<>();
             // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
             // We create a simple HTTP Request via Retrofit
             Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, ids, null, 50, 1, true, "24h,7d");
-            String finalPage = page;
             call.enqueue(new Callback<List<CoinMarket>>() {
                 @Override
                 public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
@@ -330,13 +304,6 @@ public class MostDecIn24Fragment extends Fragment {
                             }
                         }
 
-                        int firstIndex;
-                        if (finalPage != null) {
-                            firstIndex = (Integer.parseInt(finalPage) - 1) * 50;
-                        } else {
-                            firstIndex = (currentPage - 1) * 50;
-                        }
-
                         if ((fetchType.equals("update") || fetchType.equals("dataReload")) && !coinModels.isEmpty()) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 temp.sort(new Comparator<CoinModel>() {
@@ -347,7 +314,7 @@ public class MostDecIn24Fragment extends Fragment {
                                 });
                             }
                             for (int i = 0; i < temp.size(); i++) {
-                                coinModels.set(firstIndex + i, temp.get(i));
+                                coinModels.set(i, temp.get(i));
                             }
                         }
 
@@ -371,7 +338,7 @@ public class MostDecIn24Fragment extends Fragment {
                             @Override
                             public void run() {
                                 if (fetchType.equals("update") || fetchType.equals("dataReload"))
-                                    mainCoinsRecyclerAdapter.notifyItemRangeChanged(firstIndex, 50);
+                                    mainCoinsRecyclerAdapter.notifyItemRangeChanged(0, 50);
                                 else
                                     mainCoinsRecyclerAdapter.notifyDataSetChanged();
                                 progressBar.setVisibility(View.GONE);

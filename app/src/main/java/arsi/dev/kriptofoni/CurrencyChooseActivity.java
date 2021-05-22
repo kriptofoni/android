@@ -40,7 +40,7 @@ public class CurrencyChooseActivity extends AppCompatActivity {
     private ImageView back;
     private EditText search;
     private ArrayList<String> currencies;
-    private String currency;
+    private String currency, currenciesStr;
     private SharedPreferences sharedPreferences;
     private CurrenciesApi myCoinGeckoApi;
     private ProgressBar progressBar;
@@ -51,6 +51,7 @@ public class CurrencyChooseActivity extends AppCompatActivity {
         setContentView(R.layout.activity_currency_choose);
 
         sharedPreferences = getSharedPreferences("Preferences", 0);
+        currenciesStr = sharedPreferences.getString("currencies", "");
         myCoinGeckoApi = CurrenciesRetrofitClient.getInstance().getMyCoinGeckoApi();
 
         currencies = new ArrayList<>();
@@ -111,25 +112,45 @@ public class CurrencyChooseActivity extends AppCompatActivity {
     }
 
     private void getCurrencies() {
-        Call<String[]> call = myCoinGeckoApi.getCurrencies();
-        call.enqueue(new Callback<String[]>() {
-            @Override
-            public void onResponse(Call<String[]> call, Response<String[]> response) {
-                if (response.isSuccessful()) {
-                    String[] responseBody = response.body();
-                    currencies.addAll(Arrays.asList(responseBody));
-                    currencyChooseRecyclerAdapter.setCurrencies(currencies);
-                    progressBar.setVisibility(View.GONE);
-                } else {
-                    System.out.println("133 " + response.code());
+        if (currenciesStr.isEmpty()) {
+            Call<String[]> call = myCoinGeckoApi.getCurrencies();
+            call.enqueue(new Callback<String[]>() {
+                @Override
+                public void onResponse(Call<String[]> call, Response<String[]> response) {
+                    if (response.isSuccessful()) {
+                        String[] responseBody = response.body();
+                        currencies.addAll(Arrays.asList(responseBody));
+                        currencyChooseRecyclerAdapter.setCurrencies(currencies);
+
+                        StringBuilder stringBuilder = new StringBuilder();
+                        for (int i = 0; i < currencies.size(); i++) {
+                            if (i == currencies.size() - 1) {
+                                stringBuilder.append(currencies.get(i));
+                            } else {
+                                stringBuilder.append(currencies.get(i)).append(",");
+                            }
+                        }
+
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString("currencies", stringBuilder.toString());
+                        editor.apply();
+
+                        progressBar.setVisibility(View.GONE);
+                    } else {
+                        System.out.println("133 " + response.code());
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<String[]> call, Throwable t) {
-                System.out.println(t.getMessage());
-            }
-
-        });
+                @Override
+                public void onFailure(Call<String[]> call, Throwable t) {
+                    System.out.println(t.getMessage());
+                }
+            });
+        } else {
+            String[] currenciesArray = currenciesStr.split(",");
+            currencies.addAll(Arrays.asList(currenciesArray));
+            currencyChooseRecyclerAdapter.setCurrencies(currencies);
+            progressBar.setVisibility(View.GONE);
+        }
     }
 }

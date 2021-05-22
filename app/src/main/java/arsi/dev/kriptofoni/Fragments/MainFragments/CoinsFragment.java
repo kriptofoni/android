@@ -137,7 +137,7 @@ public class CoinsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (homeActivity.getActive() instanceof MainFragment) {
+        if (homeActivity != null && homeActivity.getActive() != null && homeActivity.getActive() instanceof MainFragment) {
             onScreen = true;
             handler.postDelayed(runnable, 10000);
             if (isInterrupted) {
@@ -213,6 +213,9 @@ public class CoinsFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
+
+            int currentPage = fetchType.equals("update") ? 1 : CoinsFragment.this.currentPage;
+
             ArrayList<CoinModel> temp = new ArrayList<>();
             ArrayList<CoinModel> newPage = new ArrayList<>();
             // Since we can't get weekly price change percentage via CoinGeckoAPİClient,

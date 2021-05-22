@@ -103,13 +103,17 @@ public class FullScreenChartActivity extends AppCompatActivity {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
                 String result = "";
-                if (time.equals("oneDay")) {
-                    result = getChartXAxisHourAndMinute(Float.parseFloat(timestamps.get((int) value)));
-                } else if (time.equals("allTime")) {
-                    result = getChartXAxisYears(Float.parseFloat(timestamps.get((int) value)));
-                } else {
-                    result = getChartXAxisDayAndMonth(Float.parseFloat(timestamps.get((int) value)));
+                int v = (int) value;
+                if (v < timestamps.size()) {
+                    if (time.equals("oneDay")) {
+                        result = getChartXAxisHourAndMinute(Float.parseFloat(timestamps.get(v)));
+                    } else if (time.equals("allTime")) {
+                        result = getChartXAxisYears(Float.parseFloat(timestamps.get(v)));
+                    } else {
+                        result = getChartXAxisDayAndMonth(Float.parseFloat(timestamps.get(v)));
+                    }
                 }
+
                 return result;
             }
         });
@@ -155,6 +159,7 @@ public class FullScreenChartActivity extends AppCompatActivity {
         lineChart.setScaleEnabled(false);
         lineChart.setDrawGridBackground(false);
         lineChart.setDescription(null);
+        lineChart.getLegend().setEnabled(false);
 
         XAxis xAxis = lineChart.getXAxis();
         xAxis.setTextColor(textColor);
