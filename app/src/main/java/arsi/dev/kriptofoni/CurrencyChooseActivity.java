@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -137,13 +138,23 @@ public class CurrencyChooseActivity extends AppCompatActivity {
 
                         progressBar.setVisibility(View.GONE);
                     } else {
-                        System.out.println("133 " + response.code());
+                        if (response.code() == 429) {
+                            System.out.println(response.code());
+                            Handler handler = new Handler();
+                            Runnable runnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    getCurrencies();
+                                }
+                            };
+                            handler.postDelayed(runnable, 3000);
+                        }
                     }
                 }
 
                 @Override
                 public void onFailure(Call<String[]> call, Throwable t) {
-                    System.out.println(t.getMessage());
+                    getCurrencies();
                 }
             });
         } else {

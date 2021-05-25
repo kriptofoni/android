@@ -2,6 +2,7 @@ package arsi.dev.kriptofoni;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -57,27 +58,27 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
                             thread.start();
                         }
                     } else {
-                        System.out.println(response.code());
-                        try {
-                            Thread.sleep(500);
-                            loadData(index);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                        if (response.code() == 429) {
+                            Handler handler = new Handler();
+                            Runnable runnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    loadData(index);
+                                }
+                            };
+                            handler.postDelayed(runnable, 3000);
                         }
+                        loadData(index);
                     }
+                } else {
+                    loadData(index);
                 }
             }
 
             @Override
             public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
                 if (t instanceof SocketTimeoutException) {
-//                    System.out.println(t.getMessage());
-                    try {
-                        Thread.sleep(500);
-                        loadData(index);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    loadData(index);
                 }
             }
         });

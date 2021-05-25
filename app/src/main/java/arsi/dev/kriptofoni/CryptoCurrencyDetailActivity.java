@@ -742,6 +742,17 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     makeProgressBarInvisible();
                     if (firstFetch) firstFetch = false;
                     handler.postDelayed(runnable, 10000);
+                } else {
+                    if (response.code() == 429) {
+                        Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                getCoinInfo();
+                            }
+                        };
+                        handler.postDelayed(runnable, 3000);
+                    }
                 }
             }
 
@@ -767,6 +778,17 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     String text = vol24H == null || vol24H.isJsonNull() ? "-" : currencySymbol + " " + nf.format(vol24H.getAsBigDecimal());
 
                     twentyFourHoursMarketVolume.setText(text);
+                } else {
+                    if (response.code() == 429) {
+                        Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                get24HVol();
+                            }
+                        };
+                        handler.postDelayed(runnable, 3000);
+                    }
                 }
             }
 
@@ -822,6 +844,17 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     } else {
                         getMarketChart();
                     }
+                } else {
+                    if (response.code() == 429) {
+                        Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                getMarketChart();
+                            }
+                        };
+                        handler.postDelayed(runnable, 3000);
+                    }
                 }
             }
 
@@ -868,8 +901,16 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                         getOHLC();
                     }
                 } else {
-                    System.out.println(response.code());
-                    getOHLC();
+                    if (response.code() == 429) {
+                        Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                getOHLC();
+                            }
+                        };
+                        handler.postDelayed(runnable, 3000);
+                    }
                 }
             }
 

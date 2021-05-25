@@ -56,6 +56,8 @@ import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
 import arsi.dev.kriptofoni.R;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
+import arsi.dev.kriptofoni.Retrofit.SortedCoinsApi;
+import arsi.dev.kriptofoni.Retrofit.SortedCoinsRetrofitClient;
 
 public class MainFragment extends Fragment {
 
@@ -84,6 +86,7 @@ public class MainFragment extends Fragment {
     public MainFragment (HomeActivity homeActivity) {
         this.homeActivity = homeActivity;
     }
+    private SortedCoinsApi myCoinGeckoApi;
 
     @Nullable
     @Override
@@ -106,6 +109,8 @@ public class MainFragment extends Fragment {
 
         sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
         currencyText = sharedPreferences.getString("currency", "usd");
+
+        myCoinGeckoApi = SortedCoinsRetrofitClient.getInstance().getMyCoinGeckoApi();
 
         coinModelsForSearch = new ArrayList<>();
 
@@ -329,6 +334,7 @@ public class MainFragment extends Fragment {
     }
 
     public void setMostIncIn24List(List<CoinSearchModel> mostIncIn24List) {
+        mostIncIn24Fragment.setMyCoinGeckoApi(myCoinGeckoApi);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mostIncIn24List.sort(new Comparator<CoinSearchModel>() {
                 @Override
@@ -342,6 +348,7 @@ public class MainFragment extends Fragment {
     }
 
     public void setMostDecIn24List(List<CoinSearchModel> mostDecIn24List) {
+        mostDecIn24Fragment.setMyCoinGeckoApi(myCoinGeckoApi);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mostDecIn24List.sort(new Comparator<CoinSearchModel>() {
                 @Override
@@ -355,6 +362,7 @@ public class MainFragment extends Fragment {
     }
 
     public void setMostIncIn7List(List<CoinSearchModel> mostIncIn7List) {
+        mostIncIn7Fragment.setMyCoinGeckoApi(myCoinGeckoApi);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mostIncIn7List.sort(new Comparator<CoinSearchModel>() {
                 @Override
@@ -368,6 +376,7 @@ public class MainFragment extends Fragment {
     }
 
     public void setMostDecIn7List(List<CoinSearchModel> mostDecIn7List) {
+        mostDecIn7Fragment.setMyCoinGeckoApi(myCoinGeckoApi);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mostDecIn7List.sort(new Comparator<CoinSearchModel>() {
                 @Override

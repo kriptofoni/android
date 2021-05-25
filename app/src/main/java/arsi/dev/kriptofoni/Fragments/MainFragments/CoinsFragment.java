@@ -1,6 +1,7 @@
 package arsi.dev.kriptofoni.Fragments.MainFragments;
 
 import android.content.SharedPreferences;
+import android.net.IpSecManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,6 +21,7 @@ import com.litesoftwares.coingecko.domain.Coins.CoinMarkets;
 import com.litesoftwares.coingecko.exception.CoinGeckoApiException;
 import com.litesoftwares.coingecko.impl.CoinGeckoApiClientImpl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +40,7 @@ import arsi.dev.kriptofoni.Retrofit.SortedCoinsRetrofitClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class CoinsFragment extends Fragment {
 
@@ -79,6 +82,8 @@ public class CoinsFragment extends Fragment {
             }
         };
 
+        myCoinGeckoApi = SortedCoinsRetrofitClient.getInstance().getMyCoinGeckoApi();
+
         coinModels = new ArrayList<>();
         coinModelsForSearch = new ArrayList<>();
         allCoinModels = new ArrayList<>();
@@ -94,8 +99,6 @@ public class CoinsFragment extends Fragment {
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
         currency = sharedPreferences.getString("currency" ,"usd");
-
-        myCoinGeckoApi = SortedCoinsRetrofitClient.getInstance().getMyCoinGeckoApi();
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -141,9 +144,10 @@ public class CoinsFragment extends Fragment {
             onScreen = true;
             handler.postDelayed(runnable, 10000);
             if (isInterrupted) {
-                new GetCoinInfo().execute();
-                inProgress = true;
-                isInterrupted = false;
+//                System.out.println("interrupted");
+//                new GetCoinInfo().execute();
+//                inProgress = true;
+//                isInterrupted = false;
             }
             if (firstRender && !firstOnResume) {
                 progressBar.setVisibility(View.VISIBLE);
@@ -197,34 +201,35 @@ public class CoinsFragment extends Fragment {
         allCoinModels.clear();
         coinModels.clear();
         recyclerView.scrollTo(0, 0);
+        getCoins("initial");
     }
 
     private void getCoins(String type) {
         fetchType = type;
         inProgress = true;
-        new GetCoinInfo().execute();
+        getCoinInfo();
     }
 
     public void setFirstOnResume(boolean firstOnResume) {
         this.firstOnResume = firstOnResume;
     }
 
-    private class GetCoinInfo extends AsyncTask<Void, Void, Void> {
+    public void setMyCoinGeckoApi(SortedCoinsApi myCoinGeckoApi) {
+        this.myCoinGeckoApi = myCoinGeckoApi;
+    }
 
-        @Override
-        protected Void doInBackground(Void... voids) {
+    private void getCoinInfo() {
+        int currentPage = fetchType.equals("update") ? 1 : CoinsFragment.this.currentPage;
 
-            int currentPage = fetchType.equals("update") ? 1 : CoinsFragment.this.currentPage;
-
-            ArrayList<CoinModel> temp = new ArrayList<>();
-            ArrayList<CoinModel> newPage = new ArrayList<>();
-            // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
-            // We create a simple HTTP Request via Retrofit
-            Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, null,null, 100, currentPage, true, "24h,7d");
-            call.enqueue(new Callback<List<CoinMarket>>() {
-                @Override
-                public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
-                    // Creating a list of Result objects using our response data.
+        ArrayList<CoinModel> temp = new ArrayList<>();
+        ArrayList<CoinModel> newPage = new ArrayList<>();
+        // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
+        // We create a simple HTTP Request via Retrofit
+        Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, null,null, 100, currentPage, true, "24h,7d");
+        call.enqueue(new Callback<List<CoinMarket>>() {
+            @Override
+            public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
+                if (response.isSuccessful()) {
                     List<CoinMarket> coins = response.body();
                     if (coins != null && !coins.isEmpty()) {
                         coinModels.clear();
@@ -283,19 +288,27 @@ public class CoinsFragment extends Fragment {
                         reached = false;
                         if (inProgress) inProgress = false;
                     } else {
-                        new GetCoinInfo().execute();
-                        cancel(true);
+                        System.out.println("coins null or empty");
+                        getCoinInfo();
                     }
+                } else {
+                    Handler handler = new Handler();
+                    Runnable runnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            getCoinInfo();
+                        }
+                    };
+                    handler.postDelayed(runnable, 5000);
                 }
+            }
 
-                @Override
-                public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
-                    new GetCoinInfo().execute();
-                    cancel(true);
-                }
-            });
-            return null;
-        }
+            @Override
+            public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
+                System.out.println(t.getMessage());
+                getCoinInfo();
+            }
+        });
     }
 
 }

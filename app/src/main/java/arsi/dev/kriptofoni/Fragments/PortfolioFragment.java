@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -342,8 +343,8 @@ public class PortfolioFragment extends Fragment {
         super.onResume();
 
         countryCodePicker = new CountryCodePicker();
-        String[] codes = countryCodePicker.getCountryCode(currencyText);
-        currencySymbol = codes[1];
+//        String[] codes = countryCodePicker.getCountryCode(currencyText);
+        currencySymbol = "$";
         portfolioRecyclerAdapter.setCurrencySymbol(currencySymbol);
 
         if (firstInitial) {
@@ -556,7 +557,7 @@ public class PortfolioFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... voids) {
             models.clear();
-            Call<List<CoinMarket>> call = sortedCoinsApi.getCoinMarkets(currencyText, coinIds, "market_cap_desc", 50, 1, false, "24h");
+            Call<List<CoinMarket>> call = sortedCoinsApi.getCoinMarkets("usd", coinIds, "market_cap_desc", 50, 1, false, "24h");
             call.enqueue(new Callback<List<CoinMarket>>() {
                 @Override
                 public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
@@ -671,7 +672,7 @@ public class PortfolioFragment extends Fragment {
 
             List<Entry> yValue = new ArrayList<>();
 
-            Call<JsonObject> call = chartInfoApi.getMarketChart(coinModelId, currencyText, String.valueOf(from), String.valueOf(to));
+            Call<JsonObject> call = chartInfoApi.getMarketChart(coinModelId, "usd", String.valueOf(from), String.valueOf(to));
             try {
                 Response<JsonObject> response = call.execute();
                 if (response.isSuccessful()) {
@@ -715,11 +716,19 @@ public class PortfolioFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            new GetChartInfo().execute(strings);
+                            if (response.code() == 429) {
+                                Handler handler = new Handler();
+                                Runnable runnable = new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        new GetChartInfo().execute(strings);
+                                        cancel(true);
+                                    }
+                                };
+                                handler.postDelayed(runnable, 3000);
+                            }
                         }
                     });
-                    cancel(true);
-                    System.out.println("439 " + response.code());
                 }
             } catch (IOException e) {
                 getActivity().runOnUiThread(new Runnable() {

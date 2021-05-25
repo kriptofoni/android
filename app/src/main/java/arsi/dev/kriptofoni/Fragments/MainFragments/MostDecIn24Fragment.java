@@ -74,8 +74,6 @@ public class MostDecIn24Fragment extends Fragment {
         allCoins = new ArrayList<>();
         coinModelsForSearch = new ArrayList<>();
 
-        myCoinGeckoApi = SortedCoinsRetrofitClient.getInstance().getMyCoinGeckoApi();
-
         recyclerView = view.findViewById(R.id.main_most_dec_24_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, this, "24");
@@ -134,7 +132,7 @@ public class MostDecIn24Fragment extends Fragment {
             // we check whether there is any data fetch process when the page
             // is stopped in order to start the data fetch process
             // from the beginning when the page is opened again.
-            if (inProgress) isInterrupted = true;
+//            if (inProgress) isInterrupted = true;
         }
     }
 
@@ -144,11 +142,11 @@ public class MostDecIn24Fragment extends Fragment {
         if (homeActivity != null && homeActivity.getActive() != null && homeActivity.getActive() instanceof MainFragment) {
             onScreen = true;
             handler.postDelayed(runnable, 10000);
-            if (isInterrupted) {
-                fetchType = "update";
-                addIds();
-                isInterrupted = false;
-            }
+//            if (isInterrupted) {
+//                fetchType = "update";
+//                addIds();
+//                isInterrupted = false;
+//            }
         }
     }
 
@@ -195,6 +193,8 @@ public class MostDecIn24Fragment extends Fragment {
         allCoins.clear();
         coinModels.clear();
         recyclerView.scrollTo(0, 0);
+        fetchType = "initial";
+        addIds();
     }
 
     public void setCoins(List<CoinSearchModel> coins) {
@@ -217,7 +217,10 @@ public class MostDecIn24Fragment extends Fragment {
         }
 
         if (firstRender && !startDone) startDone = true;
-        if (!firstRender) firstRender = true;
+        if (!firstRender) {
+            firstRender = true;
+            if (!homeActivity.isFetchAllCoins()) startDone = true;
+        }
     }
 
     private void addIds() {
@@ -241,7 +244,7 @@ public class MostDecIn24Fragment extends Fragment {
 
             s = stringBuilder.toString();
             inProgress = true;
-            new GetCoinInfo().execute(s);
+            getCoinInfo(s);
         }
     }
 
@@ -250,22 +253,21 @@ public class MostDecIn24Fragment extends Fragment {
             progressBar.setVisibility(visibility);
     }
 
-    private class GetCoinInfo extends AsyncTask<String, Void, Void> {
+    public void setMyCoinGeckoApi(SortedCoinsApi myCoinGeckoApi) {
+        this.myCoinGeckoApi = myCoinGeckoApi;
+    }
 
-        @Override
-        protected Void doInBackground(String... strings) {
-
-            String ids = strings[0];
-
-            ArrayList<CoinModel> temp = new ArrayList<>();
-            ArrayList<CoinModel> newPage = new ArrayList<>();
-            // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
-            // We create a simple HTTP Request via Retrofit
-            Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, ids, null, 50, 1, true, "24h,7d");
-            call.enqueue(new Callback<List<CoinMarket>>() {
-                @Override
-                public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
-                    // Creating a list of Result objects using our response data.
+    private void getCoinInfo(String ids) {
+        ArrayList<CoinModel> temp = new ArrayList<>();
+        ArrayList<CoinModel> newPage = new ArrayList<>();
+        // Since we can't get weekly price change percentage via CoinGeckoAPİClient,
+        // We create a simple HTTP Request via Retrofit
+        Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, ids, null, 50, 1, true, "24h,7d");
+        call.enqueue(new Callback<List<CoinMarket>>() {
+            @Override
+            public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
+                // Creating a list of Result objects using our response data.
+                if (response.isSuccessful()) {
                     List<CoinMarket> coins = response.body();
                     if (coins != null && !coins.isEmpty()) {
                         coinModels.clear();
@@ -350,19 +352,26 @@ public class MostDecIn24Fragment extends Fragment {
                         reached = false;
                         if (inProgress) inProgress = false;
                     } else {
-                        new GetCoinInfo().execute(strings);
-                        cancel(true);
+                        getCoinInfo(ids);
+                    }
+                } else {
+                    if (response.code() == 429) {
+                        Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                getCoinInfo(ids);
+                            }
+                        };
+                        handler.postDelayed(runnable, 5000);
                     }
                 }
+            }
 
-                @Override
-                public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
-                    new GetCoinInfo().execute(strings);
-                    cancel(true);
-                }
-            });
-
-            return null;
-        }
+            @Override
+            public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
+                getCoinInfo(ids);
+            }
+        });
     }
 }

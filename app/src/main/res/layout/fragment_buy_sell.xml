@@ -5,7 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bodyColor" >
+    android:background="@color/bodyColor"
+    android:id="@+id/buy_sell_fragment_constraint_layout">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/buyButtonLeft"

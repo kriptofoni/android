@@ -67,7 +67,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private String currency;
     private int max, totalPageNumber;
-    private boolean firstLoad = true;
+    private boolean firstLoad = true, fetchAllCoins = false;
+    private double lastFetchOfAllCoins;
 
     private SharedPreferences sharedPreferences;
 
@@ -137,6 +138,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         fragmentManager.beginTransaction().add(R.id.fragment_container, mainFragment,"1").commit();
         bottomNavigationView.getMenu().getItem(0).setEnabled(false);
 
+        // Remove splash screen after 3 seconds
         Handler handler = new Handler();
         Runnable runnable = new Runnable() {
             @Override
@@ -205,7 +207,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
             };
     
     private void getAllCoins() {
-        firstLoad = false;
+        if (firstLoad)
+            firstLoad = false;
         // Since downloading the data of all coins is a long process,
         // we are launching an AsyncTaskLoader to perform this process.
         loaderManager.initLoader(0, null, this);
@@ -251,6 +254,10 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         mainScreen.setVisibility(View.VISIBLE);
     }
 
+    public boolean isFetchAllCoins() {
+        return fetchAllCoins;
+    }
+
     @Override
     public Loader<String> onCreateLoader(int i, Bundle bundle) {
         return new GetAllCoinsAsyncTaskLoader(this, totalPageNumber, myCoinGeckoApi, currency);
@@ -282,8 +289,17 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                     mainFragment.setMostDecIn7List(mostInc7DaysFromMem);
                 }
 
-                getAllCoins();
+                firstLoad = false;
 
+                // Don't fetch all coins if already fetched in last 10 mins.
+                lastFetchOfAllCoins = sharedPreferences.getFloat("lastFetchOfAllCoins", 0);
+                if (lastFetchOfAllCoins < System.currentTimeMillis() - 1000 * 60 * 10) {
+                    fetchAllCoins = true;
+                    getAllCoins();
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putFloat("lastFetchOfAllCoins", System.currentTimeMillis());
+                    editor.apply();
+                }
             }
         }
 
