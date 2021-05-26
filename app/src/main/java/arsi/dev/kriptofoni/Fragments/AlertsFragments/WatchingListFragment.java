@@ -1,10 +1,12 @@
 package arsi.dev.kriptofoni.Fragments.AlertsFragments;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -28,11 +30,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 import arsi.dev.kriptofoni.Adapters.MainCoinsRecyclerAdapter;
 import arsi.dev.kriptofoni.Adapters.WatchingListRecyclerAdapter;
 import arsi.dev.kriptofoni.CoinSelectActivity;
 import arsi.dev.kriptofoni.CurrencyChooseActivity;
+import arsi.dev.kriptofoni.HomeActivity;
 import arsi.dev.kriptofoni.Models.CoinSearchModel;
 import arsi.dev.kriptofoni.Models.WatchingListModel;
 import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
@@ -55,11 +59,18 @@ public class WatchingListFragment extends Fragment{
     private List<WatchingListModel> models;
     private SortedCoinsApi sortedCoinsApi;
     private String currencyText, coinIds;
-    private boolean selectingMode = false;
+    private boolean selectingMode = false, firstInitial = true, hiddenChanged = false;
     private ProgressBar progressBar;
     private List<String> ids, deleteIds;
     private SharedPreferences sharedPreferences;
+    private HomeActivity homeActivity;
+    private CountryCodePicker countryCodePicker;
     private final int CURRENCY_CHOOSE_CODE = 1, COIN_CHOOSE_CODE = 2;
+
+    public WatchingListFragment() {}
+    public WatchingListFragment(HomeActivity homeActivity) {
+        this.homeActivity = homeActivity;
+    }
 
     @Nullable
     @Override
@@ -68,7 +79,7 @@ public class WatchingListFragment extends Fragment{
 
         models = new ArrayList<>();
         deleteIds = new ArrayList<>();
-        sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
+        sharedPreferences = getParentFragment().getActivity().getSharedPreferences("Preferences", 0);
         sortedCoinsApi = SortedCoinsRetrofitClient.getInstance().getMyCoinGeckoApi();
 
         noCoin = view.findViewById(R.id.alerts_watching_list_no_coin);
@@ -153,6 +164,7 @@ public class WatchingListFragment extends Fragment{
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), CurrencyChooseActivity.class);
+                intent.putExtra("converter", true);
                 startActivityForResult(intent, CURRENCY_CHOOSE_CODE);
             }
         });
@@ -175,26 +187,41 @@ public class WatchingListFragment extends Fragment{
     }
 
     @Override
+    public void onDetach() {
+        super.onDetach();
+        System.out.println("detached");
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
-        currencyText = sharedPreferences.getString("currency", "");
-        coinIds = sharedPreferences.getString("watchingList", "");
-        if (!coinIds.isEmpty())
-            ids = new LinkedList<>(Arrays.asList(coinIds.split(",")));
-        else
-            ids = new LinkedList<>();
+        if (firstInitial || hiddenChanged) {
+            currencyText = sharedPreferences.getString("currency", "");
+            currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
+            coinIds = sharedPreferences.getString("watchingList", "");
+            if (!coinIds.isEmpty())
+                ids = new LinkedList<>(Arrays.asList(coinIds.split(",")));
+            else
+                ids = new LinkedList<>();
 
-        CountryCodePicker countryCodePicker = new CountryCodePicker();
-        String[] codes = countryCodePicker.getCountryCode(currencyText);
-        watchingListRecyclerAdapter.setCurrencySymbol(codes[1]);
+            countryCodePicker = new CountryCodePicker();
+            String[] codes = countryCodePicker.getCountryCode(currencyText);
+            watchingListRecyclerAdapter.setCurrencySymbol(codes[1]);
 
-        if (!coinIds.equals(",") && !coinIds.isEmpty()) {
-            new GetCoinInfo().execute();
-        } else {
-            progressBar.setVisibility(View.GONE);
-            noCoin.setVisibility(View.VISIBLE);
+            if (!coinIds.equals(",") && !coinIds.isEmpty()) {
+                getCoinInfo();
+            } else {
+                progressBar.setVisibility(View.GONE);
+                noCoin.setVisibility(View.VISIBLE);
+            }
+
+            if (firstInitial)
+                firstInitial = false;
+            if (hiddenChanged)
+                hiddenChanged = false;
         }
+
     }
 
     @Override
@@ -215,58 +242,64 @@ public class WatchingListFragment extends Fragment{
         deleteIds.remove(id);
     }
 
-    private class GetCoinInfo extends AsyncTask<Void, Void, Void> {
+    public void setHiddenChanged(boolean hiddenChanged) {
+        this.hiddenChanged = hiddenChanged;
+    }
 
-        @Override
-        protected Void doInBackground(Void... voids) {
-            models.clear();
-            Call<List<CoinMarket>> call = sortedCoinsApi.getCoinMarkets(currencyText, coinIds, "market_cap_desc", 50, 1, false, "24h");
-            call.enqueue(new Callback<List<CoinMarket>>() {
-                @Override
-                public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
-                    if (response.isSuccessful()) {
-                        List<CoinMarket> coins = response.body();
-                        if (coins != null && !coins.isEmpty()) {
-                            models.clear();
-                            for (int i = 0; i < coins.size(); i++) {
-                                CoinMarket coin = coins.get(i);
-                                String id = coin.getId();
-                                String name = coin.getName();
-                                String icon = coin.getImage();
-                                double priceChangeIn24Hours = coin.getPrice_change_percentage_24h_in_currency();
-                                double price = coin.getCurrent_price();
-                                WatchingListModel model = new WatchingListModel(id, name, icon, priceChangeIn24Hours, price, i + 1, false);
-                                models.add(model);
-                            }
-
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    progressBar.setVisibility(View.GONE);
-                                    noCoin.setVisibility(View.GONE);
-                                    hasCoin.setVisibility(View.VISIBLE);
-                                    add.setVisibility(View.VISIBLE);
-                                    watchingListRecyclerAdapter.notifyDataSetChanged();
-                                }
-                            });
-                        } else {
-                            new GetCoinInfo().execute();
-                            cancel(true);
+    private void getCoinInfo() {
+        Call<List<CoinMarket>> call = sortedCoinsApi.getCoinMarkets(currencyText, coinIds, "market_cap_desc", 50, 1, false, "24h");
+        call.enqueue(new Callback<List<CoinMarket>>() {
+            @Override
+            public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
+                if (response.isSuccessful()) {
+                    List<CoinMarket> coins = response.body();
+                    if (coins != null && !coins.isEmpty()) {
+                        models.clear();
+                        for (int i = 0; i < coins.size(); i++) {
+                            CoinMarket coin = coins.get(i);
+                            String id = coin.getId();
+                            String name = coin.getName();
+                            String icon = coin.getImage();
+                            double priceChangeIn24Hours = coin.getPrice_change_percentage_24h_in_currency();
+                            double price = coin.getCurrent_price();
+                            WatchingListModel model = new WatchingListModel(id, name, icon, priceChangeIn24Hours, price, i + 1, false);
+                            models.add(model);
                         }
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressBar.setVisibility(View.GONE);
+                                noCoin.setVisibility(View.GONE);
+                                hasCoin.setVisibility(View.VISIBLE);
+                                add.setVisibility(View.VISIBLE);
+                                watchingListRecyclerAdapter.notifyDataSetChanged();
+                            }
+                        });
                     } else {
-                        new GetCoinInfo().execute();
-                        cancel(true);
+                        getCoinInfo();
+                    }
+                } else {
+                    if (response.code() == 429) {
+                        Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                getCoinInfo();
+                            }
+                        };
+                        handler.postDelayed(runnable, 5000);
+                    } else {
+                        getCoinInfo();
                     }
                 }
+            }
 
-                @Override
-                public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
-                    new GetCoinInfo().execute();
-                    cancel(true);
-                }
-            });
-            return null;
-        }
+            @Override
+            public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
+                getCoinInfo();
+            }
+        });
     }
 
     @Override
@@ -274,8 +307,22 @@ public class WatchingListFragment extends Fragment{
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CURRENCY_CHOOSE_CODE && resultCode == CURRENCY_CHOOSE_CODE) {
             if (data != null) {
-                currencyText = data.getStringExtra("currency");
-                new GetCoinInfo().execute();
+                noCoin.setVisibility(View.GONE);
+                hasCoin.setVisibility(View.GONE);
+                add.setVisibility(View.GONE);
+                progressBar.setVisibility(View.VISIBLE);
+
+                currencyText = data.getStringExtra("currencyId");
+                currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
+                String[] codes = countryCodePicker.getCountryCode(currencyText);
+                watchingListRecyclerAdapter.setCurrencySymbol(codes[1]);
+                if (!coinIds.equals(",") && !coinIds.isEmpty()) {
+                    getCoinInfo();
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    noCoin.setVisibility(View.VISIBLE);
+                }
+                homeActivity.resetMainFragments();
             }
         } else if (requestCode == COIN_CHOOSE_CODE && resultCode == CURRENCY_CHOOSE_CODE) {
             if (data != null) {
@@ -296,7 +343,7 @@ public class WatchingListFragment extends Fragment{
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("watchingList", coinIds);
                     editor.apply();
-                    new GetCoinInfo().execute();
+                    getCoinInfo();
                 } else {
                     Toast.makeText(getContext(), "Seçtiğiniz kripto para zaten izleme listenizde mevcut.", Toast.LENGTH_SHORT).show();
                 }

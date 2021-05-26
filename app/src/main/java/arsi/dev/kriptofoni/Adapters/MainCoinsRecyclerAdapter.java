@@ -24,6 +24,7 @@ import java.util.Random;
 
 import arsi.dev.kriptofoni.CryptoCurrencyDetailActivity;
 import arsi.dev.kriptofoni.Fragments.MainFragments.CoinsFragment;
+import arsi.dev.kriptofoni.HomeActivity;
 import arsi.dev.kriptofoni.Models.CoinModel;
 import arsi.dev.kriptofoni.R;
 

@@ -1,5 +1,6 @@
 package arsi.dev.kriptofoni;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -63,13 +64,14 @@ import retrofit2.Response;
 
 public class CryptoCurrencyDetailActivity extends AppCompatActivity{
 
+    private final int CURRENCY_CHOOSE_CODE = 1;
     private String currencyText, coinModelId, chartType, twitterScreenName, webLink,
             redditLink, coinShortCut, time;
     private TextView value, oneHourChange, twentyFourHoursChange, sevenDaysChange,
             marketValue, twentyFourHoursMarketVolume, circulatingSupply, totalSupply, webSite,
             reddit, twitter, coinName, coinMarketCap, priceInBtc, priceChangeInBtc,
             currentPrice, currentChange, currentPriceChange, oneDay, oneWeek, oneMonth, threeMonths,
-            sixMonths, oneYear, allTime;
+            sixMonths, oneYear, allTime, currency;
     private CoinInfoApi coinGeckoApi;
     private Button buySell, addWatchingList;
     private ImageView backButton, coinIcon, expand, chartIcon;
@@ -87,7 +89,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
     private RelativeLayout twitterRedirect, webRedirect, redditRedirect;
     private LineDataSet set;
     private int chartColor, days;
-    private boolean firstFetch = true;
+    private boolean firstFetch = true, inProgress = false;
 
     private Handler handler;
     private Runnable runnable;
@@ -145,6 +147,9 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         twitterRedirect = findViewById(R.id.crypto_currency_detail_twitter_redirect);
         chartProgressBar = findViewById(R.id.crypto_currency_detail_chart_progress_bar);
         addWatchingList = findViewById(R.id.addWatchingList);
+        currency = findViewById(R.id.crypto_currency_detail_currency);
+
+        currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
 
         // Initial chart values
         chartType = "line";
@@ -164,18 +169,16 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         coinModelId = intent.getStringExtra("id");
         coinGeckoApi = CoinInfoRetrofitClient.getInstance().getMyCoinGeckoApi();
 
-        // We use different threads to speed up data fetch.
-        for (int i = 0; i < 4; i++) {
-            Thread thread = new MyThread(i);
-            thread.start();
-        }
+        fetchData();
 
         handler = new Handler();
         runnable = new Runnable() {
             @Override
             public void run() {
-                getCoinInfo();
                 System.out.println("called");
+                if (!inProgress) {
+                    getCoinInfo();
+                }
                 handler.postDelayed(this, 10000);
             }
         };
@@ -204,7 +207,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 if (watchingCoins.contains(coinModelId)) {
-                    Toast.makeText(CryptoCurrencyDetailActivity.this, "Coin is already at your watching list.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(CryptoCurrencyDetailActivity.this, "Kripto para zaten izleme listenizde mevcut", Toast.LENGTH_LONG).show();
                 } else {
                     // Since watchingList is a final variable,
                     // it is copied to another variable in order to make changes on it.
@@ -219,7 +222,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     editor.putString("watchingList", copy);
                     editor.apply();
 
-                    Toast.makeText(CryptoCurrencyDetailActivity.this, "Coin has added to your watching list.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(CryptoCurrencyDetailActivity.this, "Kripto para izleme listenize eklendi.", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -437,6 +440,24 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                 startActivity(intent);
             }
         });
+
+        currency.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(CryptoCurrencyDetailActivity.this, CurrencyChooseActivity.class);
+                intent.putExtra("converter", true);
+                startActivityForResult(intent, CURRENCY_CHOOSE_CODE);
+            }
+        });
+    }
+
+    private void fetchData() {
+        inProgress = true;
+        // We use different threads to speed up data fetch.
+        for (int i = 0; i < 4; i++) {
+            Thread thread = new MyThread(i);
+            thread.start();
+        }
     }
 
     @Override
@@ -740,10 +761,15 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                         sevenDaysChange.setTextColor(sevenDays.getAsDouble() > 0 ? green : sevenDays.getAsDouble() < 0 ? red : defaultColor);
 
                     makeProgressBarInvisible();
-                    if (firstFetch) firstFetch = false;
-                    handler.postDelayed(runnable, 10000);
+                    if (firstFetch) {
+                        handler.postDelayed(runnable, 10000);
+                        firstFetch = false;
+                    }
+                    if (inProgress) inProgress = false;
+
                 } else {
                     if (response.code() == 429) {
+                        System.out.println(response.code());
                         Handler handler = new Handler();
                         Runnable runnable = new Runnable() {
                             @Override
@@ -751,7 +777,9 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                                 getCoinInfo();
                             }
                         };
-                        handler.postDelayed(runnable, 3000);
+                        handler.postDelayed(runnable, 5000);
+                    } else {
+                        getCoinInfo();
                     }
                 }
             }
@@ -787,7 +815,9 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                                 get24HVol();
                             }
                         };
-                        handler.postDelayed(runnable, 3000);
+                        handler.postDelayed(runnable, 5000);
+                    } else {
+                        get24HVol();
                     }
                 }
             }
@@ -853,7 +883,9 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                                 getMarketChart();
                             }
                         };
-                        handler.postDelayed(runnable, 3000);
+                        handler.postDelayed(runnable, 5000);
+                    } else {
+                        getMarketChart();
                     }
                 }
             }
@@ -909,7 +941,9 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                                 getOHLC();
                             }
                         };
-                        handler.postDelayed(runnable, 3000);
+                        handler.postDelayed(runnable, 5000);
+                    } else {
+                        getOHLC();
                     }
                 }
             }
@@ -946,6 +980,21 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                 case 3:
                     getOHLC();
                     break;
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == CURRENCY_CHOOSE_CODE && requestCode == CURRENCY_CHOOSE_CODE) {
+            if (data != null) {
+                currencyText = data.getStringExtra("currencyId");
+                currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
+                currencySymbols = countryCodePicker.getCountryCode(currencyText);
+                makeProgressBarVisible();
+                setChartProgressBarVisible();
+                fetchData();
             }
         }
     }

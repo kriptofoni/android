@@ -20,6 +20,7 @@ import java.util.List;
 
 import arsi.dev.kriptofoni.CoinSelectActivity;
 import arsi.dev.kriptofoni.CryptoCurrencyDetailActivity;
+import arsi.dev.kriptofoni.HomeActivity;
 import arsi.dev.kriptofoni.Models.CoinSearchModel;
 import arsi.dev.kriptofoni.R;
 
@@ -28,10 +29,12 @@ public class MainCoinsSearchRecyclerAdapter extends RecyclerView.Adapter<MainCoi
     private List<CoinSearchModel> coins;
     private Fragment fragment;
     private CoinSelectActivity coinSelectActivity;
+    private HomeActivity homeActivity;
 
     public MainCoinsSearchRecyclerAdapter(List<CoinSearchModel> coins, Fragment fragment) {
         this.coins = coins;
         this.fragment = fragment;
+        this.homeActivity = homeActivity;
     }
 
     public MainCoinsSearchRecyclerAdapter(List<CoinSearchModel> coins, CoinSelectActivity coinSelectActivity) {

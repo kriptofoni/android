@@ -43,6 +43,9 @@ import arsi.dev.kriptofoni.Models.CoinSearchModel;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
 import arsi.dev.kriptofoni.Retrofit.CoinMarket;
+import io.reactivex.Observable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -133,7 +136,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().add(R.id.fragment_container, moreFragment,"5").hide(moreFragment).commit();
         fragmentManager.beginTransaction().add(R.id.fragment_container, newsFragment,"4").hide(newsFragment).commit();
-        fragmentManager.beginTransaction().add(R.id.fragment_container, alertsFragment,"3").hide(alertsFragment).commit();
+        fragmentManager.beginTransaction().add(R.id.fragment_container, alertsFragment,"3").commit();
         fragmentManager.beginTransaction().add(R.id.fragment_container, portfolioFragment,"2").hide(portfolioFragment).commit();
         fragmentManager.beginTransaction().add(R.id.fragment_container, mainFragment,"1").commit();
         bottomNavigationView.getMenu().getItem(0).setEnabled(false);
@@ -143,6 +146,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
+                fragmentManager.beginTransaction().hide(alertsFragment).commit();
                 setScreen();
             }
         };
@@ -207,6 +211,11 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
             };
     
     private void getAllCoins() {
+        // Fetching all coins is required because CoinGeckoAPI doesn't have sorting options
+        // by coins' 24 hour price change percent and 7 days price change percent.
+        // In order to obtain sorted coins, we fetch all the coins that CoinGeckoApi listed.
+        // And sort them according to the desired values.
+
         if (firstLoad)
             firstLoad = false;
         // Since downloading the data of all coins is a long process,
@@ -254,6 +263,10 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         mainScreen.setVisibility(View.VISIBLE);
     }
 
+    public void resetMainFragments() {
+        mainFragment.resetFragments();
+    }
+
     public boolean isFetchAllCoins() {
         return fetchAllCoins;
     }
@@ -293,6 +306,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
                 // Don't fetch all coins if already fetched in last 10 mins.
                 lastFetchOfAllCoins = sharedPreferences.getFloat("lastFetchOfAllCoins", 0);
+                System.out.println(lastFetchOfAllCoins - (System.currentTimeMillis() - 1000 * 60 * 10));
                 if (lastFetchOfAllCoins < System.currentTimeMillis() - 1000 * 60 * 10) {
                     fetchAllCoins = true;
                     getAllCoins();

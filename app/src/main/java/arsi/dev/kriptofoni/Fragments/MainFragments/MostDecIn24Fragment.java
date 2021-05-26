@@ -364,6 +364,8 @@ public class MostDecIn24Fragment extends Fragment {
                             }
                         };
                         handler.postDelayed(runnable, 5000);
+                    } else {
+                        getCoinInfo(ids);
                     }
                 }
             }

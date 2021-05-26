@@ -244,6 +244,9 @@ public class MostIncIn24Fragment extends Fragment {
         if (allCoinSearchModels != null && !allCoinSearchModels.isEmpty()) {
             for (int i = firstIndex; i < lastIndex; i++) {
                 stringBuilder.append(allCoinSearchModels.get(i).getId() + ",");
+                if (fetchType.equals("initial") || fetchType.equals("newPage")) {
+//                    System.out.println(allCoinSearchModels.get(i).getName() + " " + allCoinSearchModels.get(i).getPriceChangeIn24());
+                }
             }
 
             s = stringBuilder.toString();
@@ -369,6 +372,8 @@ public class MostIncIn24Fragment extends Fragment {
                             }
                         };
                         handler.postDelayed(runnable, 5000);
+                    } else {
+                        getCoinInfo(ids);
                     }
                 }
             }

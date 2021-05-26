@@ -96,7 +96,7 @@ public class ConverterActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (cryptoEditText.getText().toString().isEmpty() && currencyEditText.getText().toString().isEmpty()) {
-                    Toast.makeText(ConverterActivity.this, "Please enter the price that you want to convert", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ConverterActivity.this, "Lütfen dönüştürmek istediğiniz miktarı girin.", Toast.LENGTH_SHORT).show();
                 } else {
                     convertButton.setClickable(false);
                     reload.setVisibility(View.GONE);

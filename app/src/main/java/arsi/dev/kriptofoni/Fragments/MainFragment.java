@@ -109,6 +109,7 @@ public class MainFragment extends Fragment {
 
         sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
         currencyText = sharedPreferences.getString("currency", "usd");
+        currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
 
         myCoinGeckoApi = SortedCoinsRetrofitClient.getInstance().getMyCoinGeckoApi();
 
@@ -191,7 +192,12 @@ public class MainFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
+        String tempCurrency = sharedPreferences.getString("currency", "usd");
+        if (!tempCurrency.equals(currencyText)) {
+            currencyText = tempCurrency;
+            currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
+            resetFragments();
+        }
     }
 
     @Override
@@ -396,32 +402,37 @@ public class MainFragment extends Fragment {
         editor.apply();
     }
 
+    public void resetFragments() {
+        currencyText = sharedPreferences.getString("currency", "usd");
+        currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
+        homeActivity.getTotalMarketCap();
+        // Refreshing coinsFragment
+        coinsFragment.setCurrency(currencyText);
+        coinsFragment.setCurrentPage(1);
+        coinsFragment.emptyAllCoinModels();
+        // Refreshing mostIncIn24HFragment
+        mostIncIn24Fragment.setCurrency(currencyText);
+        mostIncIn24Fragment.setCurrentPage(1);
+        mostIncIn24Fragment.emptyAllCoinModels();
+        // Refreshing mostDecIn24HFragment
+        mostDecIn24Fragment.setCurrency(currencyText);
+        mostDecIn24Fragment.setCurrentPage(1);
+        mostDecIn24Fragment.emptyAllCoinModels();
+        // Refreshing mostIncIn7HFragment
+        mostIncIn7Fragment.setCurrency(currencyText);
+        mostIncIn7Fragment.setCurrentPage(1);
+        mostIncIn7Fragment.emptyAllCoinModels();
+        // Refreshing mostDecIn7HFragment
+        mostDecIn7Fragment.setCurrency(currencyText);
+        mostDecIn7Fragment.setCurrentPage(1);
+        mostDecIn7Fragment.emptyAllCoinModels();
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CURRENCY_CHOOSE_REQUEST_CODE && resultCode == CURRENCY_CHOOSE_REQUEST_CODE) {
-            currencyText = sharedPreferences.getString("currency", "usd");
-            homeActivity.getTotalMarketCap();
-            // Refreshing coinsFragment
-            coinsFragment.setCurrency(currencyText);
-            coinsFragment.setCurrentPage(1);
-            coinsFragment.emptyAllCoinModels();
-            // Refreshing mostIncIn24HFragment
-            mostIncIn24Fragment.setCurrency(currencyText);
-            mostIncIn24Fragment.setCurrentPage(1);
-            mostIncIn24Fragment.emptyAllCoinModels();
-            // Refreshing mostDecIn24HFragment
-            mostDecIn24Fragment.setCurrency(currencyText);
-            mostDecIn24Fragment.setCurrentPage(1);
-            mostDecIn24Fragment.emptyAllCoinModels();
-            // Refreshing mostIncIn7HFragment
-            mostIncIn7Fragment.setCurrency(currencyText);
-            mostIncIn7Fragment.setCurrentPage(1);
-            mostIncIn7Fragment.emptyAllCoinModels();
-            // Refreshing mostDecIn7HFragment
-            mostDecIn7Fragment.setCurrency(currencyText);
-            mostDecIn7Fragment.setCurrentPage(1);
-            mostDecIn7Fragment.emptyAllCoinModels();
+            resetFragments();
         }
     }
 }

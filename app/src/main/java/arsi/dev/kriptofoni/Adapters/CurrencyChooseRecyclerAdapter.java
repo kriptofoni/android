@@ -73,10 +73,10 @@ public class CurrencyChooseRecyclerAdapter extends RecyclerView.Adapter<Currency
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("currency", text);
+                editor.apply();
                 if (!converter) {
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString("currency", text);
-                    editor.apply();
                     currencyChooseActivity.setResult(1);
                     notifyDataSetChanged();
                     setCurrency(text);

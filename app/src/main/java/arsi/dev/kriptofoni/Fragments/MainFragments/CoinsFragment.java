@@ -288,24 +288,26 @@ public class CoinsFragment extends Fragment {
                         reached = false;
                         if (inProgress) inProgress = false;
                     } else {
-                        System.out.println("coins null or empty");
                         getCoinInfo();
                     }
                 } else {
-                    Handler handler = new Handler();
-                    Runnable runnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            getCoinInfo();
-                        }
-                    };
-                    handler.postDelayed(runnable, 5000);
+                    if (response.code() == 429) {
+                        Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                getCoinInfo();
+                            }
+                        };
+                        handler.postDelayed(runnable, 5000);
+                    } else {
+                        getCoinInfo();
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
-                System.out.println(t.getMessage());
                 getCoinInfo();
             }
         });

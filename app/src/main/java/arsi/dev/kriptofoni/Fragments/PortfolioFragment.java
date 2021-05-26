@@ -407,7 +407,7 @@ public class PortfolioFragment extends Fragment {
             coinIds = builder.toString();
 
             if (!coinIds.isEmpty()) {
-                new GetCoinInfo().execute();
+                getCoinInfo();
             }
         } else {
             progressBar.setVisibility(View.GONE);
@@ -552,75 +552,77 @@ public class PortfolioFragment extends Fragment {
         deleteIds.remove(id);
     }
 
-    private class GetCoinInfo extends AsyncTask<Void, Void, Void> {
+    private void getCoinInfo() {
+        Call<List<CoinMarket>> call = sortedCoinsApi.getCoinMarkets("usd", coinIds, "market_cap_desc", 50, 1, false, "24h");
+        call.enqueue(new Callback<List<CoinMarket>>() {
+            @Override
+            public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
+                if (response.isSuccessful()) {
+                    List<CoinMarket> coins = response.body();
+                    if (coins != null && !coins.isEmpty()) {
+                        models.clear();
+                        for (int i = 0; i < coins.size(); i++) {
+                            CoinMarket coin = coins.get(i);
+                            String shortCut = coin.getSymbol();
+                            String icon = coin.getImage();
+                            String id = coin.getId();
+                            double currentPrice = coin.getCurrent_price();
+                            double change24h = coin.getPrice_change_24h();
+                            double changePercentage24H = coin.getPrice_change_percentage_24h_in_currency();
+                            double quantity = quantities.get(id);
+                            double change = change24h * quantity;
+                            PortfolioModel model = new PortfolioModel(id, shortCut, icon, quantity * currentPrice, change, changePercentage24H, currentPrice, quantity, false);
+                            models.add(model);
 
-        @Override
-        protected Void doInBackground(Void... voids) {
-            models.clear();
-            Call<List<CoinMarket>> call = sortedCoinsApi.getCoinMarkets("usd", coinIds, "market_cap_desc", 50, 1, false, "24h");
-            call.enqueue(new Callback<List<CoinMarket>>() {
-                @Override
-                public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
-                    if (response.isSuccessful()) {
-                        List<CoinMarket> coins = response.body();
-                        if (coins != null && !coins.isEmpty()) {
-                            models.clear();
-                            for (int i = 0; i < coins.size(); i++) {
-                                CoinMarket coin = coins.get(i);
-                                String shortCut = coin.getSymbol();
-                                String icon = coin.getImage();
-                                String id = coin.getId();
-                                double currentPrice = coin.getCurrent_price();
-                                double change24h = coin.getPrice_change_24h();
-                                double changePercentage24H = coin.getPrice_change_percentage_24h_in_currency();
-                                double quantity = quantities.get(id);
-                                double change = change24h * quantity;
-                                PortfolioModel model = new PortfolioModel(id, shortCut, icon, quantity * currentPrice, change, changePercentage24H, currentPrice, quantity, false);
-                                models.add(model);
-
-                                portfolioValue += quantity * currentPrice;
-                            }
-
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    progressBar.setVisibility(View.GONE);
-                                    noCoin.setVisibility(View.GONE);
-                                    hasCoin.setVisibility(View.VISIBLE);
-                                    addCoin.setVisibility(View.VISIBLE);
-                                    totalPrice.setText(String.format("%s%s", currencySymbol, nf.format(portfolioValue)));
-                                    double priceDiff = portfolioValue - totalPrincipal;
-                                    double priceDiffPerc = priceDiff / totalPrincipal * 100;
-                                    String priceChangeText = String.format("%s%s (%%%s)", currencySymbol, nf.format(priceDiff), nf.format(priceDiffPerc));
-                                    totalPriceChange.setText(priceChangeText);
-                                    principal.setText(String.format("Ana para: %s%s", currencySymbol, nf.format(totalPrincipal)));
-
-                                    int red = Color.parseColor("#f6465d");
-                                    int green = Color.parseColor("#2ebd85");
-                                    int defaultColor = ContextCompat.getColor(getContext(), R.color.textColor);
-
-                                    totalPriceChange.setTextColor(priceDiff < 0 ? red : priceDiff > 0 ? green : defaultColor);
-                                    portfolioRecyclerAdapter.notifyDataSetChanged();
-                                }
-                            });
-                        } else {
-                            new GetCoinInfo().execute();
-                            cancel(true);
+                            portfolioValue += quantity * currentPrice;
                         }
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressBar.setVisibility(View.GONE);
+                                noCoin.setVisibility(View.GONE);
+                                hasCoin.setVisibility(View.VISIBLE);
+                                addCoin.setVisibility(View.VISIBLE);
+                                totalPrice.setText(String.format("%s%s", currencySymbol, nf.format(portfolioValue)));
+                                double priceDiff = portfolioValue - totalPrincipal;
+                                double priceDiffPerc = priceDiff / totalPrincipal * 100;
+                                String priceChangeText = String.format("%s%s (%%%s)", currencySymbol, nf.format(priceDiff), nf.format(priceDiffPerc));
+                                totalPriceChange.setText(priceChangeText);
+                                principal.setText(String.format("Ana para: %s%s", currencySymbol, nf.format(totalPrincipal)));
+
+                                int red = Color.parseColor("#f6465d");
+                                int green = Color.parseColor("#2ebd85");
+                                int defaultColor = ContextCompat.getColor(getContext(), R.color.textColor);
+
+                                totalPriceChange.setTextColor(priceDiff < 0 ? red : priceDiff > 0 ? green : defaultColor);
+                                portfolioRecyclerAdapter.notifyDataSetChanged();
+                            }
+                        });
                     } else {
-                        new GetCoinInfo().execute();
-                        cancel(true);
+                        getCoinInfo();
+                    }
+                } else {
+                    if (response.code() == 429) {
+                        Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                getCoinInfo();
+                            }
+                        };
+                        handler.postDelayed(runnable, 3000);
+                    } else {
+                        getCoinInfo();
                     }
                 }
+            }
 
-                @Override
-                public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
-                    new GetCoinInfo().execute();
-                    cancel(true);
-                }
-            });
-            return null;
-        }
+            @Override
+            public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
+                getCoinInfo();
+            }
+        });
     }
 
     private class GetChartInfo extends AsyncTask<String, Void, Void> {
@@ -726,6 +728,9 @@ public class PortfolioFragment extends Fragment {
                                     }
                                 };
                                 handler.postDelayed(runnable, 3000);
+                            } else {
+                                new GetChartInfo().execute(strings);
+                                cancel(true);
                             }
                         }
                     });
@@ -738,7 +743,6 @@ public class PortfolioFragment extends Fragment {
                     }
                 });
                 cancel(true);
-                System.out.println(e.getMessage());
             }
 
             return null;
@@ -747,7 +751,6 @@ public class PortfolioFragment extends Fragment {
         @Override
         protected void onCancelled(Void aVoid) {
             super.onCancelled(aVoid);
-            System.out.println("cancelled");
         }
     }
 

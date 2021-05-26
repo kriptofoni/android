@@ -40,8 +40,8 @@ public class FullScreenChartActivity extends AppCompatActivity {
     private ArrayList<LineChartEntryModel> lineChartEntryModels;
     private ArrayList<CandleStickChartEntryModel> candleStickChartEntryModels;
     private ArrayList<String> timestamps;
-    private String time;
-    private ImageView backButton;
+    private String time, type;
+    private ImageView backButton, change;
     private int chartColor, textColor;
 
     @Override
@@ -54,25 +54,45 @@ public class FullScreenChartActivity extends AppCompatActivity {
         lineChart = findViewById(R.id.full_screen_chart_line_chart);
         candleStickChart = findViewById(R.id.full_screen_chart_candlestick_chart);
         backButton = findViewById(R.id.full_screen_chart_back_button);
+        change = findViewById(R.id.full_screen_chart_change_chart);
 
         Intent intent = getIntent();
 
         time = intent.getStringExtra("time");
-        String type = intent.getStringExtra("type");
+        type = intent.getStringExtra("type");
         lineChartEntryModels = intent.getParcelableArrayListExtra("lineChartModels");
         candleStickChartEntryModels = intent.getParcelableArrayListExtra("candleStickChartModels");
         timestamps = intent.getStringArrayListExtra("timestamps");
         chartColor = intent.getIntExtra("color", textColor);
 
-        if (type.equals("line") && lineChartEntryModels != null)
+        if (type.equals("line") && lineChartEntryModels != null) {
+            change.setImageResource(R.drawable.ic_candlestickchart);
             getLineChart();
-        else
+        } else if (type.equals("candleStick") && candleStickChartEntryModels != null) {
+            change.setImageResource(R.drawable.ic_linechart);
             getCandleStickChart();
+        }
+
 
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 finish();
+            }
+        });
+
+        change.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (type.equals("line")) {
+                    type = "candleStick";
+                    change.setImageResource(R.drawable.ic_linechart);
+                    getCandleStickChart();
+                } else {
+                    type = "line";
+                    change.setImageResource(R.drawable.ic_candlestickchart);
+                    getLineChart();
+                }
             }
         });
     }

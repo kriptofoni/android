@@ -1,5 +1,6 @@
 package arsi.dev.kriptofoni.Fragments;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,9 +10,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
@@ -37,6 +40,10 @@ public class AlertsFragment extends Fragment {
     private WatchingListFragment watchingListFragment;
 
     private HomeActivity homeActivity;
+    private SharedPreferences sharedPreferences;
+    private String currencyText;
+
+    private boolean initial = true;
 
     public AlertsFragment() {}
     public AlertsFragment(HomeActivity homeActivity) {
@@ -48,14 +55,27 @@ public class AlertsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_alerts, container, false);
 
+        sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
+        currencyText = sharedPreferences.getString("currency", "usd");
+
         viewPager = view.findViewById(R.id.alerts_view_pager);
         setUpViewPager();
 
         tabLayout = view.findViewById(R.id.alerts_tab_layout);
-        tabLayout.setSelectedTabIndicatorColor(Color.parseColor("#f2a900"));
+        tabLayout.setSelectedTabIndicatorColor(ContextCompat.getColor(getContext(), R.color.buttonColor));
         tabLayout.setupWithViewPager(viewPager);
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        String tempCurrency = sharedPreferences.getString("currency", "usd");
+        if (!tempCurrency.equals(currencyText)) {
+            watchingListFragment.setHiddenChanged(true);
+            watchingListFragment.onResume();
+        }
     }
 
     @Override
@@ -64,10 +84,10 @@ public class AlertsFragment extends Fragment {
         Fragment active;
         switch (viewPager.getCurrentItem()) {
             case 0:
-                active = alertFragment;
+                active = watchingListFragment;
                 break;
             case 1:
-                active = watchingListFragment;
+                active = alertFragment;
                 break;
             default:
                 active = null;
@@ -76,18 +96,23 @@ public class AlertsFragment extends Fragment {
         if (hidden) {
             active.onPause();
         } else {
-            active.onResume();
+            if (!initial) {
+                watchingListFragment.setHiddenChanged(true);
+                active.onResume();
+            }
+            if (initial) initial = false;
         }
+
     }
 
     private void setUpViewPager() {
-
         Adapter adapter = new Adapter(getChildFragmentManager(), BEHAVIOUR_RESUME_ONLY_CURRENT_FRAGMENT);
 
+        watchingListFragment = new WatchingListFragment(homeActivity);
         alertFragment = new AlertFragment();
-        watchingListFragment = new WatchingListFragment();
-        adapter.addFragment(alertFragment, "Alarmlar");
+
         adapter.addFragment(watchingListFragment, "İzleme Listesi");
+        adapter.addFragment(alertFragment, "Alarmlar");
 
         viewPager.setAdapter(adapter);
     }
@@ -104,7 +129,7 @@ public class AlertsFragment extends Fragment {
         @NonNull
         @Override
         public Fragment getItem(int position) {
-            tabLayout.setTabTextColors(Color.parseColor("#797676"), Color.parseColor("#f2a900"));
+            tabLayout.setTabTextColors(ContextCompat.getColor(getContext(), R.color.textColor), ContextCompat.getColor(getContext(), R.color.buttonColor));
             return alertFragmentsList.get(position);
         }
 

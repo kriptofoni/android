@@ -360,7 +360,6 @@ public class MostDecIn7Fragment extends Fragment {
                     }
                 } else {
                     if (response.code() == 429) {
-                        System.out.println(response.code());
                         Handler handler = new Handler();
                         Runnable runnable = new Runnable() {
                             @Override
@@ -369,6 +368,8 @@ public class MostDecIn7Fragment extends Fragment {
                             }
                         };
                         handler.postDelayed(runnable, 5000);
+                    } else {
+                        getCoinInfo(ids);
                     }
                 }
             }

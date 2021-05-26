@@ -56,7 +56,6 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.9" />
 
-
     <EditText
         android:id="@+id/coop_subject_input"
         android:layout_width="0dp"
@@ -88,9 +87,10 @@
         app:layout_constraintTop_toBottomOf="@id/coop_button_top"
         app:layout_constraintBottom_toTopOf="@id/coop_button_bottom"
         android:background="@drawable/detail_button"
-        android:text="SEND"
+        android:text="GÖNDER"
+        android:textSize="20dp"
         android:backgroundTint="@color/buttonColor"
-        android:textColor="@color/textColor"/>
+        android:textColor="@color/buttonTextColor"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
