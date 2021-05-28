@@ -19,6 +19,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,6 +52,7 @@ public class BuySellFragment extends Fragment {
     private Button addOperation;
     private TextView datePickerClick, currencies;
     private EditText notesInput, currenciesInputText, costInput, priceInput, datePickerText;
+    private RelativeLayout coinSelect;
     private boolean operationType = false, fromPortfolio = false;
     private DatePickerDialog.OnDateSetListener dateSetListener;
     private List<PortfolioMemoryModel> models;
@@ -85,6 +87,7 @@ public class BuySellFragment extends Fragment {
         addOperation = view.findViewById(R.id.addOperation);
         currenciesInputText = view.findViewById(R.id.currenciesInputText);
         currencies = view.findViewById(R.id.currencies);
+        coinSelect = view.findViewById(R.id.buy_sell_crypto_select);
 
         Intent intent = buySellActivity.getIntent();
         String coinShortCut = intent.getStringExtra("shortCut");
@@ -92,11 +95,14 @@ public class BuySellFragment extends Fragment {
         if (coinShortCut != null) {
             shortCut = coinShortCut;
             id = intent.getStringExtra("id");
-            String text = "Total " + coinShortCut.toUpperCase(Locale.ENGLISH);
-            currencies.setText(text);
+            currencies.setText(coinShortCut.toUpperCase(Locale.ENGLISH));
+        } else {
+            currencies.setText("BTC");
+            shortCut = "BTC";
+            id = "bitcoin";
         }
 
-        currencies.setOnClickListener(new View.OnClickListener() {
+        coinSelect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(buySellActivity, CoinSelectActivity.class);
@@ -271,10 +277,9 @@ public class BuySellFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == COIN_SELECT_REQUEST_CODE && resultCode == COIN_SELECT_REQUEST_CODE) {
-            String text = "Total " + data.getStringExtra("shortCut").toUpperCase(Locale.ENGLISH);
             shortCut = data.getStringExtra("shortCut");
             id = data.getStringExtra("id");
-            currencies.setText(text);
+            currencies.setText(data.getStringExtra("shortCut").toUpperCase(Locale.ENGLISH));
         }
     }
 }

@@ -52,8 +52,7 @@ public class CoinsFragment extends Fragment {
     private SortedCoinsApi myCoinGeckoApi;
     private int currentPage = 1;
     private String currency, fetchType;
-    private boolean reached = false, onScreen = false, firstRender = false, inProgress = false,
-            isInterrupted = false, firstOnResume = false, firstFetch = false;
+    private boolean reached = false, onScreen = false, firstRender = false, inProgress = false;
     private Handler handler;
     private Runnable runnable;
     private ProgressBar progressBar, bottomProgressBar;
@@ -77,8 +76,8 @@ public class CoinsFragment extends Fragment {
             public void run() {
                 if (onScreen && firstRender && !inProgress) {
                     getCoins("update");
-                    handler.postDelayed(this, 10000);
                 }
+                handler.postDelayed(this, 10000);
             }
         };
 
@@ -104,13 +103,12 @@ public class CoinsFragment extends Fragment {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if (!reached && !inProgress) {
-                    if (!recyclerView.canScrollVertically(1) && recyclerView.getAdapter() instanceof MainCoinsRecyclerAdapter) {
+                if (!recyclerView.canScrollVertically(1) && recyclerView.getAdapter() instanceof MainCoinsRecyclerAdapter) {
+                    if (!reached && !inProgress) {
                         reached = true;
                         currentPage++;
                         bottomProgressBar.setVisibility(View.VISIBLE);
                         getCoins("newPage");
-                        recyclerView.scrollToPosition((currentPage - 1) * 100 - 4);
                     }
                 }
             }
@@ -118,7 +116,6 @@ public class CoinsFragment extends Fragment {
 
         getCoins("initial");
         if (!firstRender) firstRender = true;
-        if (!firstOnResume) firstOnResume = true;
 
         return view;
     }
@@ -129,11 +126,6 @@ public class CoinsFragment extends Fragment {
         if (onScreen) {
             onScreen = false;
             handler.removeCallbacks(runnable);
-            // If the page is stopped while a data loading process is in progress,
-            // we check whether there is any data fetch process when the page
-            // is stopped in order to start the data fetch process
-            // from the beginning when the page is opened again.
-            if (inProgress) isInterrupted = true;
         }
     }
 
@@ -143,17 +135,6 @@ public class CoinsFragment extends Fragment {
         if (homeActivity != null && homeActivity.getActive() != null && homeActivity.getActive() instanceof MainFragment) {
             onScreen = true;
             handler.postDelayed(runnable, 10000);
-            if (isInterrupted) {
-//                System.out.println("interrupted");
-//                new GetCoinInfo().execute();
-//                inProgress = true;
-//                isInterrupted = false;
-            }
-            if (firstRender && !firstOnResume) {
-                progressBar.setVisibility(View.VISIBLE);
-                getCoins("initial");
-                firstOnResume = true;
-            }
         }
     }
 
@@ -205,13 +186,11 @@ public class CoinsFragment extends Fragment {
     }
 
     private void getCoins(String type) {
-        fetchType = type;
+        if (!inProgress) {
+            fetchType = type;
+            getCoinInfo();
+        }
         inProgress = true;
-        getCoinInfo();
-    }
-
-    public void setFirstOnResume(boolean firstOnResume) {
-        this.firstOnResume = firstOnResume;
     }
 
     public void setMyCoinGeckoApi(SortedCoinsApi myCoinGeckoApi) {
@@ -277,10 +256,6 @@ public class CoinsFragment extends Fragment {
                                     mainCoinsRecyclerAdapter.notifyDataSetChanged();
                                 progressBar.setVisibility(View.GONE);
                                 bottomProgressBar.setVisibility(View.GONE);
-                                if (!firstFetch) {
-                                    homeActivity.setScreen();
-                                    firstFetch = true;
-                                }
                             }
                         });
 

@@ -187,12 +187,6 @@ public class WatchingListFragment extends Fragment{
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        System.out.println("detached");
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
 

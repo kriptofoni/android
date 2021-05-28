@@ -307,9 +307,10 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                 // Don't fetch all coins if already fetched in last 10 mins.
                 lastFetchOfAllCoins = sharedPreferences.getFloat("lastFetchOfAllCoins", 0);
                 System.out.println(lastFetchOfAllCoins - (System.currentTimeMillis() - 1000 * 60 * 10));
+                getAllCoins();
                 if (lastFetchOfAllCoins < System.currentTimeMillis() - 1000 * 60 * 10) {
                     fetchAllCoins = true;
-                    getAllCoins();
+
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putFloat("lastFetchOfAllCoins", System.currentTimeMillis());
                     editor.apply();
@@ -319,7 +320,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
         @Override
         protected Void doInBackground(Void... voids) {
-
             try {
                 Global global = client.getGlobal();
                 if (global != null) {
@@ -369,11 +369,13 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                 String id = coin.getId();
                 String symbol = coin.getSymbol();
                 String image = coin.getImage();
+                double priceIn24 = coin.getPrice_change_24h();
                 double priceChangeIn24h = coin.getPrice_change_percentage_24h_in_currency();
                 double priceChangeIn7d = coin.getPrice_change_percentage_7d_in_currency();
                 double marketCapRank = coin.getMarket_cap_rank();
                 double marketCap = coin.getMarket_cap();
-                CoinSearchModel model = new CoinSearchModel(marketCapRank, id, name, symbol, marketCap, image, priceChangeIn24h, priceChangeIn7d, (index - 1) * 100 + i + 1);
+                double currentPrice = coin.getCurrent_price();
+                CoinSearchModel model = new CoinSearchModel(marketCapRank, id, name, symbol, marketCap, image, priceChangeIn24h, priceChangeIn7d, (index - 1) * 100 + i + 1, currentPrice, priceIn24);
                 search.add(model);
             }
             synchronized (search) {

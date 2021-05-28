@@ -87,14 +87,21 @@ public class MostDecIn24Fragment extends Fragment {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if (!reached && !inProgress) {
-                    if (!recyclerView.canScrollVertically(1) && recyclerView.getAdapter() instanceof MainCoinsRecyclerAdapter) {
+                if (!recyclerView.canScrollVertically(1) && recyclerView.getAdapter() instanceof MainCoinsRecyclerAdapter) {
+                    if (!reached && !inProgress) {
                         reached = true;
                         currentPage++;
-                        bottomProgressBar.setVisibility(View.VISIBLE);
                         fetchType = "newPage";
-                        addIds();
-                        recyclerView.scrollToPosition((currentPage - 1) * 50 - 4);
+                        renderCoins();
+                        bottomProgressBar.setVisibility(View.VISIBLE);
+                        Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                bottomProgressBar.setVisibility(View.GONE);
+                            }
+                        };
+                        handler.postDelayed(runnable, 250);
                     }
                 }
             }
@@ -190,6 +197,7 @@ public class MostDecIn24Fragment extends Fragment {
     }
 
     public void emptyAllCoinModels() {
+        progressBar.setVisibility(View.VISIBLE);
         allCoins.clear();
         coinModels.clear();
         recyclerView.scrollTo(0, 0);
@@ -209,11 +217,11 @@ public class MostDecIn24Fragment extends Fragment {
         if (!inProgress) {
             if (!firstRender) {
                 fetchType = "initial";
-                addIds();
             } else {
                 fetchType = "dataReload";
-                addIds();
             }
+
+            renderCoins();
         }
 
         if (firstRender && !startDone) startDone = true;
@@ -221,6 +229,63 @@ public class MostDecIn24Fragment extends Fragment {
             firstRender = true;
             if (!homeActivity.isFetchAllCoins()) startDone = true;
         }
+    }
+
+    private void renderCoins() {
+
+        int firstIndex, lastIndex;
+
+        if (fetchType.equals("newPage")) {
+            firstIndex = (currentPage - 1) * 50;
+            lastIndex = firstIndex + 50;
+        } else if (fetchType.equals("dataReload")) {
+            firstIndex = 0;
+            lastIndex = currentPage * 50;
+        } else {
+            firstIndex = 0;
+            lastIndex = firstIndex + 50;
+        }
+
+        coinModels.clear();
+        coinModels.addAll(allCoins);
+        allCoins.clear();
+
+        ArrayList<CoinModel> temp = new ArrayList<>();
+
+        for (int i = firstIndex; i < lastIndex; i++) {
+            CoinSearchModel searchModel = allCoinSearchModels.get(i);
+
+            String imageUrl = searchModel.getImage();
+            String name = searchModel.getName();
+            String shortCut = searchModel.getSymbol();
+            String id = searchModel.getId();
+            double changeIn24Hours = searchModel.getPriceChangeIn24();
+            double priceChangeIn24Hours = searchModel.getPriceIn24();
+            double currentPrice = searchModel.getCurrentPrice();
+            double marketCap = searchModel.getMarketCap();
+            double changeIn7Days = searchModel.getPriceChangeIn7();
+
+            CoinModel model = new CoinModel(i + 1, imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id, 0);
+            if (fetchType.equals("dataReload"))
+                temp.add(model);
+            else {
+                coinModels.add(model);
+            }
+        }
+
+        if (fetchType.equals("dataReload") && !coinModels.isEmpty()) {
+            for (int i = 0; i < temp.size(); i++) {
+                coinModels.set(i, temp.get(i));
+            }
+            mainCoinsRecyclerAdapter.notifyItemRangeChanged(firstIndex, lastIndex - firstIndex);
+        } else {
+            mainCoinsRecyclerAdapter.notifyDataSetChanged();
+        }
+
+        progressBar.setVisibility(View.GONE);
+        bottomProgressBar.setVisibility(View.GONE);
+        if (reached) reached = false;
+        allCoins.addAll(coinModels);
     }
 
     private void addIds() {
@@ -243,8 +308,9 @@ public class MostDecIn24Fragment extends Fragment {
             }
 
             s = stringBuilder.toString();
+            if (!inProgress)
+                getCoinInfo(s);
             inProgress = true;
-            getCoinInfo(s);
         }
     }
 
@@ -286,10 +352,8 @@ public class MostDecIn24Fragment extends Fragment {
                             double marketCap = result.getMarket_cap();
                             double changeIn7Days = result.getPrice_change_percentage_7d_in_currency();
                             CoinModel model = new CoinModel(i, imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id, 0);
-                            if (fetchType.equals("update") || fetchType.equals("dataReload")) {
+                            if (fetchType.equals("update")) {
                                 temp.add(model);
-                            } else if (fetchType.equals("newPage")) {
-                                newPage.add(model);
                             } else {
                                 coinModels.add(model);
                             }
@@ -306,7 +370,7 @@ public class MostDecIn24Fragment extends Fragment {
                             }
                         }
 
-                        if ((fetchType.equals("update") || fetchType.equals("dataReload")) && !coinModels.isEmpty()) {
+                        if ((fetchType.equals("update")) && !coinModels.isEmpty()) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                 temp.sort(new Comparator<CoinModel>() {
                                     @Override
@@ -320,17 +384,17 @@ public class MostDecIn24Fragment extends Fragment {
                             }
                         }
 
-                        if (fetchType.equals("newPage")) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                newPage.sort(new Comparator<CoinModel>() {
-                                    @Override
-                                    public int compare(CoinModel lhs, CoinModel rhs) {
-                                        return Double.compare(lhs.getChangeIn24Hours(), rhs.getChangeIn24Hours());
-                                    }
-                                });
-                            }
-                            coinModels.addAll(newPage);
-                        }
+//                        if (fetchType.equals("newPage")) {
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//                                newPage.sort(new Comparator<CoinModel>() {
+//                                    @Override
+//                                    public int compare(CoinModel lhs, CoinModel rhs) {
+//                                        return Double.compare(lhs.getChangeIn24Hours(), rhs.getChangeIn24Hours());
+//                                    }
+//                                });
+//                            }
+//                            coinModels.addAll(newPage);
+//                        }
 
                         for (int i = 0; i < coinModels.size(); i++) {
                             coinModels.get(i).setNumber(i + 1);
@@ -339,13 +403,13 @@ public class MostDecIn24Fragment extends Fragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                if (fetchType.equals("update") || fetchType.equals("dataReload"))
+                                if (fetchType.equals("update"))
                                     mainCoinsRecyclerAdapter.notifyItemRangeChanged(0, 50);
                                 else
                                     mainCoinsRecyclerAdapter.notifyDataSetChanged();
                                 progressBar.setVisibility(View.GONE);
                                 bottomProgressBar.setVisibility(View.GONE);
-                                if (fetchType.equals("newPage")) recyclerView.scrollToPosition((currentPage - 1) * 50 - 4);
+//                                if (fetchType.equals("newPage")) recyclerView.scrollToPosition((currentPage - 1) * 50 - 4);
                             }
                         });
                         allCoins.addAll(coinModels);

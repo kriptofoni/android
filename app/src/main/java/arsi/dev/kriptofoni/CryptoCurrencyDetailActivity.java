@@ -12,6 +12,7 @@ import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -175,7 +176,6 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         runnable = new Runnable() {
             @Override
             public void run() {
-                System.out.println("called");
                 if (!inProgress) {
                     getCoinInfo();
                 }
@@ -504,6 +504,24 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         candleStickChart.setDragEnabled(true);
         candleStickChart.setScaleEnabled(true);
         candleStickChart.setDescription(null);
+        candleStickChart.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        scrollView.requestDisallowInterceptTouchEvent(true);
+                        break;
+                    }
+                    case MotionEvent.ACTION_CANCEL:
+                    case MotionEvent.ACTION_UP: {
+                        scrollView.requestDisallowInterceptTouchEvent(false);
+                        break;
+                    }
+                }
+
+                return false;
+            }
+        });
 
         XAxis xAxis = candleStickChart.getXAxis();
         xAxis.setTextColor(defaultColor);
@@ -558,6 +576,24 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         lineChart.setScaleEnabled(true);
         lineChart.setDrawGridBackground(false);
         lineChart.setDescription(null);
+        lineChart.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        scrollView.requestDisallowInterceptTouchEvent(true);
+                        break;
+                    }
+                    case MotionEvent.ACTION_CANCEL:
+                    case MotionEvent.ACTION_UP: {
+                        scrollView.requestDisallowInterceptTouchEvent(false);
+                        break;
+                    }
+                }
+
+                return false;
+            }
+        });
 
         XAxis xAxis = lineChart.getXAxis();
         xAxis.setTextColor(textColor);
@@ -768,8 +804,8 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     if (inProgress) inProgress = false;
 
                 } else {
+//                    System.out.println(response.code() + " " + response.message() + " " + response.errorBody() + " " + response.headers());
                     if (response.code() == 429) {
-                        System.out.println(response.code());
                         Handler handler = new Handler();
                         Runnable runnable = new Runnable() {
                             @Override

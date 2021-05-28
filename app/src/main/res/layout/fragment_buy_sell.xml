@@ -51,6 +51,14 @@
         app:layout_constraintGuide_percent="0.2" />
 
     <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/totalMoneyTextTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.13" />
+
+
+    <androidx.constraintlayout.widget.Guideline
         android:id="@+id/editTextLeft"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -106,16 +114,36 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.35" />
 
-    <TextView
-        android:id="@+id/currencies"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:text="Toplam"
-        android:textColor="@color/textColor"
-        android:textSize="20sp"
+    <RelativeLayout
+        android:id="@+id/buy_sell_crypto_select"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/buy_sell_picker"
         app:layout_constraintBottom_toTopOf="@+id/totalMoneyTextBottom"
-        app:layout_constraintStart_toStartOf="@+id/buyButtonLeft" />
+        app:layout_constraintStart_toStartOf="@+id/buyButtonLeft"
+        app:layout_constraintEnd_toEndOf="@id/buyButtonRight"
+        app:layout_constraintTop_toTopOf="@id/totalMoneyTextTop"
+        >
+
+        <TextView
+            android:id="@+id/currencies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BTC"
+            android:layout_centerVertical="true"
+            android:textSize="18dp"
+            android:layout_marginStart="10dp"
+            android:textColor="@color/textColor" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="10dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_baseline_arrow_drop_down_buy_sell_24"/>
+
+    </RelativeLayout>
 
     <EditText
         android:id="@+id/currenciesInputText"
