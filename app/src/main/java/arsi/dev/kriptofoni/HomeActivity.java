@@ -42,6 +42,8 @@ import arsi.dev.kriptofoni.Fragments.PortfolioFragment;
 import arsi.dev.kriptofoni.Models.CoinSearchModel;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
+import arsi.dev.kriptofoni.Retrofit.CoinInfoApi;
+import arsi.dev.kriptofoni.Retrofit.CoinInfoRetrofitClient;
 import arsi.dev.kriptofoni.Retrofit.CoinMarket;
 import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
@@ -230,6 +232,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
             public void run() {
                 if (coinSearchModels.size() == max && max != 0) {
                     System.out.println("run");
+                    loaderManager.destroyLoader(0);
                     // When the data download is complete, we send the data to the required pages.
                     mainFragment.setCoinModelsForSearch(coinSearchModels);
                     mainFragment.setMostIncIn24List(coinSearchModels);
@@ -307,10 +310,9 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                 // Don't fetch all coins if already fetched in last 10 mins.
                 lastFetchOfAllCoins = sharedPreferences.getFloat("lastFetchOfAllCoins", 0);
                 System.out.println(lastFetchOfAllCoins - (System.currentTimeMillis() - 1000 * 60 * 10));
-                getAllCoins();
                 if (lastFetchOfAllCoins < System.currentTimeMillis() - 1000 * 60 * 10) {
                     fetchAllCoins = true;
-
+                    getAllCoins();
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putFloat("lastFetchOfAllCoins", System.currentTimeMillis());
                     editor.apply();

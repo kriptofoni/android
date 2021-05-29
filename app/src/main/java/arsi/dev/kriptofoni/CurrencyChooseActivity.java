@@ -139,7 +139,6 @@ public class CurrencyChooseActivity extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                     } else {
                         if (response.code() == 429) {
-                            System.out.println(response.code());
                             Handler handler = new Handler();
                             Runnable runnable = new Runnable() {
                                 @Override

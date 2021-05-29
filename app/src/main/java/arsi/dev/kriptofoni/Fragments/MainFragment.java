@@ -1,20 +1,15 @@
 package arsi.dev.kriptofoni.Fragments;
 
-import android.app.AlertDialog;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -30,19 +25,14 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
-import com.litesoftwares.coingecko.CoinGeckoApiClient;
-import com.litesoftwares.coingecko.impl.CoinGeckoApiClientImpl;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.UnaryOperator;
 
 import arsi.dev.kriptofoni.CurrencyChooseActivity;
 import arsi.dev.kriptofoni.Fragments.MainFragments.CoinsFragment;
@@ -54,8 +44,6 @@ import arsi.dev.kriptofoni.HomeActivity;
 import arsi.dev.kriptofoni.Models.CoinSearchModel;
 import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
 import arsi.dev.kriptofoni.R;
-import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
-import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
 import arsi.dev.kriptofoni.Retrofit.SortedCoinsApi;
 import arsi.dev.kriptofoni.Retrofit.SortedCoinsRetrofitClient;
 
@@ -80,13 +68,14 @@ public class MainFragment extends Fragment {
     private MostDecIn7Fragment mostDecIn7Fragment;
 
     private ViewPager viewPager;
+    private SortedCoinsApi myCoinGeckoApi;
 
     public MainFragment() {}
 
     public MainFragment (HomeActivity homeActivity) {
         this.homeActivity = homeActivity;
     }
-    private SortedCoinsApi myCoinGeckoApi;
+
 
     @Nullable
     @Override

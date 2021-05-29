@@ -1,19 +1,13 @@
 package arsi.dev.kriptofoni.Fragments.AlertsFragments;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -32,12 +26,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
-import arsi.dev.kriptofoni.Adapters.MainCoinsRecyclerAdapter;
 import arsi.dev.kriptofoni.Adapters.WatchingListRecyclerAdapter;
 import arsi.dev.kriptofoni.CoinSelectActivity;
 import arsi.dev.kriptofoni.CurrencyChooseActivity;
 import arsi.dev.kriptofoni.HomeActivity;
-import arsi.dev.kriptofoni.Models.CoinSearchModel;
 import arsi.dev.kriptofoni.Models.WatchingListModel;
 import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
 import arsi.dev.kriptofoni.R;

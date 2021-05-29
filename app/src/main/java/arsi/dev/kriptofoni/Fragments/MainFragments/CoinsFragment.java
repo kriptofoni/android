@@ -1,8 +1,6 @@
 package arsi.dev.kriptofoni.Fragments.MainFragments;
 
 import android.content.SharedPreferences;
-import android.net.IpSecManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -16,12 +14,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.litesoftwares.coingecko.CoinGeckoApiClient;
-import com.litesoftwares.coingecko.domain.Coins.CoinMarkets;
-import com.litesoftwares.coingecko.exception.CoinGeckoApiException;
-import com.litesoftwares.coingecko.impl.CoinGeckoApiClientImpl;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,15 +24,12 @@ import arsi.dev.kriptofoni.HomeActivity;
 import arsi.dev.kriptofoni.Models.CoinModel;
 import arsi.dev.kriptofoni.Models.CoinSearchModel;
 import arsi.dev.kriptofoni.R;
-import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
 import arsi.dev.kriptofoni.Retrofit.CoinMarket;
-import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
 import arsi.dev.kriptofoni.Retrofit.SortedCoinsApi;
 import arsi.dev.kriptofoni.Retrofit.SortedCoinsRetrofitClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class CoinsFragment extends Fragment {
 
@@ -75,6 +64,7 @@ public class CoinsFragment extends Fragment {
             @Override
             public void run() {
                 if (onScreen && firstRender && !inProgress) {
+                    System.out.println("called");
                     getCoins("update");
                 }
                 handler.postDelayed(this, 10000);
@@ -104,11 +94,32 @@ public class CoinsFragment extends Fragment {
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 if (!recyclerView.canScrollVertically(1) && recyclerView.getAdapter() instanceof MainCoinsRecyclerAdapter) {
-                    if (!reached && !inProgress) {
-                        reached = true;
-                        currentPage++;
+                    if (!reached) {
                         bottomProgressBar.setVisibility(View.VISIBLE);
-                        getCoins("newPage");
+
+                        // If there is already an update process,
+                        // wait for this process to finish.
+                        if (inProgress) {
+                            Handler scrollHandler = new Handler();
+                            Runnable scrollRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (!inProgress) {
+                                        System.out.println("progress handler called");
+                                        reached = true;
+                                        currentPage++;
+                                        getCoins("newPage");
+                                        return;
+                                    }
+                                    scrollHandler.postDelayed(this, 250);
+                                }
+                            };
+                            scrollHandler.postDelayed(scrollRunnable, 250);
+                        } else {
+                            reached = true;
+                            currentPage++;
+                            getCoins("newPage");
+                        }
                     }
                 }
             }
@@ -287,5 +298,4 @@ public class CoinsFragment extends Fragment {
             }
         });
     }
-
 }

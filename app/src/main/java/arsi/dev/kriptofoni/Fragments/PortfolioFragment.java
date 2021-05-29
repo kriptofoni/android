@@ -1,11 +1,9 @@
 package arsi.dev.kriptofoni.Fragments;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -29,7 +27,6 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.DataSet;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -44,26 +41,18 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import arsi.dev.kriptofoni.Adapters.PortfolioRecyclerAdapter;
 import arsi.dev.kriptofoni.BuySellActivity;
-import arsi.dev.kriptofoni.CurrencyChooseActivity;
-import arsi.dev.kriptofoni.Fragments.AlertsFragments.WatchingListFragment;
-import arsi.dev.kriptofoni.Models.LineChartEntryModel;
 import arsi.dev.kriptofoni.Models.PortfolioMemoryModel;
 import arsi.dev.kriptofoni.Models.PortfolioModel;
-import arsi.dev.kriptofoni.Models.WatchingListModel;
 import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
 import arsi.dev.kriptofoni.R;
 import arsi.dev.kriptofoni.Retrofit.CoinInfoApi;
@@ -119,6 +108,7 @@ public class PortfolioFragment extends Fragment {
         models = new ArrayList<>();
         deleteIds = new ArrayList<>();
         removeModels = new ArrayList<>();
+        memoryModels = new ArrayList<>();
 
         sortedCoinsApi = SortedCoinsRetrofitClient.getInstance().getMyCoinGeckoApi();
         chartInfoApi = CoinInfoRetrofitClient.getInstance().getMyCoinGeckoApi();
@@ -357,15 +347,19 @@ public class PortfolioFragment extends Fragment {
         totalPrincipal = 0;
         portfolioValue = 0;
 
-        hasCoin.setVisibility(View.GONE);
-        addCoin.setVisibility(View.GONE);
-        progressBar.setVisibility(View.VISIBLE);
-
         String portfolioJson = sharedPreferences.getString("portfolio", "");
         Gson gson = new Gson();
         Type type = new TypeToken<List<PortfolioMemoryModel>>() {}.getType();
-        if (!portfolioJson.isEmpty()) memoryModels = gson.fromJson(portfolioJson, type);
-        else memoryModels = new ArrayList<>();
+        if (!portfolioJson.isEmpty()) {
+            double lastFetchOfPortfolio = sharedPreferences.getFloat("lastFetchOfPortfolio", 0);
+            ArrayList<PortfolioMemoryModel> temp = gson.fromJson(portfolioJson, type);
+            if (temp.size() != memoryModels.size() || lastFetchOfPortfolio < System.currentTimeMillis() - (1000 * 60)) {
+                hasCoin.setVisibility(View.GONE);
+                addCoin.setVisibility(View.GONE);
+                progressBar.setVisibility(View.VISIBLE);
+                memoryModels = temp;
+            }
+        }
 
         quantities = new HashMap<>();
         timestamps = new HashMap<>();
@@ -407,6 +401,9 @@ public class PortfolioFragment extends Fragment {
             coinIds = builder.toString();
 
             if (!coinIds.isEmpty()) {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putFloat("lastFetchOfPortfolio", System.currentTimeMillis());
+                editor.apply();
                 getCoinInfo();
             }
         } else {

@@ -128,13 +128,13 @@ public class BuySellFragment extends Fragment {
                         if (quantities.get(shortCut) == null) {
                             new AlertDialog.Builder(buySellActivity)
                                     .setTitle("Invalid Operation")
-                                    .setMessage(String.format("You can't sell %s because it is not in your portfolio.", shortCut.toUpperCase(Locale.ENGLISH)))
+                                    .setMessage(String.format("Portföyünüzde %s bulunmadığı için satış işlemi gerçekleştiremezsiniz.", shortCut.toUpperCase(Locale.ENGLISH)))
                                     .setNegativeButton("OK", null)
                                     .show();
                         } else if (quantities.get(shortCut) < currencyAmount) {
                             new AlertDialog.Builder(buySellActivity)
                                     .setTitle("Invalid Operation")
-                                    .setMessage(String.format("You can't sell more %s than you have.", shortCut.toUpperCase(Locale.ENGLISH)))
+                                    .setMessage(String.format("Sahip olduğunuzdan fazla %s satış işlemi gerçekleştiremezsiniz.", shortCut.toUpperCase(Locale.ENGLISH)))
                                     .setNegativeButton("OK", null)
                                     .show();
                         } else {
@@ -144,7 +144,7 @@ public class BuySellFragment extends Fragment {
                         createModel(currencyAmount, price, costInput, notes, "buy");
                     }
                 } else {
-                    Toast.makeText(buySellActivity, "Please fill necessary fields.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(buySellActivity, "Lütfen gerekli alanları doldurunuz.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -193,7 +193,7 @@ public class BuySellFragment extends Fragment {
             buySellActivity.setResult(2);
             buySellActivity.finish();
         } else {
-            Toast.makeText(buySellActivity, "Your operation added your portfolio successfully.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(buySellActivity, "İşleminiz portföyünüze eklenmiştir.", Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -26,7 +26,7 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
 
     private CoinGeckoApi myCoinGeckoApi;
     private String currency;
-    private int totalPageNumber;
+    private int totalPageNumber, ctr = 0;
 
     public GetAllCoinsAsyncTaskLoader(@NonNull Context context, int totalPageNumber, CoinGeckoApi myCoinGeckoApi, String currency) {
         super(context);
@@ -95,41 +95,7 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
         for (int i = 1; i <= totalPageNumber ; i++) {
             loadData(i);
         }
-//        List<Observable<List<CoinMarket>>> requests = new ArrayList<>();
-//        for (int i = 1; i <= totalPageNumber; i++) {
-//            requests.add(myCoinGeckoApi.getCoinMarkets(currency, null,"id_desc", 250, i, true, "24h,7d"));
-//        }
-//
-//        Observable.zip(
-//                requests,
-//                new Function<Object[], Object>() {
-//                    @Override
-//                    public Object apply(Object[] objects) throws Exception {
-//                        List<List<CoinMarket>> response = new ArrayList<>();
-//                        for (Object o : objects) {
-//                            response.add((List<CoinMarket>) o);
-//                        }
-//                        return response;
-//                    }
-//                })
-//                .subscribe(
-//                        new Consumer<Object>() {
-//                            @Override
-//                            public void accept(Object o) throws Exception {
-//                                List<List<CoinMarket>> coins = (List<List<CoinMarket>>) o;
-//                                System.out.println("245 " + coins.size());
-//                                for (int i = 0; i < coins.size(); i++) {
-//                                    System.out.println(coins.get(i).size());
-//                                }
-//                            }
-//                        },
-//                        new Consumer<Throwable>() {
-//                            @Override
-//                            public void accept(Throwable throwable) throws Exception {
-//                                System.out.println("251 " + throwable.toString());
-//                            }
-//                        }
-//                );
+
         return "Task Done";
     }
 
@@ -138,4 +104,5 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
         super.onStartLoading();
         forceLoad();
     }
+
 }

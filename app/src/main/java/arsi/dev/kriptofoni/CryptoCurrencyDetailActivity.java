@@ -57,6 +57,7 @@ import java.util.Locale;
 import arsi.dev.kriptofoni.Models.CandleStickChartEntryModel;
 import arsi.dev.kriptofoni.Models.LineChartEntryModel;
 import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
+import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
 import arsi.dev.kriptofoni.Retrofit.CoinInfoApi;
 import arsi.dev.kriptofoni.Retrofit.CoinInfoRetrofitClient;
 import retrofit2.Call;
@@ -804,7 +805,6 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     if (inProgress) inProgress = false;
 
                 } else {
-//                    System.out.println(response.code() + " " + response.message() + " " + response.errorBody() + " " + response.headers());
                     if (response.code() == 429) {
                         Handler handler = new Handler();
                         Runnable runnable = new Runnable() {

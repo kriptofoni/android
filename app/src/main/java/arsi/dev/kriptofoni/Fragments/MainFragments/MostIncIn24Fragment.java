@@ -32,6 +32,7 @@ import arsi.dev.kriptofoni.HomeActivity;
 import arsi.dev.kriptofoni.Models.CoinModel;
 import arsi.dev.kriptofoni.Models.CoinSearchModel;
 import arsi.dev.kriptofoni.R;
+import arsi.dev.kriptofoni.Retrofit.Coin;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
 import arsi.dev.kriptofoni.Retrofit.CoinMarket;
@@ -423,7 +424,6 @@ public class MostIncIn24Fragment extends Fragment {
                         getCoinInfo(ids);
                     }
                 } else {
-                    System.out.println(response.code());
                     if (response.code() == 429) {
                         Handler handler = new Handler();
                         Runnable runnable = new Runnable() {
@@ -441,7 +441,6 @@ public class MostIncIn24Fragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
-                System.out.println(t.getMessage());
                 getCoinInfo(ids);
             }
         });

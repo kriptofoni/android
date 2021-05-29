@@ -5,28 +5,19 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.DeadObjectException;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.widget.Adapter;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.navigation.NavigationView;
 import com.google.gson.JsonObject;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.Locale;
 
 import arsi.dev.kriptofoni.CoinSelectActivity;
@@ -39,7 +30,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static java.math.BigDecimal.valueOf;
-import static java.math.MathContext.DECIMAL64;
 
 public class ConverterActivity extends AppCompatActivity {
 
