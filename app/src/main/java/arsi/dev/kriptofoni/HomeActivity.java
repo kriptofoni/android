@@ -21,9 +21,9 @@ import android.widget.RelativeLayout;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.litesoftwares.coingecko.CoinGeckoApiClient;
-import com.litesoftwares.coingecko.domain.Global.Global;
 import com.litesoftwares.coingecko.exception.CoinGeckoApiException;
 import com.litesoftwares.coingecko.impl.CoinGeckoApiClientImpl;
 
@@ -45,6 +45,7 @@ import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
 import arsi.dev.kriptofoni.Retrofit.CoinInfoApi;
 import arsi.dev.kriptofoni.Retrofit.CoinInfoRetrofitClient;
 import arsi.dev.kriptofoni.Retrofit.CoinMarket;
+import arsi.dev.kriptofoni.Retrofit.Global;
 import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
@@ -65,7 +66,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     private RelativeLayout splashScreen, mainScreen;
 
     private CoinGeckoApi myCoinGeckoApi;
-    private CoinGeckoApiClient client;
 
     private static List<CoinSearchModel> coinSearchModels;
     private List<CoinSearchModel> coinSearchModelsFromMem, mostInc24HoursFromMem, mostInc7DaysFromMem;
@@ -128,10 +128,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         if (!coinSearchModelsJson.isEmpty()) coinSearchModelsFromMem = gson.fromJson(coinSearchModelsJson, type);
         if (!mostInc24HoursJson.isEmpty()) mostInc24HoursFromMem = gson.fromJson(mostInc24HoursJson, type);
         if (!mostInc7DaysJson.isEmpty()) mostInc7DaysFromMem = gson.fromJson(mostInc7DaysJson, type);
-
-        client = new CoinGeckoApiClientImpl();
-
-        getTotalMarketCap();
         
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(navigationItemSelectedListener);
@@ -153,6 +149,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
             }
         };
         handler.postDelayed(runnable, 3000);
+
+        getTotalMarketCap();
 
     }
 
@@ -230,9 +228,9 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
+//                System.out.println(coinSearchModels.size());
                 if (coinSearchModels.size() == max && max != 0) {
                     System.out.println("run");
-                    loaderManager.destroyLoader(0);
                     // When the data download is complete, we send the data to the required pages.
                     mainFragment.setCoinModelsForSearch(coinSearchModels);
                     mainFragment.setMostIncIn24List(coinSearchModels);
@@ -245,6 +243,12 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                     mainFragment.writeToMem("coinModelsForSearch", coinSearchModels);
                     mainFragment.writeToMem("mostIncIn24List", coinSearchModels);
                     mainFragment.writeToMem("mostIncIn7List", coinSearchModels);
+
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putFloat("lastFetchOfAllCoins", System.currentTimeMillis());
+                    editor.apply();
+
+                    loaderManager.destroyLoader(0);
                     return;
                 }
                 handler.postDelayed(this, 250);
@@ -254,7 +258,69 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     public void getTotalMarketCap() {
-        new GetTotalMarketCap().execute();
+        Call<Global> call = myCoinGeckoApi.getGlobal();
+        call.enqueue(new Callback<Global>() {
+            @Override
+            public void onResponse(Call<Global> call, Response<Global> response) {
+                if (response.isSuccessful()) {
+                    Global body = response.body();
+                    JsonObject data = body.getData();
+                    if (data != null) {
+                        currency = sharedPreferences.getString("currency", "usd");
+                        JsonObject marketCaps = (JsonObject) data.get("total_market_cap");
+                        double totalMarketCap = marketCaps.get(currency).getAsDouble();
+                        mainFragment.setTotalMarketValue(totalMarketCap);
+                        max = data.get("active_cryptocurrencies").getAsInt();
+                        totalPageNumber = max / 250 + 1;
+
+                        if (firstLoad) {
+                            if (!coinSearchModelsFromMem.isEmpty())
+                                mainFragment.setCoinModelsForSearch(coinSearchModelsFromMem);
+                            if (!mostInc24HoursFromMem.isEmpty()) {
+                                mainFragment.setMostIncIn24List(mostInc24HoursFromMem);
+                                mainFragment.setMostDecIn24List(mostInc24HoursFromMem);
+                            }
+                            if (!mostInc7DaysFromMem.isEmpty()) {
+                                mainFragment.setMostIncIn7List(mostInc7DaysFromMem);
+                                mainFragment.setMostDecIn7List(mostInc7DaysFromMem);
+                            }
+
+                            firstLoad = false;
+
+                            // Don't fetch all coins if already fetched in last 10 mins.
+                            lastFetchOfAllCoins = sharedPreferences.getFloat("lastFetchOfAllCoins", 0);
+                            System.out.println(lastFetchOfAllCoins - (System.currentTimeMillis() - 1000 * 60 * 10));
+                            if (lastFetchOfAllCoins < System.currentTimeMillis() - 1000 * 60 * 10) {
+                                fetchAllCoins = true;
+                                getAllCoins();
+                            }
+                        }
+                    } else {
+                        getTotalMarketCap();
+                    }
+                } else {
+                    if (response.code() == 429) {
+                        Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                getTotalMarketCap();
+                            }
+                        };
+                        handler.postDelayed(runnable, 5000);
+                    } else {
+                        getTotalMarketCap();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Global> call, Throwable t) {
+                System.out.println(t.getMessage());
+                getTotalMarketCap();
+            }
+        });
+
     }
 
     public Fragment getActive() {
@@ -286,68 +352,68 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onLoaderReset(@NonNull Loader<String> loader) {}
 
 
-    private class GetTotalMarketCap extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            // At the first opening of the application, if there is data stored in memory,
-            // we send this data to the required pages.
-            if (firstLoad) {
-                if (!coinSearchModelsFromMem.isEmpty())
-                    mainFragment.setCoinModelsForSearch(coinSearchModelsFromMem);
-                if (!mostInc24HoursFromMem.isEmpty()) {
-                    mainFragment.setMostIncIn24List(mostInc24HoursFromMem);
-                    mainFragment.setMostDecIn24List(mostInc24HoursFromMem);
-                }
-                if (!mostInc7DaysFromMem.isEmpty()) {
-                    mainFragment.setMostIncIn7List(mostInc7DaysFromMem);
-                    mainFragment.setMostDecIn7List(mostInc7DaysFromMem);
-                }
-
-                firstLoad = false;
-
-                // Don't fetch all coins if already fetched in last 10 mins.
-                lastFetchOfAllCoins = sharedPreferences.getFloat("lastFetchOfAllCoins", 0);
-                System.out.println(lastFetchOfAllCoins - (System.currentTimeMillis() - 1000 * 60 * 10));
-                if (lastFetchOfAllCoins < System.currentTimeMillis() - 1000 * 60 * 10) {
-                    fetchAllCoins = true;
-                    getAllCoins();
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putFloat("lastFetchOfAllCoins", System.currentTimeMillis());
-                    editor.apply();
-                }
-            }
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            try {
-                Global global = client.getGlobal();
-                if (global != null) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            currency = sharedPreferences.getString("currency", "usd");
-                            System.out.println(global.getData().getTotalMarketCap().get(currency));
-                            mainFragment.setTotalMarketValue(global.getData().getTotalMarketCap().get(currency));
-                            max = (int) global.getData().getActiveCryptocurrencies();
-                            totalPageNumber = max / 250 + 1;
-                        }
-                    });
-                }
-            } catch (CoinGeckoApiException ex) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        new GetTotalMarketCap().execute();
-                    }
-                });
-                cancel(true);
-            }
-            return null;
-        }
-    }
+//    private class GetTotalMarketCap extends AsyncTask<Void, Void, Void> {
+//
+//        @Override
+//        protected void onPostExecute(Void aVoid) {
+//            super.onPostExecute(aVoid);
+//            // At the first opening of the application, if there is data stored in memory,
+//            // we send this data to the required pages.
+//            if (firstLoad) {
+//                if (!coinSearchModelsFromMem.isEmpty())
+//                    mainFragment.setCoinModelsForSearch(coinSearchModelsFromMem);
+//                if (!mostInc24HoursFromMem.isEmpty()) {
+//                    mainFragment.setMostIncIn24List(mostInc24HoursFromMem);
+//                    mainFragment.setMostDecIn24List(mostInc24HoursFromMem);
+//                }
+//                if (!mostInc7DaysFromMem.isEmpty()) {
+//                    mainFragment.setMostIncIn7List(mostInc7DaysFromMem);
+//                    mainFragment.setMostDecIn7List(mostInc7DaysFromMem);
+//                }
+//
+//                firstLoad = false;
+//
+//                // Don't fetch all coins if already fetched in last 10 mins.
+//                lastFetchOfAllCoins = sharedPreferences.getFloat("lastFetchOfAllCoins", 0);
+//                System.out.println(lastFetchOfAllCoins - (System.currentTimeMillis() - 1000 * 60 * 10));
+//                if (lastFetchOfAllCoins < System.currentTimeMillis() - 1000 * 60 * 10) {
+//                    fetchAllCoins = true;
+//                    getAllCoins();
+//                    SharedPreferences.Editor editor = sharedPreferences.edit();
+//                    editor.putFloat("lastFetchOfAllCoins", System.currentTimeMillis());
+//                    editor.apply();
+//                }
+//            }
+//        }
+//
+//        @Override
+//        protected Void doInBackground(Void... voids) {
+//            try {
+//                Global global = client.getGlobal();
+//                if (global != null) {
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            currency = sharedPreferences.getString("currency", "usd");
+//                            System.out.println(global.getData().getTotalMarketCap().get(currency));
+//                            mainFragment.setTotalMarketValue(global.getData().getTotalMarketCap().get(currency));
+//                            max = (int) global.getData().getActiveCryptocurrencies();
+//                            totalPageNumber = max / 250 + 1;
+//                        }
+//                    });
+//                }
+//            } catch (CoinGeckoApiException ex) {
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        new GetTotalMarketCap().execute();
+//                    }
+//                });
+//                cancel(true);
+//            }
+//            return null;
+//        }
+//    }
 
     public static class MyThread extends Thread {
 

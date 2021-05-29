@@ -72,8 +72,8 @@ public class MostDecIn7Fragment extends Fragment {
         if (allCoinSearchModels == null)
             allCoinSearchModels = new ArrayList<>();
 
-        coinModels = new ArrayList<>();
-        allCoins = new ArrayList<>();
+        if (coinModels == null) coinModels = new ArrayList<>();
+        if (allCoins == null) allCoins = new ArrayList<>();
         coinModelsForSearch = new ArrayList<>();
 
         recyclerView = view.findViewById(R.id.main_most_dec_7_recycler_view);
@@ -247,6 +247,9 @@ public class MostDecIn7Fragment extends Fragment {
             firstIndex = 0;
             lastIndex = firstIndex + 50;
         }
+
+        if (coinModels == null) coinModels = new ArrayList<>();
+        if (allCoins == null) allCoins = new ArrayList<>();
 
         coinModels.clear();
         coinModels.addAll(allCoins);

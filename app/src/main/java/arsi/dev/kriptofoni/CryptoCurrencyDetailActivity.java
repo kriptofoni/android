@@ -89,7 +89,6 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
     private LineChart lineChart;
     private CandleStickChart candleStickChart;
     private RelativeLayout twitterRedirect, webRedirect, redditRedirect;
-    private LineDataSet set;
     private int chartColor, days;
     private boolean firstFetch = true, inProgress = false;
 
@@ -561,7 +560,10 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         cds.setNeutralColor(defaultColor);
         cds.setDrawValues(false);
 
-        CandleData cd = new CandleData(cds);
+        CandleData cd = new CandleData();
+        if (!candleEntries.isEmpty()) {
+            cd.addDataSet(cds);
+        }
 
         candleStickChart.setData(cd);
         candleStickChart.notifyDataSetChanged();
@@ -618,7 +620,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         yAxisRight.setEnabled(false);
         lineChart.getLegend().setEnabled(false);
 
-        set = new LineDataSet(yValue, "Fiyatlar");
+        LineDataSet set = new LineDataSet(yValue, "Fiyatlar");
         set.setDrawCircleHole(false);
         set.setDrawCircles(false);
         set.setValueTextSize(0f);
@@ -629,10 +631,10 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         set.setFillColor(chartColor);
         set.setDrawValues(false);
 
-        ArrayList<ILineDataSet> dataSets = new ArrayList<>();
-        dataSets.add(set);
-
-        LineData data = new LineData(dataSets);
+        LineData data = new LineData();
+        if (!yValue.isEmpty()) {
+            data.addDataSet(set);
+        }
 
         lineChart.setData(data);
         lineChart.notifyDataSetChanged();

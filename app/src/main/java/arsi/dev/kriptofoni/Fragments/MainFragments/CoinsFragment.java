@@ -64,7 +64,6 @@ public class CoinsFragment extends Fragment {
             @Override
             public void run() {
                 if (onScreen && firstRender && !inProgress) {
-                    System.out.println("called");
                     getCoins("update");
                 }
                 handler.postDelayed(this, 10000);
@@ -105,7 +104,6 @@ public class CoinsFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     if (!inProgress) {
-                                        System.out.println("progress handler called");
                                         reached = true;
                                         currentPage++;
                                         getCoins("newPage");

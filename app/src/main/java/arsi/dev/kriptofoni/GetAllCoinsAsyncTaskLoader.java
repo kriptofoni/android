@@ -40,6 +40,7 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
         call.enqueue(new Callback<List<CoinMarket>>() {
             @Override
             public void onResponse(Call<List<CoinMarket>> call, Response<List<CoinMarket>> response) {
+                System.out.println("loaded");
                 if (response.isSuccessful()) {
                     List<CoinMarket> coins = response.body();
                     if (coins != null) {
@@ -83,6 +84,7 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
             @Override
             public void onFailure(Call<List<CoinMarket>> call, Throwable t) {
                 if (t instanceof SocketTimeoutException) {
+                    System.out.println(t.getMessage());
                     loadData(index);
                 }
             }
