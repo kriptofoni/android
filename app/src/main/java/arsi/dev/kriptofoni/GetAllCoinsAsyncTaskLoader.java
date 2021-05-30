@@ -27,12 +27,15 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
     private CoinGeckoApi myCoinGeckoApi;
     private String currency;
     private int totalPageNumber, ctr = 0;
+    private boolean firstLoad = true;
+    private HomeActivity homeActivity;
 
-    public GetAllCoinsAsyncTaskLoader(@NonNull Context context, int totalPageNumber, CoinGeckoApi myCoinGeckoApi, String currency) {
+    public GetAllCoinsAsyncTaskLoader(@NonNull Context context, int totalPageNumber, CoinGeckoApi myCoinGeckoApi, String currency, HomeActivity homeActivity) {
         super(context);
         this.myCoinGeckoApi = myCoinGeckoApi;
         this.currency = currency;
         this.totalPageNumber = totalPageNumber;
+        this.homeActivity = homeActivity;
     }
 
     private void loadData (int index) {
@@ -64,20 +67,21 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
                             thread.start();
                         }
                     } else {
-                        if (response.code() == 429) {
-                            Handler handler = new Handler();
-                            Runnable runnable = new Runnable() {
-                                @Override
-                                public void run() {
-                                    loadData(index);
-                                }
-                            };
-                            handler.postDelayed(runnable, 3000);
-                        }
                         loadData(index);
                     }
                 } else {
-                    loadData(index);
+                    if (response.code() == 429) {
+                        Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                loadData(index);
+                            }
+                        };
+                        handler.postDelayed(runnable, 3000);
+                    } else {
+                        loadData(index);
+                    }
                 }
             }
 
@@ -104,7 +108,9 @@ public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
     @Override
     protected void onStartLoading() {
         super.onStartLoading();
-        forceLoad();
+        if (firstLoad) {
+            forceLoad();
+            firstLoad = false;
+        }
     }
-
 }

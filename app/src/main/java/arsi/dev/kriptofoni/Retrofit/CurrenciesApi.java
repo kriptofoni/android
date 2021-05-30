@@ -15,4 +15,6 @@ public interface CurrenciesApi {
     @GET("simple/supported_vs_currencies")
     Call<String[]> getCurrencies();
 
+    @GET("global")
+    Call<Global> getGlobal();
 }

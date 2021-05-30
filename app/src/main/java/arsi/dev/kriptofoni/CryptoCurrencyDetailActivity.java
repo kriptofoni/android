@@ -880,6 +880,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                         ArrayList<Entry> yValue = new ArrayList<>();
                         float firstPrice = 0, lastPrice = 0;
                         if (prices != null && !prices.isJsonNull()) {
+                            System.out.println(prices.size());
                             for (int i = 0; i < prices.size(); i++) {
                                 if (i == 0) {
                                     JsonArray priceValues = (JsonArray) prices.get(i);
@@ -890,7 +891,16 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                                     if (priceValues != null && !priceValues.isJsonNull())
                                         lastPrice = priceValues.get(1).getAsFloat();
                                 }
-                                if (i % 4 == 0) {
+                                if (prices.size() > 100 && i % 4 == 0) {
+                                    JsonArray priceValues = (JsonArray) prices.get(i);
+                                    if (priceValues != null && !priceValues.isJsonNull()) {
+                                        float timestamp = priceValues.get(0).getAsFloat();
+                                        float price = priceValues.get(1).getAsFloat();
+                                        LineChartEntryModel model = new LineChartEntryModel(timestamp, price);
+                                        lineChartEntryModels.add(model);
+                                        yValue.add(new Entry(timestamp, price));
+                                    }
+                                } else if (prices.size() <= 100) {
                                     JsonArray priceValues = (JsonArray) prices.get(i);
                                     if (priceValues != null && !priceValues.isJsonNull()) {
                                         float timestamp = priceValues.get(0).getAsFloat();

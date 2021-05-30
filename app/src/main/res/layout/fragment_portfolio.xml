@@ -167,12 +167,13 @@
                         android:layout_height="wrap_content"
                         android:layout_centerInParent="true"
                         android:indeterminateTint="@color/textColor"
-                        android:visibility="gone" />
+                        android:visibility="visible" />
 
                     <com.github.mikephil.charting.charts.LineChart
                         android:id="@+id/portfolio_chart"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="match_parent"
+                        android:visibility="invisible"/>
 
                 </RelativeLayout>
 

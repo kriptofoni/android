@@ -45,6 +45,8 @@ import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
 import arsi.dev.kriptofoni.Retrofit.CoinInfoApi;
 import arsi.dev.kriptofoni.Retrofit.CoinInfoRetrofitClient;
 import arsi.dev.kriptofoni.Retrofit.CoinMarket;
+import arsi.dev.kriptofoni.Retrofit.CurrenciesApi;
+import arsi.dev.kriptofoni.Retrofit.CurrenciesRetrofitClient;
 import arsi.dev.kriptofoni.Retrofit.Global;
 import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
@@ -66,6 +68,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     private RelativeLayout splashScreen, mainScreen;
 
     private CoinGeckoApi myCoinGeckoApi;
+    private CurrenciesApi myCoinGeckoGlobalApi;
 
     private static List<CoinSearchModel> coinSearchModels;
     private List<CoinSearchModel> coinSearchModelsFromMem, mostInc24HoursFromMem, mostInc7DaysFromMem;
@@ -111,6 +114,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         mostInc7DaysFromMem = Collections.synchronizedList(new ArrayList<>());
 
         myCoinGeckoApi = CoinGeckoRetrofitClient.getInstance().getMyCoinGeckoApi();
+        myCoinGeckoGlobalApi = CurrenciesRetrofitClient.getInstance().getMyCoinGeckoApi();
+
         sharedPreferences = getSharedPreferences("Preferences", 0);
         currency = sharedPreferences.getString("currency", "");
         if (currency.isEmpty()) {
@@ -216,8 +221,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         // In order to obtain sorted coins, we fetch all the coins that CoinGeckoApi listed.
         // And sort them according to the desired values.
 
-        if (firstLoad)
-            firstLoad = false;
         // Since downloading the data of all coins is a long process,
         // we are launching an AsyncTaskLoader to perform this process.
         loaderManager.initLoader(0, null, this);
@@ -258,7 +261,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     public void getTotalMarketCap() {
-        Call<Global> call = myCoinGeckoApi.getGlobal();
+        Call<Global> call = myCoinGeckoGlobalApi.getGlobal();
         call.enqueue(new Callback<Global>() {
             @Override
             public void onResponse(Call<Global> call, Response<Global> response) {
@@ -277,6 +280,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                             if (!coinSearchModelsFromMem.isEmpty())
                                 mainFragment.setCoinModelsForSearch(coinSearchModelsFromMem);
                             if (!mostInc24HoursFromMem.isEmpty()) {
+                                System.out.println("not empty");
                                 mainFragment.setMostIncIn24List(mostInc24HoursFromMem);
                                 mainFragment.setMostDecIn24List(mostInc24HoursFromMem);
                             }
@@ -290,9 +294,10 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                             // Don't fetch all coins if already fetched in last 10 mins.
                             lastFetchOfAllCoins = sharedPreferences.getFloat("lastFetchOfAllCoins", 0);
                             System.out.println(lastFetchOfAllCoins - (System.currentTimeMillis() - 1000 * 60 * 10));
+                            getAllCoins();
                             if (lastFetchOfAllCoins < System.currentTimeMillis() - 1000 * 60 * 10) {
                                 fetchAllCoins = true;
-                                getAllCoins();
+
                             }
                         }
                     } else {
@@ -340,9 +345,13 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         return fetchAllCoins;
     }
 
+    public boolean isFirstLoad() {
+        return firstLoad;
+    }
+
     @Override
     public Loader<String> onCreateLoader(int i, Bundle bundle) {
-        return new GetAllCoinsAsyncTaskLoader(this, totalPageNumber, myCoinGeckoApi, currency);
+        return new GetAllCoinsAsyncTaskLoader(this, totalPageNumber, myCoinGeckoApi, currency, this);
     }
 
     @Override
@@ -350,70 +359,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onLoaderReset(@NonNull Loader<String> loader) {}
-
-
-//    private class GetTotalMarketCap extends AsyncTask<Void, Void, Void> {
-//
-//        @Override
-//        protected void onPostExecute(Void aVoid) {
-//            super.onPostExecute(aVoid);
-//            // At the first opening of the application, if there is data stored in memory,
-//            // we send this data to the required pages.
-//            if (firstLoad) {
-//                if (!coinSearchModelsFromMem.isEmpty())
-//                    mainFragment.setCoinModelsForSearch(coinSearchModelsFromMem);
-//                if (!mostInc24HoursFromMem.isEmpty()) {
-//                    mainFragment.setMostIncIn24List(mostInc24HoursFromMem);
-//                    mainFragment.setMostDecIn24List(mostInc24HoursFromMem);
-//                }
-//                if (!mostInc7DaysFromMem.isEmpty()) {
-//                    mainFragment.setMostIncIn7List(mostInc7DaysFromMem);
-//                    mainFragment.setMostDecIn7List(mostInc7DaysFromMem);
-//                }
-//
-//                firstLoad = false;
-//
-//                // Don't fetch all coins if already fetched in last 10 mins.
-//                lastFetchOfAllCoins = sharedPreferences.getFloat("lastFetchOfAllCoins", 0);
-//                System.out.println(lastFetchOfAllCoins - (System.currentTimeMillis() - 1000 * 60 * 10));
-//                if (lastFetchOfAllCoins < System.currentTimeMillis() - 1000 * 60 * 10) {
-//                    fetchAllCoins = true;
-//                    getAllCoins();
-//                    SharedPreferences.Editor editor = sharedPreferences.edit();
-//                    editor.putFloat("lastFetchOfAllCoins", System.currentTimeMillis());
-//                    editor.apply();
-//                }
-//            }
-//        }
-//
-//        @Override
-//        protected Void doInBackground(Void... voids) {
-//            try {
-//                Global global = client.getGlobal();
-//                if (global != null) {
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            currency = sharedPreferences.getString("currency", "usd");
-//                            System.out.println(global.getData().getTotalMarketCap().get(currency));
-//                            mainFragment.setTotalMarketValue(global.getData().getTotalMarketCap().get(currency));
-//                            max = (int) global.getData().getActiveCryptocurrencies();
-//                            totalPageNumber = max / 250 + 1;
-//                        }
-//                    });
-//                }
-//            } catch (CoinGeckoApiException ex) {
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        new GetTotalMarketCap().execute();
-//                    }
-//                });
-//                cancel(true);
-//            }
-//            return null;
-//        }
-//    }
 
     public static class MyThread extends Thread {
 
