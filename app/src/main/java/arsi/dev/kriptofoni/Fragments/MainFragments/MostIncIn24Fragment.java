@@ -89,6 +89,8 @@ public class MostIncIn24Fragment extends Fragment {
         mainCoinsSearchRecyclerAdapter = new MainCoinsSearchRecyclerAdapter(coinModelsForSearch, this);
         recyclerView.setAdapter(mainCoinsRecyclerAdapter);
 
+        System.out.println("initiated");
+
         progressBar = view.findViewById(R.id.main_most_inc_24_progress_bar);
         bottomProgressBar = view.findViewById(R.id.main_most_inc_24_bottom_progress_bar);
 

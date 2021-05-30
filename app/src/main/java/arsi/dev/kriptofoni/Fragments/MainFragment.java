@@ -23,13 +23,19 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -81,6 +87,12 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
+
+        sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
+        currencyText = sharedPreferences.getString("currency", "usd");
+
+        coinModelsForSearch = new ArrayList<>();
+
         viewPager = view.findViewById(R.id.main_viewpager);
         setupViewPager();
 
@@ -96,13 +108,9 @@ public class MainFragment extends Fragment {
         back = view.findViewById(R.id.main_seach_back_button);
         searchBar = view.findViewById(R.id.main_search_bar);
 
-        sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
-        currencyText = sharedPreferences.getString("currency", "usd");
         currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
 
         myCoinGeckoApi = SortedCoinsRetrofitClient.getInstance().getMyCoinGeckoApi();
-
-        coinModelsForSearch = new ArrayList<>();
 
         searchBar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -250,6 +258,7 @@ public class MainFragment extends Fragment {
     }
 
     private void setupViewPager() {
+        System.out.println("called");
         Adapter adapter = new Adapter(getChildFragmentManager(), BEHAVIOUR_RESUME_ONLY_CURRENT_FRAGMENT);
         coinsFragment = new CoinsFragment(homeActivity);
         mostIncIn24Fragment = new MostIncIn24Fragment(homeActivity);

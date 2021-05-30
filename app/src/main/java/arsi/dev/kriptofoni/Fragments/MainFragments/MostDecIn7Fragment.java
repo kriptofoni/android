@@ -135,6 +135,9 @@ public class MostDecIn7Fragment extends Fragment {
             }
         };
 
+        // When all tabs printed to screen render the coins from memory
+        homeActivity.renderMemory();
+
         return view;
     }
 

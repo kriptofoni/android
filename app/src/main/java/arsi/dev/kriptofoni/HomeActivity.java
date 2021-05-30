@@ -143,11 +143,13 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(navigationItemSelectedListener);
         fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().add(R.id.fragment_container, moreFragment,"5").hide(moreFragment).commit();
-        fragmentManager.beginTransaction().add(R.id.fragment_container, newsFragment,"4").hide(newsFragment).commit();
+
+        fragmentManager.beginTransaction().add(R.id.fragment_container, moreFragment,"5").commit();
+        fragmentManager.beginTransaction().add(R.id.fragment_container, newsFragment,"4").commit();
         fragmentManager.beginTransaction().add(R.id.fragment_container, alertsFragment,"3").commit();
-        fragmentManager.beginTransaction().add(R.id.fragment_container, portfolioFragment,"2").hide(portfolioFragment).commit();
+        fragmentManager.beginTransaction().add(R.id.fragment_container, portfolioFragment,"2").commit();
         fragmentManager.beginTransaction().add(R.id.fragment_container, mainFragment,"1").commit();
+
         bottomNavigationView.getMenu().getItem(0).setEnabled(false);
 
         // Remove splash screen after 3 seconds
@@ -155,7 +157,10 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
+                fragmentManager.beginTransaction().hide(moreFragment).commit();
+                fragmentManager.beginTransaction().hide(newsFragment).commit();
                 fragmentManager.beginTransaction().hide(alertsFragment).commit();
+                fragmentManager.beginTransaction().hide(portfolioFragment).commit();
                 setScreen();
             }
         };
@@ -285,17 +290,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                         totalPageNumber = max / 250 + 1;
 
                         if (firstLoad) {
-                            if (!coinSearchModelsFromMem.isEmpty())
-                                mainFragment.setCoinModelsForSearch(coinSearchModelsFromMem);
-                            if (!mostInc24HoursFromMem.isEmpty()) {
-                                mainFragment.setMostIncIn24List(mostInc24HoursFromMem);
-                                mainFragment.setMostDecIn24List(mostInc24HoursFromMem);
-                            }
-                            if (!mostInc7DaysFromMem.isEmpty()) {
-                                mainFragment.setMostIncIn7List(mostInc7DaysFromMem);
-                                mainFragment.setMostDecIn7List(mostInc7DaysFromMem);
-                            }
-
                             firstLoad = false;
 
                             // Don't fetch all coins if already fetched in last 10 mins.
@@ -331,7 +325,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                 getTotalMarketCap();
             }
         });
-
     }
 
     public Fragment getActive() {
@@ -341,6 +334,19 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     public void setScreen() {
         splashScreen.setVisibility(View.GONE);
         mainScreen.setVisibility(View.VISIBLE);
+    }
+
+    public void renderMemory() {
+        if (!coinSearchModelsFromMem.isEmpty())
+            mainFragment.setCoinModelsForSearch(coinSearchModelsFromMem);
+        if (!mostInc24HoursFromMem.isEmpty()) {
+            mainFragment.setMostIncIn24List(mostInc24HoursFromMem);
+            mainFragment.setMostDecIn24List(mostInc24HoursFromMem);
+        }
+        if (!mostInc7DaysFromMem.isEmpty()) {
+            mainFragment.setMostIncIn7List(mostInc7DaysFromMem);
+            mainFragment.setMostDecIn7List(mostInc7DaysFromMem);
+        }
     }
 
     public void resetMainFragments() {
