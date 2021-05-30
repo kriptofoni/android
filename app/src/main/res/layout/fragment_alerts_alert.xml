@@ -6,4 +6,99 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/bodyColor">
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/header_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintGuide_percent="0.07"
+        android:orientation="horizontal" />
+
+    <RelativeLayout
+        android:id="@+id/detail_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/header_top"
+        app:layout_constraintStart_toStartOf="parent"
+        android:background="@color/headerColor">
+
+        <ImageView
+            android:id="@+id/alerts_alert_add"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_baseline_add_24"
+            android:layout_marginVertical="10dp"
+            android:layout_marginStart="10dp"
+            android:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/alerts_alert_currency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="USD"
+            android:textSize="20dp"
+            android:layout_marginEnd="20dp"
+            android:textColor="@color/textColor"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true" />
+
+    </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/alerts_alert_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminateTint="@color/textColor"
+        app:layout_constraintTop_toBottomOf="@id/detail_header"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <RelativeLayout
+        android:id="@+id/alerts_alert_no_alarm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/detail_header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/no_alarm_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Henüz bir alarmınız bulunmamakta."
+            android:textColor="@color/textColor"
+            android:textSize="20dp"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:id="@+id/alerts_alert_no_alarm_add"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:text="Alarm Ekle"
+            android:background="@drawable/detail_button"
+            android:textColor="@color/buttonTextColor"
+            android:layout_marginHorizontal="30dp"
+            android:layout_below="@id/no_alarm_text"
+            android:layout_marginTop="30dp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/alerts_alert_has_alarm"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/detail_header"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/alerts_alert_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:overScrollMode="never"/>
+
+    </RelativeLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

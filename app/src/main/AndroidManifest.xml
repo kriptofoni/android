@@ -49,6 +49,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".NotificationBackgroundService"
+            android:enabled="true" />
+
+        <receiver android:name=".NotificationBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true" />
+
     </application>
 
 </manifest>

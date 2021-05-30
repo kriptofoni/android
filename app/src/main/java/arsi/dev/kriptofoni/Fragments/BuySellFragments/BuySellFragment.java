@@ -240,7 +240,7 @@ public class BuySellFragment extends Fragment {
         dialog.show();
     }
 
-    public void setupUI(View view) {
+    private void setupUI(View view) {
 
         // Set up touch listener for non-text box views to hide keyboard.
         if (!(view instanceof EditText)) {
@@ -261,7 +261,7 @@ public class BuySellFragment extends Fragment {
         }
     }
 
-    public static void hideSoftKeyboard(Activity activity) {
+    private static void hideSoftKeyboard(Activity activity) {
         InputMethodManager inputMethodManager =
                 (InputMethodManager) activity.getSystemService(
                         Activity.INPUT_METHOD_SERVICE);

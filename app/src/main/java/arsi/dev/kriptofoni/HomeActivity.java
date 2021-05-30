@@ -8,9 +8,15 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.loader.app.LoaderManager;
 
+import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import androidx.loader.content.Loader;
+
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,6 +37,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import arsi.dev.kriptofoni.Adapters.MainCoinsRecyclerAdapter;
 import arsi.dev.kriptofoni.Fragments.AlertsFragment;
@@ -75,12 +82,29 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private String currency;
     private int max, totalPageNumber;
-    private boolean firstLoad = true, fetchAllCoins = false, emptyMemory = false;
+    private boolean firstLoad = true, fetchAllCoins = false, emptyMemory = false, firstOpen;
     private double lastFetchOfAllCoins;
 
     private SharedPreferences sharedPreferences;
 
     private LoaderManager loaderManager;
+
+    private static final Intent[] POWERMANAGER_INTENTS = {
+            new Intent().setComponent(new ComponentName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity")),
+            new Intent().setComponent(new ComponentName("com.letv.android.letvsafe", "com.letv.android.letvsafe.AutobootManageActivity")),
+            new Intent().setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity")),
+            new Intent().setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity")),
+            new Intent().setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity")),
+            new Intent().setComponent(new ComponentName("com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity")),
+            new Intent().setComponent(new ComponentName("com.coloros.safecenter", "com.coloros.safecenter.startupapp.StartupAppListActivity")),
+            new Intent().setComponent(new ComponentName("com.oppo.safe", "com.oppo.safe.permission.startup.StartupAppListActivity")),
+            new Intent().setComponent(new ComponentName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity")),
+            new Intent().setComponent(new ComponentName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager")),
+            new Intent().setComponent(new ComponentName("com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity")),
+            new Intent().setComponent(new ComponentName("com.samsung.android.lool", "com.samsung.android.sm.ui.battery.BatteryActivity")),
+            new Intent().setComponent(new ComponentName("com.htc.pitroad", "com.htc.pitroad.landingpage.activity.LandingPageActivity")),
+            new Intent().setComponent(new ComponentName("com.asus.mobilemanager", "com.asus.mobilemanager.MainActivity"))
+    };
 
     public HomeActivity() {}
 
@@ -92,6 +116,31 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
         loaderManager = LoaderManager.getInstance(this);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+
+        sharedPreferences = getSharedPreferences("Preferences", 0);
+        firstOpen = sharedPreferences.getBoolean("firstOpen", true);
+        if (firstOpen) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("firstOpen", false);
+            editor.apply();
+
+            for (Intent intent : POWERMANAGER_INTENTS)
+                if (getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) != null) {
+                    // show dialog to ask user action
+                    new AlertDialog.Builder(this)
+                            .setTitle("Bildirim İzni")
+                            .setMessage("Bu cihazda bildirim alabilmek için lütfen izin verin.")
+                            .setPositiveButton("İzin ver", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    startActivityForResult(intent, 1234);
+                                }
+                            })
+                            .setNegativeButton("Reddet", null)
+                            .show();
+                    break;
+                }
+        }
 
         if (savedInstanceState != null) {
             System.out.println("savedInstance");
@@ -116,7 +165,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         myCoinGeckoApi = CoinGeckoRetrofitClient.getInstance().getMyCoinGeckoApi();
         myCoinGeckoGlobalApi = CurrenciesRetrofitClient.getInstance().getMyCoinGeckoApi();
 
-        sharedPreferences = getSharedPreferences("Preferences", 0);
         currency = sharedPreferences.getString("currency", "");
         if (currency.isEmpty()) {
             currency = "usd";

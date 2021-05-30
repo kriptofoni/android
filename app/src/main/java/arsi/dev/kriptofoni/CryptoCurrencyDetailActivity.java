@@ -68,14 +68,15 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
 
     private final int CURRENCY_CHOOSE_CODE = 1;
     private String currencyText, coinModelId, chartType, twitterScreenName, webLink,
-            redditLink, coinShortCut, time;
+            redditLink, coinShortCut, time, coinImage, coinNameText;
+    private double coinCurrentPrice;
     private TextView value, oneHourChange, twentyFourHoursChange, sevenDaysChange,
             marketValue, twentyFourHoursMarketVolume, circulatingSupply, totalSupply, webSite,
             reddit, twitter, coinName, coinMarketCap, priceInBtc, priceChangeInBtc,
             currentPrice, currentChange, currentPriceChange, oneDay, oneWeek, oneMonth, threeMonths,
             sixMonths, oneYear, allTime, currency;
     private CoinInfoApi coinGeckoApi;
-    private Button buySell, addWatchingList;
+    private Button buySell, addWatchingList, createAlarm;
     private ImageView backButton, coinIcon, expand, chartIcon;
     private CountryCodePicker countryCodePicker;
     private String[] currencySymbols;
@@ -149,6 +150,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
         chartProgressBar = findViewById(R.id.crypto_currency_detail_chart_progress_bar);
         addWatchingList = findViewById(R.id.addWatchingList);
         currency = findViewById(R.id.crypto_currency_detail_currency);
+        createAlarm = findViewById(R.id.setAlarm);
 
         currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
 
@@ -449,6 +451,20 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                 startActivityForResult(intent, CURRENCY_CHOOSE_CODE);
             }
         });
+
+        createAlarm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(CryptoCurrencyDetailActivity.this, AlarmActivity.class);
+                intent.putExtra("id", coinModelId);
+                intent.putExtra("image", coinImage);
+                intent.putExtra("name", coinNameText);
+                intent.putExtra("shortCut", coinShortCut);
+                intent.putExtra("price", currentPrice.getText());
+                intent.putExtra("priceValue", coinCurrentPrice);
+                startActivity(intent);
+            }
+        });
     }
 
     private void fetchData() {
@@ -707,8 +723,10 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
 
                     JsonObject image = (JsonObject) coin.get("image");
                     JsonElement thumb = (JsonElement) image.get("large");
+                    coinImage = thumb.getAsString();
 
                     JsonElement name = (JsonElement) coin.get("name");
+                    coinNameText = name.getAsString();
                     JsonElement shortCut = (JsonElement) coin.get("symbol");
                     coinShortCut = shortCut.isJsonNull() ? "" : shortCut.getAsString();
                     String nameText = name.getAsString() + " " + shortCut.getAsString().toUpperCase(Locale.ENGLISH);
@@ -721,6 +739,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
 
                     JsonObject price = (JsonObject) marketData.get("current_price");
                     JsonElement currentPriceVal = price.get(currencyText);
+                    coinCurrentPrice = currentPriceVal.getAsDouble();
                     String currentPriceText = currencySymbol + " " + nf.format(currentPriceVal.getAsBigDecimal());
 
                     JsonElement currentBtcPrice = price.get("btc");
