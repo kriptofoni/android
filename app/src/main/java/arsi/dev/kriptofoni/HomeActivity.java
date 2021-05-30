@@ -75,7 +75,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private String currency;
     private int max, totalPageNumber;
-    private boolean firstLoad = true, fetchAllCoins = false;
+    private boolean firstLoad = true, fetchAllCoins = false, emptyMemory = false;
     private double lastFetchOfAllCoins;
 
     private SharedPreferences sharedPreferences;
@@ -124,6 +124,11 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
             editor.putString("currency", currency);
             editor.apply();
         }
+
+        // Saving last selected currency in order to use in main tabs.
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("savedCurrency", currency);
+        editor.apply();
         Gson gson = new Gson();
 
         String coinSearchModelsJson = sharedPreferences.getString("coinModelsForSearch", "");
@@ -133,6 +138,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         if (!coinSearchModelsJson.isEmpty()) coinSearchModelsFromMem = gson.fromJson(coinSearchModelsJson, type);
         if (!mostInc24HoursJson.isEmpty()) mostInc24HoursFromMem = gson.fromJson(mostInc24HoursJson, type);
         if (!mostInc7DaysJson.isEmpty()) mostInc7DaysFromMem = gson.fromJson(mostInc7DaysJson, type);
+        else emptyMemory = true;
         
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(navigationItemSelectedListener);
@@ -220,6 +226,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         // by coins' 24 hour price change percent and 7 days price change percent.
         // In order to obtain sorted coins, we fetch all the coins that CoinGeckoApi listed.
         // And sort them according to the desired values.
+        if (firstLoad)
+            firstLoad = false;
 
         // Since downloading the data of all coins is a long process,
         // we are launching an AsyncTaskLoader to perform this process.
@@ -280,7 +288,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                             if (!coinSearchModelsFromMem.isEmpty())
                                 mainFragment.setCoinModelsForSearch(coinSearchModelsFromMem);
                             if (!mostInc24HoursFromMem.isEmpty()) {
-                                System.out.println("not empty");
                                 mainFragment.setMostIncIn24List(mostInc24HoursFromMem);
                                 mainFragment.setMostDecIn24List(mostInc24HoursFromMem);
                             }
@@ -294,10 +301,9 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                             // Don't fetch all coins if already fetched in last 10 mins.
                             lastFetchOfAllCoins = sharedPreferences.getFloat("lastFetchOfAllCoins", 0);
                             System.out.println(lastFetchOfAllCoins - (System.currentTimeMillis() - 1000 * 60 * 10));
-                            getAllCoins();
                             if (lastFetchOfAllCoins < System.currentTimeMillis() - 1000 * 60 * 10) {
+                                getAllCoins();
                                 fetchAllCoins = true;
-
                             }
                         }
                     } else {
@@ -345,8 +351,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         return fetchAllCoins;
     }
 
-    public boolean isFirstLoad() {
-        return firstLoad;
+    public boolean isEmptyMemory() {
+        return emptyMemory;
     }
 
     @Override

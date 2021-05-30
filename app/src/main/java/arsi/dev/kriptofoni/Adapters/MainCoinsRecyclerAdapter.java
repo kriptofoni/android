@@ -26,20 +26,26 @@ import arsi.dev.kriptofoni.CryptoCurrencyDetailActivity;
 import arsi.dev.kriptofoni.Fragments.MainFragments.CoinsFragment;
 import arsi.dev.kriptofoni.HomeActivity;
 import arsi.dev.kriptofoni.Models.CoinModel;
+import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
 import arsi.dev.kriptofoni.R;
+import arsi.dev.kriptofoni.Retrofit.CurrenciesRetrofitClient;
 
 public class MainCoinsRecyclerAdapter extends RecyclerView.Adapter<MainCoinsRecyclerAdapter.Holder> {
 
     private List<CoinModel> coins;
     private ViewGroup parent;
-    private String currencySymbol = "";
+    private String currencySymbol = "", currency;
     private String type;
     private Fragment fragment;
 
-    public MainCoinsRecyclerAdapter(List<CoinModel> coins, Fragment fragment, String type) {
+    public MainCoinsRecyclerAdapter(List<CoinModel> coins, Fragment fragment, String type, String currency) {
         this.coins = coins;
         this.fragment = fragment;
         this.type = type;
+        this.currency = currency;
+
+        CountryCodePicker ccp = new CountryCodePicker();
+        currencySymbol = ccp.getCountryCode(currency)[1];
     }
 
     @NonNull

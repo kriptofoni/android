@@ -59,6 +59,9 @@ public class CoinsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main_coins, container, false);
 
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
+        currency = sharedPreferences.getString("currency" ,"usd");
+
         handler = new Handler();
         runnable = new Runnable() {
             @Override
@@ -81,12 +84,9 @@ public class CoinsFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.main_coins_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, this, "24");
+        mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, this, "24", currency);
         recyclerView.setAdapter(mainCoinsRecyclerAdapter);
         mainCoinsSearchRecyclerAdapter = new MainCoinsSearchRecyclerAdapter(coinModelsForSearch, this);
-
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
-        currency = sharedPreferences.getString("currency" ,"usd");
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -188,10 +188,33 @@ public class CoinsFragment extends Fragment {
 
     public void emptyAllCoinModels() {
         progressBar.setVisibility(View.VISIBLE);
-        allCoinModels.clear();
-        coinModels.clear();
-        recyclerView.scrollTo(0, 0);
-        getCoins("initial");
+        // If there is already a fetching process wait for this process to finish.
+        if (inProgress) {
+            Handler handler = new Handler();
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (!inProgress) {
+                        allCoinModels = new ArrayList<>();
+                        coinModels = new ArrayList<>();
+                        recyclerView.scrollTo(0, 0);
+                        mainCoinsRecyclerAdapter.setCoins(coinModels);
+                        mainCoinsRecyclerAdapter.notifyDataSetChanged();
+                        getCoins("initial");
+                        return;
+                    }
+                    handler.postDelayed(this, 250);
+                }
+            };
+            handler.postDelayed(runnable, 250);
+        } else {
+            allCoinModels = new ArrayList<>();
+            coinModels = new ArrayList<>();
+            recyclerView.scrollTo(0, 0);
+            mainCoinsRecyclerAdapter.setCoins(coinModels);
+            mainCoinsRecyclerAdapter.notifyDataSetChanged();
+            getCoins("initial");
+        }
     }
 
     private void getCoins(String type) {

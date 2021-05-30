@@ -69,6 +69,9 @@ public class MostDecIn7Fragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main_most_dec_7, container, false);
 
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
+        currency = sharedPreferences.getString("currency", "usd");
+
         if (allCoinSearchModels == null)
             allCoinSearchModels = new ArrayList<>();
 
@@ -78,7 +81,7 @@ public class MostDecIn7Fragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.main_most_dec_7_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, this,"7");
+        mainCoinsRecyclerAdapter = new MainCoinsRecyclerAdapter(coinModels, this,"7", currency);
         mainCoinsSearchRecyclerAdapter = new MainCoinsSearchRecyclerAdapter(coinModelsForSearch, this);
         recyclerView.setAdapter(mainCoinsRecyclerAdapter);
 
@@ -91,19 +94,30 @@ public class MostDecIn7Fragment extends Fragment {
                 super.onScrollStateChanged(recyclerView, newState);
                 if (!recyclerView.canScrollVertically(1) && recyclerView.getAdapter() instanceof MainCoinsRecyclerAdapter) {
                     if (!reached && !inProgress) {
+                        String savedCurrency = sharedPreferences.getString("savedCurrency", "usd");
                         reached = true;
                         currentPage++;
                         fetchType = "newPage";
-                        renderCoins();
-                        bottomProgressBar.setVisibility(View.VISIBLE);
-                        Handler handler = new Handler();
-                        Runnable runnable = new Runnable() {
-                            @Override
-                            public void run() {
-                                bottomProgressBar.setVisibility(View.GONE);
-                            }
-                        };
-                        handler.postDelayed(runnable, 250);
+
+                        // If user change app's currency make API call for next page.
+                        if (!savedCurrency.equals(currency)) {
+                            bottomProgressBar.setVisibility(View.VISIBLE);
+                            addIds();
+                        }
+                        // If user doesn't change app's currency don't make API call.
+                        // Render saved values.
+                        else {
+                            renderCoins();
+                            bottomProgressBar.setVisibility(View.VISIBLE);
+                            Handler handler = new Handler();
+                            Runnable runnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    bottomProgressBar.setVisibility(View.GONE);
+                                }
+                            };
+                            handler.postDelayed(runnable, 250);
+                        }
                     }
                 }
             }
@@ -125,23 +139,11 @@ public class MostDecIn7Fragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
-        currency = sharedPreferences.getString("currency", "usd");
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
         if (onScreen) {
             onScreen = false;
             handler.removeCallbacks(runnable);
-            // If the page is stopped while a data loading process is in progress,
-            // we check whether there is any data fetch process when the page
-            // is stopped in order to start the data fetch process
-            // from the beginning when the page is opened again.
-//            if (inProgress) isInterrupted = true;
         }
     }
 
@@ -151,11 +153,6 @@ public class MostDecIn7Fragment extends Fragment {
         if (homeActivity != null && homeActivity.getActive() != null && homeActivity.getActive() instanceof MainFragment) {
             onScreen = true;
             handler.postDelayed(runnable, 10000);
-//            if (isInterrupted) {
-//                fetchType = "update";
-//                addIds();
-//                isInterrupted = false;
-//            }
         }
     }
 
@@ -200,11 +197,35 @@ public class MostDecIn7Fragment extends Fragment {
 
     public void emptyAllCoinModels() {
         progressBar.setVisibility(View.VISIBLE);
-        allCoins.clear();
-        coinModels.clear();
-        recyclerView.scrollTo(0, 0);
-        fetchType = "initial";
-        addIds();
+        // If there is already a fetching process wait for this process to finish.
+        if (inProgress) {
+            Handler handler = new Handler();
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (!inProgress) {
+                        allCoins = new ArrayList<>();
+                        coinModels = new ArrayList<>();
+                        recyclerView.scrollTo(0, 0);
+                        mainCoinsRecyclerAdapter.setCoins(coinModels);
+                        mainCoinsRecyclerAdapter.notifyDataSetChanged();
+                        fetchType = "initial";
+                        addIds();
+                        return;
+                    }
+                    handler.postDelayed(this, 250);
+                }
+            };
+            handler.postDelayed(runnable, 250);
+        } else {
+            allCoins = new ArrayList<>();
+            coinModels = new ArrayList<>();
+            recyclerView.scrollTo(0, 0);
+            mainCoinsRecyclerAdapter.setCoins(coinModels);
+            mainCoinsRecyclerAdapter.notifyDataSetChanged();
+            fetchType = "initial";
+            addIds();
+        }
     }
 
     public void setCoins(List<CoinSearchModel> coins) {
@@ -230,6 +251,7 @@ public class MostDecIn7Fragment extends Fragment {
         if (!firstRender) {
             firstRender = true;
             if (!homeActivity.isFetchAllCoins()) startDone = true;
+            if (homeActivity.isEmptyMemory()) startDone = true;
         }
     }
 
@@ -360,9 +382,10 @@ public class MostDecIn7Fragment extends Fragment {
                             double changeIn7Days = result.getPrice_change_percentage_7d_in_currency();
                             double firstPrice = currentPrice / (changeIn7Days / 100 + 1);
                             CoinModel model = new CoinModel(i, imageUrl, name, shortCut, changeIn24Hours, priceChangeIn24Hours, currentPrice, marketCap, changeIn7Days, id, currentPrice - firstPrice);
-
                             if (fetchType.equals("update")) {
                                 temp.add(model);
+                            } else if (fetchType.equals("newPage")) {
+                                newPage.add(model);
                             } else {
                                 coinModels.add(model);
                             }
@@ -393,17 +416,17 @@ public class MostDecIn7Fragment extends Fragment {
                             }
                         }
 
-//                        if (fetchType.equals("newPage") && !coinModels.isEmpty()) {
-//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//                                newPage.sort(new Comparator<CoinModel>() {
-//                                    @Override
-//                                    public int compare(CoinModel lhs, CoinModel rhs) {
-//                                        return Double.compare(lhs.getChangeIn7Days(), rhs.getChangeIn7Days());
-//                                    }
-//                                });
-//                            }
-//                            coinModels.addAll(newPage);
-//                        }
+                        if (fetchType.equals("newPage") && !coinModels.isEmpty()) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                newPage.sort(new Comparator<CoinModel>() {
+                                    @Override
+                                    public int compare(CoinModel lhs, CoinModel rhs) {
+                                        return Double.compare(lhs.getChangeIn7Days(), rhs.getChangeIn7Days());
+                                    }
+                                });
+                            }
+                            coinModels.addAll(newPage);
+                        }
 
                         for (int i = 0; i < coinModels.size(); i++) {
                             coinModels.get(i).setNumber(i + 1);
