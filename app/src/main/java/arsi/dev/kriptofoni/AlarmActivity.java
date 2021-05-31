@@ -7,6 +7,9 @@ import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,7 +35,6 @@ import java.util.List;
 import java.util.Locale;
 
 import arsi.dev.kriptofoni.Models.AlarmModel;
-import arsi.dev.kriptofoni.Models.CoinSearchModel;
 
 public class AlarmActivity extends AppCompatActivity {
 
@@ -90,7 +92,10 @@ public class AlarmActivity extends AppCompatActivity {
                 String text = currencyAmount.getText().toString().trim();
                 if (!text.isEmpty()) {
                     double price = Double.parseDouble(text);
-                    startService(new Intent(getApplication(), NotificationBackgroundService.class));
+                    Intent intent = new Intent(getApplication(), NotificationBackgroundService.class);
+                    intent.putExtra("fromAlarm", true);
+                    startService(intent);
+
                     AlarmModel model = new AlarmModel(nameText, shortCutText, imageText, price, price < coinPrice);
                     alarmModels.add(model);
 
