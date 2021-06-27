@@ -2,6 +2,7 @@ package arsi.dev.kriptofoni.Adapters;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -95,7 +96,7 @@ public class WatchingListRecyclerAdapter extends RecyclerView.Adapter<WatchingLi
         return coins.size();
     }
 
-    public class Holder extends RecyclerView.ViewHolder {
+    public class Holder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
 
         TextView number, name, priceChangePercent, price;
         ImageView icon;
@@ -111,6 +112,12 @@ public class WatchingListRecyclerAdapter extends RecyclerView.Adapter<WatchingLi
             card = itemView.findViewById(R.id.watching_list_card);
             number = itemView.findViewById(R.id.watching_list_card_number);
             checkBox = itemView.findViewById(R.id.watching_list_card_check_box);
+            card.setOnCreateContextMenuListener(this);
+        }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+            contextMenu.add(this.getAdapterPosition(), 101, 0, "Sil");
         }
     }
 

@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -94,7 +95,7 @@ public class PortfolioFragment extends Fragment {
     private CoinInfoApi chartInfoApi;
     private SharedPreferences sharedPreferences;
 
-    private NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
+    private NumberFormat nf;
     private CountryCodePicker countryCodePicker;
 
     @Nullable
@@ -136,6 +137,9 @@ public class PortfolioFragment extends Fragment {
         threeMonths = view.findViewById(R.id.portfolio_3m);
         oneYear = view.findViewById(R.id.portfolio_1y);
         all = view.findViewById(R.id.portfolio_all);
+
+        nf = NumberFormat.getInstance(new Locale("tr", "TR"));
+        nf.setMaximumFractionDigits(2);
 
         long oneDayInSeconds = 60 * 60 * 24;
         to = System.currentTimeMillis() / 1000;
@@ -748,6 +752,37 @@ public class PortfolioFragment extends Fragment {
         @Override
         protected void onCancelled(Void aVoid) {
             super.onCancelled(aVoid);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == 101) {
+            String deleteId = models.get(item.getGroupId()).getId();
+
+            List<PortfolioMemoryModel> removeIds = new ArrayList<>();
+
+            for (PortfolioMemoryModel memoryModel : memoryModels) {
+                if (memoryModel.getId().equals(deleteId))
+                    removeIds.add(memoryModel);
+            }
+
+            memoryModels.removeAll(removeIds);
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            String json = "";
+            if (!memoryModels.isEmpty()) {
+                json = new Gson().toJson(memoryModels);
+            }
+
+            editor.putString("portfolio", json);
+            editor.apply();
+
+            readFromMemory();
+
+            return true;
+        } else {
+            return super.onContextItemSelected(item);
         }
     }
 

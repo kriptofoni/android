@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".App"
@@ -14,37 +16,50 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <!--        <receiver android:name=".AlarmActivity" />-->
-        <activity android:name=".NotificationActivity"
+
+        <activity
+            android:name=".NotificationActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".AlarmActivity"
+        <activity
+            android:name=".AlarmActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".MoreActivities.ToolsActivities.ConverterActivity"
+        <activity
+            android:name=".MoreActivities.ToolsActivities.ConverterActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".MoreActivities.ToolsActivity"
+        <activity
+            android:name=".MoreActivities.ToolsActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".MoreActivities.AboutActivity"
+        <activity
+            android:name=".MoreActivities.AboutActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".MoreActivities.CooperationActivity"
+        <activity
+            android:name=".MoreActivities.CooperationActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".MoreActivities.ContractActivity"
+        <activity
+            android:name=".MoreActivities.ContractActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".FullScreenChartActivity"
             android:screenOrientation="landscape" />
-        <activity android:name=".CoinSelectActivity"
+        <activity
+            android:name=".CoinSelectActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".CurrencyChooseActivity"
+        <activity
+            android:name=".CurrencyChooseActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".CryptoCurrencyDetailActivity"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".BuySellActivity"
+        <activity
+            android:name=".CryptoCurrencyDetailActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".BuySellActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".HomeActivity"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustPan"
+            android:configChanges="uiMode"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.Launcher">
+            android:theme="@style/AppTheme.Launcher"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -52,14 +67,15 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".NotificationBackgroundService"
+        <service
+            android:name=".NotificationBackgroundService"
             android:enabled="true" />
 
-        <receiver android:name=".NotificationBroadcastReceiver"
+        <receiver
+            android:name=".NotificationBroadcastReceiver"
             android:enabled="true"
             android:exported="true"
-            android:label="RestartServiceWhenStopped"/>
-
+            android:label="RestartServiceWhenStopped" />
     </application>
 
 </manifest>

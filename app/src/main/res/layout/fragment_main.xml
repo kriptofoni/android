@@ -136,6 +136,7 @@
             android:layout_width="match_parent"
             android:background="@color/bodyColor"
             android:layout_height="0dp"
+            android:overScrollMode="never"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/main_tabs"
             app:layout_constraintBottom_toBottomOf="@id/bottom"/>

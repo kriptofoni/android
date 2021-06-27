@@ -78,6 +78,7 @@ public class ConverterActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(ConverterActivity.this, CurrencyChooseActivity.class);
                 intent.putExtra("converter", true);
+                intent.putExtra("changeAppCurrency", false);
                 startActivityForResult(intent, CURRENCY_SELECT_CODE);
             }
         });

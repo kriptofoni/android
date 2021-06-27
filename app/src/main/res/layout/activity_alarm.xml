@@ -122,7 +122,6 @@
         android:id="@+id/alarm_coin_price"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="$33.896,56"
         android:textSize="20dp"
         android:textColor="@color/textColor"
         android:layout_marginTop="10dp"

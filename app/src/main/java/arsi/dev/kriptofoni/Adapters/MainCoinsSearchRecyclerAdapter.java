@@ -34,7 +34,6 @@ public class MainCoinsSearchRecyclerAdapter extends RecyclerView.Adapter<MainCoi
     public MainCoinsSearchRecyclerAdapter(List<CoinSearchModel> coins, Fragment fragment) {
         this.coins = coins;
         this.fragment = fragment;
-        this.homeActivity = homeActivity;
     }
 
     public MainCoinsSearchRecyclerAdapter(List<CoinSearchModel> coins, CoinSelectActivity coinSelectActivity) {
@@ -74,6 +73,8 @@ public class MainCoinsSearchRecyclerAdapter extends RecyclerView.Adapter<MainCoi
                     Intent intent = coinSelectActivity.getIntent();
                     intent.putExtra("shortCut", coin.getSymbol());
                     intent.putExtra("id", coin.getId());
+                    intent.putExtra("name", coin.getName());
+                    intent.putExtra("image", coin.getImage());
                     coinSelectActivity.setResult(1, intent);
                     coinSelectActivity.finish();
                 }

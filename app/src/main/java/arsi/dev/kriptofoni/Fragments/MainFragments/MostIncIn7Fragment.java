@@ -55,6 +55,7 @@ public class MostIncIn7Fragment extends Fragment {
     private Handler handler;
     private Runnable runnable;
     private ProgressBar progressBar, bottomProgressBar;
+    private SharedPreferences sharedPreferences;
 
     private HomeActivity homeActivity;
 
@@ -69,7 +70,7 @@ public class MostIncIn7Fragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main_most_inc_7, container, false);
 
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
+        sharedPreferences = getActivity().getSharedPreferences("Preferences", 0);
         currency = sharedPreferences.getString("currency", "usd");
 
         if (allCoinSearchModels == null)
@@ -152,6 +153,10 @@ public class MostIncIn7Fragment extends Fragment {
         super.onResume();
         if (homeActivity != null && homeActivity.getActive() != null && homeActivity.getActive() instanceof MainFragment) {
             onScreen = true;
+            if (!sharedPreferences.getString("savedCurrency", "usd").equals(currency)) {
+                fetchType = "update";
+                addIds();
+            }
             handler.postDelayed(runnable, 10000);
         }
     }

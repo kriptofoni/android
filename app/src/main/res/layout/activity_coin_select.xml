@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/textColor"
             android:textSize="20dp"
-            android:text="Select Coin"
+            android:text="Kripto Para Seçimi"
             android:layout_marginStart="40dp"
             android:layout_marginTop="10dp"
             android:layout_toRightOf="@id/coin_select_back_button"

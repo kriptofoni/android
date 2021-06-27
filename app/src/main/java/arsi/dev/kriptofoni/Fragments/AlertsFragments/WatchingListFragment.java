@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -72,6 +73,7 @@ public class WatchingListFragment extends Fragment{
         models = new ArrayList<>();
         deleteIds = new ArrayList<>();
         sharedPreferences = getParentFragment().getActivity().getSharedPreferences("Preferences", 0);
+        currencyText = sharedPreferences.getString("currency", "usd");
         sortedCoinsApi = SortedCoinsRetrofitClient.getInstance().getMyCoinGeckoApi();
 
         noCoin = view.findViewById(R.id.alerts_watching_list_no_coin);
@@ -112,39 +114,7 @@ public class WatchingListFragment extends Fragment{
                 if (!deleteIds.isEmpty()) {
                     ids.removeAll(deleteIds);
 
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-
-                    if (ids.isEmpty()) {
-                        coinIds = "";
-                    } else {
-                        StringBuilder res = new StringBuilder();
-                        for (String id : ids) {
-                            if (!id.isEmpty())
-                                res.append(id).append(",");
-                        }
-                        coinIds = res.toString();
-                    }
-
-                    editor.putString("watchingList", coinIds);
-                    editor.apply();
-
-                    delete.setVisibility(View.GONE);
-                    selectingMode = false;
-                    deleteIds.clear();
-                    watchingListRecyclerAdapter.setSelectingMode(selectingMode);
-
-                    if (coinIds.isEmpty()) {
-                        hasCoin.setVisibility(View.GONE);
-                        noCoin.setVisibility(View.VISIBLE);
-                    } else {
-                        add.setVisibility(View.VISIBLE);
-                        List<WatchingListModel> modelsToRemove = new ArrayList<>();
-                        for (WatchingListModel model : models) {
-                            if (!ids.contains(model.getId())) modelsToRemove.add(model);
-                        }
-                        models.removeAll(modelsToRemove);
-                        watchingListRecyclerAdapter.notifyDataSetChanged();
-                    }
+                    removeCoin();
                 } else {
                     Toast.makeText(getContext(), "Lütfen silmek istediğiniz kripto paraları seçin", Toast.LENGTH_SHORT).show();
                 }
@@ -152,6 +122,7 @@ public class WatchingListFragment extends Fragment{
             }
         });
 
+        currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
         currency.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -182,32 +153,22 @@ public class WatchingListFragment extends Fragment{
     public void onResume() {
         super.onResume();
 
+        String tempCurrencyText = sharedPreferences.getString("currency", "");
+
         if (firstInitial || hiddenChanged) {
-            currencyText = sharedPreferences.getString("currency", "");
-            currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
-            coinIds = sharedPreferences.getString("watchingList", "");
-            if (!coinIds.isEmpty())
-                ids = new LinkedList<>(Arrays.asList(coinIds.split(",")));
-            else
-                ids = new LinkedList<>();
 
-            countryCodePicker = new CountryCodePicker();
-            String[] codes = countryCodePicker.getCountryCode(currencyText);
-            watchingListRecyclerAdapter.setCurrencySymbol(codes[1]);
-
-            if (!coinIds.equals(",") && !coinIds.isEmpty()) {
-                getCoinInfo();
-            } else {
-                progressBar.setVisibility(View.GONE);
-                noCoin.setVisibility(View.VISIBLE);
-            }
+            fetchCoins();
 
             if (firstInitial)
                 firstInitial = false;
             if (hiddenChanged)
                 hiddenChanged = false;
-        }
+        } else if (!tempCurrencyText.equals(currencyText)) {
+            currencyText = tempCurrencyText;
+            currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
 
+            fetchCoins();
+        }
     }
 
     @Override
@@ -230,6 +191,61 @@ public class WatchingListFragment extends Fragment{
 
     public void setHiddenChanged(boolean hiddenChanged) {
         this.hiddenChanged = hiddenChanged;
+    }
+
+    private void fetchCoins() {
+        coinIds = sharedPreferences.getString("watchingList", "");
+        if (!coinIds.isEmpty())
+            ids = new LinkedList<>(Arrays.asList(coinIds.split(",")));
+        else
+            ids = new LinkedList<>();
+
+        countryCodePicker = new CountryCodePicker();
+        String[] codes = countryCodePicker.getCountryCode(currencyText);
+        watchingListRecyclerAdapter.setCurrencySymbol(codes[1]);
+
+        if (!coinIds.equals(",") && !coinIds.isEmpty()) {
+            getCoinInfo();
+        } else {
+            progressBar.setVisibility(View.GONE);
+            noCoin.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void removeCoin() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        if (ids.isEmpty()) {
+            coinIds = "";
+        } else {
+            StringBuilder res = new StringBuilder();
+            for (String id : ids) {
+                if (!id.isEmpty())
+                    res.append(id).append(",");
+            }
+            coinIds = res.toString();
+        }
+
+        editor.putString("watchingList", coinIds);
+        editor.apply();
+
+        delete.setVisibility(View.GONE);
+        selectingMode = false;
+        deleteIds.clear();
+        watchingListRecyclerAdapter.setSelectingMode(selectingMode);
+
+        if (coinIds.isEmpty()) {
+            hasCoin.setVisibility(View.GONE);
+            noCoin.setVisibility(View.VISIBLE);
+        } else {
+            add.setVisibility(View.VISIBLE);
+            List<WatchingListModel> modelsToRemove = new ArrayList<>();
+            for (WatchingListModel model : models) {
+                if (!ids.contains(model.getId())) modelsToRemove.add(model);
+            }
+            models.removeAll(modelsToRemove);
+            watchingListRecyclerAdapter.notifyDataSetChanged();
+        }
     }
 
     private void getCoinInfo() {
@@ -286,6 +302,20 @@ public class WatchingListFragment extends Fragment{
                 getCoinInfo();
             }
         });
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == 101) {
+            List<String> removeIds = new ArrayList<>();
+            removeIds.add(ids.get(item.getGroupId()));
+            ids.removeAll(removeIds);
+
+            removeCoin();
+
+            return true;
+        } else
+            return false;
     }
 
     @Override

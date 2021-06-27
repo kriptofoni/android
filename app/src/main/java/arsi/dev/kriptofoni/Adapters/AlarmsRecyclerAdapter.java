@@ -1,5 +1,6 @@
 package arsi.dev.kriptofoni.Adapters;
 
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,7 @@ public class AlarmsRecyclerAdapter extends RecyclerView.Adapter<AlarmsRecyclerAd
         this.currency = currency;
         countryCodePicker = new CountryCodePicker();
         nf = NumberFormat.getInstance(new Locale("tr", "TR"));
+        nf.setMaximumFractionDigits(2);
     }
 
     @NonNull
@@ -63,7 +65,7 @@ public class AlarmsRecyclerAdapter extends RecyclerView.Adapter<AlarmsRecyclerAd
         return alarmModels.size();
     }
 
-    public class Holder extends RecyclerView.ViewHolder {
+    public class Holder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
 
         RelativeLayout card;
         ImageView image;
@@ -77,6 +79,12 @@ public class AlarmsRecyclerAdapter extends RecyclerView.Adapter<AlarmsRecyclerAd
             name = itemView.findViewById(R.id.alarm_card_name);
             smallerOrBigger = itemView.findViewById(R.id.alarm_card_bigger_or_smaller);
             price = itemView.findViewById(R.id.alarm_card_price);
+            card.setOnCreateContextMenuListener(this);
+        }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+            contextMenu.add(this.getAdapterPosition(), 102, 0, "Sil");
         }
     }
 

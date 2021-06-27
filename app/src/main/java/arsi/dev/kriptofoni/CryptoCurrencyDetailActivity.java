@@ -97,6 +97,24 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
     private Runnable runnable;
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+//        Intent intent1 = new Intent(this, CryptoCurrencyDetailActivity.class);
+//        intent1.putExtra("id", intent.getStringExtra("id"));
+//        startActivity(intent);
+//        finish();
+
+        if (!intent.getStringExtra("id").equals(coinModelId)) {
+            coinModelId = intent.getStringExtra("id");
+            makeProgressBarVisible();
+            setChartProgressBarVisible();
+            fetchData();
+        } else {
+            scrollView.smoothScrollTo(0, 0);
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_crypto_currency_detail);
@@ -720,6 +738,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     JsonObject coin = response.body();
                     String currencySymbol = currencySymbols[1];
                     NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
+                    nf.setMaximumFractionDigits(2);
 
                     JsonObject image = (JsonObject) coin.get("image");
                     JsonElement thumb = (JsonElement) image.get("large");
@@ -793,12 +812,12 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
                     value.setText(currentPriceText);
                     currentPrice.setText(currentPriceText);
                     priceInBtc.setText(currentBtcPriceText);
-                    oneHourChange.setText(oneHours == null || oneHours.isJsonNull()  ? "-" : "%" + oneHours.getAsDouble());
-                    sevenDaysChange.setText(sevenDays == null || sevenDays.isJsonNull() ? "-" : "%" +sevenDays.getAsDouble());
-                    twentyFourHoursChange.setText(twentyFourHours == null || twentyFourHours.isJsonNull() ? "-" : "%" + twentyFourHours.getAsDouble());
-                    currentPriceChange.setText(twentyFourHours == null || twentyFourHours.isJsonNull() ? "-" : "%" + twentyFourHours.getAsDouble());
-                    currentChange.setText(twentyFourHours == null || twentyFourHours.isJsonNull() ? "-" : "%" + twentyFourHours.getAsDouble());
-                    priceChangeInBtc.setText(changePercentageInBtc == null || changePercentageInBtc.isJsonNull() ? "-" : "%" + changePercentageInBtc.getAsDouble());
+                    oneHourChange.setText(oneHours == null || oneHours.isJsonNull()  ? "-" : "%" + nf.format(oneHours.getAsBigDecimal()));
+                    sevenDaysChange.setText(sevenDays == null || sevenDays.isJsonNull() ? "-" : "%" + nf.format(sevenDays.getAsBigDecimal()));
+                    twentyFourHoursChange.setText(twentyFourHours == null || twentyFourHours.isJsonNull() ? "-" : "%" + nf.format(twentyFourHours.getAsBigDecimal()));
+                    currentPriceChange.setText(twentyFourHours == null || twentyFourHours.isJsonNull() ? "-" : "%" + nf.format(twentyFourHours.getAsBigDecimal()));
+                    currentChange.setText(twentyFourHours == null || twentyFourHours.isJsonNull() ? "-" : "%" + nf.format(twentyFourHours.getAsBigDecimal()));
+                    priceChangeInBtc.setText(changePercentageInBtc == null || changePercentageInBtc.isJsonNull() ? "-" : "%" + nf.format(changePercentageInBtc.getAsBigDecimal()));
                     circulatingSupply.setText(circulatingSupplyText);
                     totalSupply.setText(totalSupplyText);
 
@@ -855,6 +874,7 @@ public class CryptoCurrencyDetailActivity extends AppCompatActivity{
             public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                 if (response.isSuccessful()) {
                     NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
+                    nf.setMaximumFractionDigits(2);
 
                     JsonObject coin = (JsonObject) response.body().get(coinModelId);
                     String currencySymbol = currencySymbols[1];

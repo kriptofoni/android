@@ -109,7 +109,7 @@ public class AlertsFragment extends Fragment {
         Adapter adapter = new Adapter(getChildFragmentManager(), BEHAVIOUR_RESUME_ONLY_CURRENT_FRAGMENT);
 
         watchingListFragment = new WatchingListFragment(homeActivity);
-        alertFragment = new AlertFragment();
+        alertFragment = new AlertFragment(homeActivity);
 
         adapter.addFragment(watchingListFragment, "İzleme Listesi");
         adapter.addFragment(alertFragment, "Alarmlar");

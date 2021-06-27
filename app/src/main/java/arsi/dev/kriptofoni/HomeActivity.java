@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.loader.app.LoaderManager;
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -17,6 +18,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -74,7 +76,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     private FragmentManager fragmentManager;
     private RelativeLayout splashScreen, mainScreen;
 
-    private CoinGeckoApi myCoinGeckoApi;
     private CurrenciesApi myCoinGeckoGlobalApi;
 
     private static List<CoinSearchModel> coinSearchModels;
@@ -89,24 +90,19 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private LoaderManager loaderManager;
 
-    private static final Intent[] POWERMANAGER_INTENTS = {
-            new Intent().setComponent(new ComponentName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity")),
-            new Intent().setComponent(new ComponentName("com.letv.android.letvsafe", "com.letv.android.letvsafe.AutobootManageActivity")),
-            new Intent().setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity")),
-            new Intent().setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity")),
-            new Intent().setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity")),
-            new Intent().setComponent(new ComponentName("com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity")),
-            new Intent().setComponent(new ComponentName("com.coloros.safecenter", "com.coloros.safecenter.startupapp.StartupAppListActivity")),
-            new Intent().setComponent(new ComponentName("com.oppo.safe", "com.oppo.safe.permission.startup.StartupAppListActivity")),
-            new Intent().setComponent(new ComponentName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity")),
-            new Intent().setComponent(new ComponentName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager")),
-            new Intent().setComponent(new ComponentName("com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity")),
-            new Intent().setComponent(new ComponentName("com.samsung.android.lool", "com.samsung.android.sm.ui.battery.BatteryActivity")),
-            new Intent().setComponent(new ComponentName("com.htc.pitroad", "com.htc.pitroad.landingpage.activity.LandingPageActivity")),
-            new Intent().setComponent(new ComponentName("com.asus.mobilemanager", "com.asus.mobilemanager.MainActivity"))
-    };
-
     public HomeActivity() {}
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        if (intent != null) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                redirect(bundle);
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,37 +110,19 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        if (!isTaskRoot()
+                && getIntent().hasCategory(Intent.CATEGORY_LAUNCHER)
+                && getIntent().getAction() != null
+                && getIntent().getAction().equals(Intent.ACTION_MAIN)) {
+
+            finish();
+            return;
+        }
+
         loaderManager = LoaderManager.getInstance(this);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
 
         sharedPreferences = getSharedPreferences("Preferences", 0);
-        firstOpen = sharedPreferences.getBoolean("firstOpen", true);
-        if (firstOpen) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean("firstOpen", false);
-            editor.apply();
-
-            for (Intent intent : POWERMANAGER_INTENTS)
-                if (getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) != null) {
-                    // show dialog to ask user action
-                    new AlertDialog.Builder(this)
-                            .setTitle("Bildirim İzni")
-                            .setMessage("Bu cihazda bildirim alabilmek için lütfen izin verin.")
-                            .setPositiveButton("İzin ver", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    startActivityForResult(intent, 1234);
-                                }
-                            })
-                            .setNegativeButton("Reddet", null)
-                            .show();
-                    break;
-                }
-        }
-
-        if (savedInstanceState != null) {
-            System.out.println("savedInstance");
-        }
 
         mainFragment = new MainFragment(this);
         portfolioFragment = new PortfolioFragment();
@@ -162,7 +140,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         mostInc24HoursFromMem = Collections.synchronizedList(new ArrayList<>());
         mostInc7DaysFromMem = Collections.synchronizedList(new ArrayList<>());
 
-        myCoinGeckoApi = CoinGeckoRetrofitClient.getInstance().getMyCoinGeckoApi();
         myCoinGeckoGlobalApi = CurrenciesRetrofitClient.getInstance().getMyCoinGeckoApi();
 
         currency = sharedPreferences.getString("currency", "");
@@ -173,10 +150,6 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
             editor.apply();
         }
 
-        // Saving last selected currency in order to use in main tabs.
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("savedCurrency", currency);
-        editor.apply();
         Gson gson = new Gson();
 
         String coinSearchModelsJson = sharedPreferences.getString("coinModelsForSearch", "");
@@ -215,7 +188,27 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         handler.postDelayed(runnable, 3000);
 
         getTotalMarketCap();
+    }
 
+    private void checkIfBackgroundServiceRunning() {
+        if (isMyServiceRunning(NotificationBackgroundService.class)) {
+            Intent stopIntent = new Intent(this, NotificationBackgroundService.class);
+            stopIntent.putExtra("killService", true);
+            stopService(stopIntent);
+
+            Intent startIntent= new Intent(this, NotificationBackgroundService.class);
+            startIntent.putExtra("fromAlarm", true);
+            startService(startIntent);
+        }
+    }
+
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Intent intent = new Intent(HomeActivity.this, HomeActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     @Override
@@ -293,7 +286,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
             @Override
             public void run() {
 //                System.out.println(coinSearchModels.size());
-                if (coinSearchModels.size() == max && max != 0) {
+                if (coinSearchModels.size() >= max - 5 && max != 0) {
                     System.out.println("run");
                     // When the data download is complete, we send the data to the required pages.
                     mainFragment.setCoinModelsForSearch(coinSearchModels);
@@ -346,6 +339,10 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                             if (lastFetchOfAllCoins < System.currentTimeMillis() - 1000 * 60 * 10) {
                                 getAllCoins();
                                 fetchAllCoins = true;
+                                // Saving last selected currency in order to use in main tabs.
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putString("savedCurrency", currency);
+                                editor.apply();
                             }
                         }
                     } else {
@@ -379,9 +376,38 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         return active;
     }
 
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void setScreen() {
         splashScreen.setVisibility(View.GONE);
         mainScreen.setVisibility(View.VISIBLE);
+        Intent intent = getIntent();
+
+        if (intent != null) {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                redirect(bundle);
+            }
+        }
+    }
+
+    private void redirect(Bundle bundle) {
+        // If user opens app from a notification redirect to crypto currency detail page
+        boolean fromNotification = bundle.getBoolean("fromNotification", false);
+        System.out.println(fromNotification);
+        if (fromNotification) {
+            Intent intent1 = new Intent(HomeActivity.this, CryptoCurrencyDetailActivity.class);
+            intent1.putExtra("id", bundle.getString("coinId"));
+            startActivity(intent1);
+        }
     }
 
     public void renderMemory() {
@@ -411,7 +437,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public Loader<String> onCreateLoader(int i, Bundle bundle) {
-        return new GetAllCoinsAsyncTaskLoader(this, totalPageNumber, myCoinGeckoApi, currency, this);
+        return new GetAllCoinsAsyncTaskLoader(this, totalPageNumber, currency, this);
     }
 
     @Override

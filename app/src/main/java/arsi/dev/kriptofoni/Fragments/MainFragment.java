@@ -319,6 +319,7 @@ public class MainFragment extends Fragment {
         // Formatting number with decimal points
         // Ex. 123456 -> 123.456
         NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
+        nf.setMaximumFractionDigits(2);
         String text = !arr[1].isEmpty() ? arr[1] + " " + nf.format(totalMarketValue) : nf.format(totalMarketValue);
         System.out.println(text);
         totalMarketVal.setText(text);

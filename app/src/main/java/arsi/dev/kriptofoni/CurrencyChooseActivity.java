@@ -51,6 +51,8 @@ public class CurrencyChooseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_currency_choose);
 
+        Intent intent = getIntent();
+
         sharedPreferences = getSharedPreferences("Preferences", 0);
         currenciesStr = sharedPreferences.getString("currencies", "");
         myCoinGeckoApi = CurrenciesRetrofitClient.getInstance().getMyCoinGeckoApi();
@@ -59,11 +61,9 @@ public class CurrencyChooseActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.currency_choose_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        currencyChooseRecyclerAdapter = new CurrencyChooseRecyclerAdapter(currencies, sharedPreferences, this);
+        currencyChooseRecyclerAdapter = new CurrencyChooseRecyclerAdapter(currencies, sharedPreferences, this, intent.getBooleanExtra("converter", false),
+                intent.getBooleanExtra("changeAppCurrency", true));
         recyclerView.setAdapter(currencyChooseRecyclerAdapter);
-
-        Intent intent = getIntent();
-        currencyChooseRecyclerAdapter.setConverter(intent.getBooleanExtra("converter", false));
 
         back = findViewById(R.id.currency_choose_back_button);
         search = findViewById(R.id.currency_choose_search_bar);

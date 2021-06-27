@@ -1,9 +1,12 @@
 package arsi.dev.kriptofoni;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -11,10 +14,13 @@ import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,25 +32,52 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.squareup.picasso.Picasso;
 
 import java.lang.reflect.Type;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import arsi.dev.kriptofoni.Models.AlarmModel;
+import arsi.dev.kriptofoni.Pickers.CountryCodePicker;
+import arsi.dev.kriptofoni.Retrofit.CoinInfoApi;
+import arsi.dev.kriptofoni.Retrofit.CoinInfoRetrofitClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AlarmActivity extends AppCompatActivity {
 
-    private static final String CHANNEL_ID = "0";
+    private final int CURRENCY_CHOOSE_CODE = 1;
     private List<AlarmModel> alarmModels;
     private EditText currencyAmount;
     private Button setAlarm;
     private TextView name, shortcut, currency, price;
     private ImageView image, back;
     private double coinPrice;
+    private CoinInfoApi coinInfoApi;
+    private String currencyText, coinId;
+
+    private static final Intent[] POWERMANAGER_INTENTS = {
+            new Intent().setComponent(new ComponentName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity")),
+            new Intent().setComponent(new ComponentName("com.letv.android.letvsafe", "com.letv.android.letvsafe.AutobootManageActivity")),
+            new Intent().setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity")),
+            new Intent().setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity")),
+            new Intent().setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity")),
+            new Intent().setComponent(new ComponentName("com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity")),
+            new Intent().setComponent(new ComponentName("com.coloros.safecenter", "com.coloros.safecenter.startupapp.StartupAppListActivity")),
+            new Intent().setComponent(new ComponentName("com.oppo.safe", "com.oppo.safe.permission.startup.StartupAppListActivity")),
+            new Intent().setComponent(new ComponentName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity")),
+            new Intent().setComponent(new ComponentName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager")),
+            new Intent().setComponent(new ComponentName("com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity")),
+            new Intent().setComponent(new ComponentName("com.samsung.android.lool", "com.samsung.android.sm.ui.battery.BatteryActivity")),
+            new Intent().setComponent(new ComponentName("com.htc.pitroad", "com.htc.pitroad.landingpage.activity.LandingPageActivity")),
+            new Intent().setComponent(new ComponentName("com.asus.mobilemanager", "com.asus.mobilemanager.MainActivity"))
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +85,7 @@ public class AlarmActivity extends AppCompatActivity {
         setContentView(R.layout.activity_alarm);
 
         setupUI(findViewById(R.id.alarm_activity_constraint_layout));
+        coinInfoApi = CoinInfoRetrofitClient.getInstance().getMyCoinGeckoApi();
 
         currencyAmount = findViewById(R.id.alarm_currency_amount);
         setAlarm = findViewById(R.id.alarm_add_alarm_button);
@@ -63,7 +97,17 @@ public class AlarmActivity extends AppCompatActivity {
         back = findViewById(R.id.alarm_back_button);
 
         SharedPreferences sharedPreferences = getSharedPreferences("Preferences", 0);
-        currency.setText(sharedPreferences.getString("currency", "usd").toUpperCase(Locale.ENGLISH));
+        currencyText = sharedPreferences.getString("currency", "usd");
+        currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
+        currency.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(AlarmActivity.this, CurrencyChooseActivity.class);
+                intent.putExtra("converter", true);
+                intent.putExtra("changeAppCurrency", false);
+                startActivityForResult(intent, CURRENCY_CHOOSE_CODE);
+            }
+        });
 
         Gson gson = new Gson();
         String alarmModelsJson = sharedPreferences.getString("alarmModels", "");
@@ -74,17 +118,23 @@ public class AlarmActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
+        coinId = intent.getStringExtra("id");
         String nameText = intent.getStringExtra("name");
         String shortCutText = intent.getStringExtra("shortCut");
         String imageText = intent.getStringExtra("image");
-        String nameTextConcat = intent.getStringExtra("name") + " (" + intent.getStringExtra("shortCut").toUpperCase(Locale.ENGLISH) + ")";
-        String shourtCutTextConcat = "GÜNCEL " + intent.getStringExtra("shortCut").toUpperCase(Locale.ENGLISH) + " FİYATI";
-        name.setText(nameTextConcat);
-        shortcut.setText(shourtCutTextConcat);
-        price.setText(intent.getStringExtra("price"));
-        Picasso.get().load(imageText).into(image);
+        String priceText = intent.getStringExtra("price");
 
-        coinPrice = intent.getDoubleExtra("priceValue", 0);
+        String nameTextConcat = intent.getStringExtra("name") + " (" + intent.getStringExtra("shortCut").toUpperCase(Locale.ENGLISH) + ")";
+        String shortCutTextConcat = "GÜNCEL " + intent.getStringExtra("shortCut").toUpperCase(Locale.ENGLISH) + " FİYATI";
+        name.setText(nameTextConcat);
+        shortcut.setText(shortCutTextConcat);
+        Picasso.get().load(imageText).into(image);
+        if (priceText != null) {
+            price.setText(intent.getStringExtra("price"));
+            coinPrice = intent.getDoubleExtra("priceValue", 0);
+        } else {
+            fetchCoinPrice();
+        }
 
         setAlarm.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,11 +142,15 @@ public class AlarmActivity extends AppCompatActivity {
                 String text = currencyAmount.getText().toString().trim();
                 if (!text.isEmpty()) {
                     double price = Double.parseDouble(text);
-                    Intent intent = new Intent(getApplication(), NotificationBackgroundService.class);
-                    intent.putExtra("fromAlarm", true);
-                    startService(intent);
+                    if (!isMyServiceRunning(NotificationBackgroundService.class)) {
+                        Intent intent = new Intent(getApplication(), NotificationBackgroundService.class);
+                        intent.putExtra("fromAlarm", true);
+                        startService(intent);
+                    } else {
+                        System.out.println("service running");
+                    }
 
-                    AlarmModel model = new AlarmModel(nameText, shortCutText, imageText, price, price < coinPrice);
+                    AlarmModel model = new AlarmModel(coinId, nameText, shortCutText, imageText, price, price < coinPrice, currencyText);
                     alarmModels.add(model);
 
                     SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -119,6 +173,73 @@ public class AlarmActivity extends AppCompatActivity {
             }
         });
 
+        boolean firstOpen = sharedPreferences.getBoolean("firstOpen", true);
+        if (firstOpen) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("firstOpen", false);
+            editor.apply();
+
+            for (Intent permissionIntent : POWERMANAGER_INTENTS)
+                if (getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) != null) {
+                    // show dialog to ask user action
+                    new AlertDialog.Builder(this)
+                            .setTitle("Bildirim İzni")
+                            .setMessage("Uygulama kapalıyken bildirim alabilmek için lütfen açılan pencerede Kriptofoni'yi aktif hale getirin.")
+                            .setPositiveButton("İzin ver", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    startActivityForResult(permissionIntent, 1234);
+                                }
+                            })
+                            .setNegativeButton("Reddet", null)
+                            .show();
+                    break;
+                }
+        }
+    }
+
+    private void fetchCoinPrice() {
+        Call<JsonObject> call = coinInfoApi.getCoinSimple(coinId, currencyText, "false");
+        call.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (response.isSuccessful()) {
+                    JsonObject body = response.body();
+                    if (body != null) {
+                        JsonObject coin = (JsonObject) body.get(coinId);
+                        if (!coin.isJsonNull()) {
+                            coinPrice = coin.get(currencyText).getAsDouble();
+                            NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
+                            nf.setMaximumFractionDigits(2);
+                            CountryCodePicker countryCodePicker = new CountryCodePicker();
+                            String priceText = countryCodePicker.getCountryCode(currencyText)[1] + " " + nf.format(coinPrice);
+                            price.setText(priceText);
+                        }
+                    } else {
+                        fetchCoinPrice();
+                    }
+                } else {
+                    if (response.code() == 429) {
+                        Handler handler = new Handler();
+                        Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                fetchCoinPrice();
+                                handler.postDelayed(this, 5000);
+                            }
+                        };
+                        handler.postDelayed(runnable, 5000);
+                    } else {
+                        fetchCoinPrice();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                fetchCoinPrice();
+            }
+        });
     }
 
     private void setupUI(View view) {
@@ -154,41 +275,25 @@ public class AlarmActivity extends AppCompatActivity {
         }
     }
 
-    private void func() {
-        String message = "MESSAGE";
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(AlarmActivity.this)
-                .setSmallIcon(R.drawable.ic_market_icon__10)
-                .setContentTitle("New Message")
-                .setContentText(message)
-                .setAutoCancel(true);
-
-        Intent intent = new Intent(AlarmActivity.this,NotificationActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("message",message);
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(AlarmActivity.this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(pendingIntent);
-
-        NotificationManager notificationManager =(NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(0,builder.build());
-
-        createNotificationChannel();
-    }
-
-    private void createNotificationChannel(){
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.notificationChannel);
-            String description = getString(R.string.channelDescription);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
         }
-
+        return false;
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CURRENCY_CHOOSE_CODE && resultCode == CURRENCY_CHOOSE_CODE) {
+            if (data != null) {
+                currencyText = data.getStringExtra("currencyId");
+                currency.setText(currencyText.toUpperCase(Locale.ENGLISH));
+                fetchCoinPrice();
+            }
+        }
+    }
 }

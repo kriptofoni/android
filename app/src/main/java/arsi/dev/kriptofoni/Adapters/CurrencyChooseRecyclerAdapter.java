@@ -28,13 +28,15 @@ public class CurrencyChooseRecyclerAdapter extends RecyclerView.Adapter<Currency
     private String currency;
     private CountryCodePicker countryCodePicker;
     private CurrencyChooseActivity currencyChooseActivity;
-    private boolean converter;
+    private boolean converter, changeAppCurrency;
 
-    public CurrencyChooseRecyclerAdapter(ArrayList<String> currencies, SharedPreferences sharedPreferences, CurrencyChooseActivity currencyChooseActivity) {
+    public CurrencyChooseRecyclerAdapter(ArrayList<String> currencies, SharedPreferences sharedPreferences, CurrencyChooseActivity currencyChooseActivity, boolean converter, boolean changeAppCurrency) {
         this.currencies = currencies;
         this.sharedPreferences = sharedPreferences;
         this.currencyChooseActivity = currencyChooseActivity;
         this.currency = sharedPreferences.getString("currency", "usd");
+        this.converter = converter;
+        this.changeAppCurrency = changeAppCurrency;
         countryCodePicker = new CountryCodePicker();
     }
 
@@ -73,9 +75,12 @@ public class CurrencyChooseRecyclerAdapter extends RecyclerView.Adapter<Currency
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("currency", text);
-                editor.apply();
+                if (changeAppCurrency) {
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("currency", text);
+                    editor.apply();
+                }
+
                 if (!converter) {
                     currencyChooseActivity.setResult(1);
                     notifyDataSetChanged();
@@ -127,9 +132,5 @@ public class CurrencyChooseRecyclerAdapter extends RecyclerView.Adapter<Currency
             this.currencies = new ArrayList<>();
         }
         notifyDataSetChanged();
-    }
-
-    public void setConverter(boolean converter) {
-        this.converter = converter;
     }
 }

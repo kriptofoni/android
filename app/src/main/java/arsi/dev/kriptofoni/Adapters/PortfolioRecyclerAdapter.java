@@ -1,7 +1,9 @@
 package arsi.dev.kriptofoni.Adapters;
 
 import android.graphics.Color;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -54,6 +56,7 @@ public class PortfolioRecyclerAdapter extends RecyclerView.Adapter<PortfolioRecy
     @Override
     public void onBindViewHolder(@NonNull Holder holder, int position) {
         NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
+        nf.setMaximumFractionDigits(2);
         PortfolioModel coin = coins.get(position);
 
         int red = Color.parseColor("#f6465d");
@@ -98,7 +101,7 @@ public class PortfolioRecyclerAdapter extends RecyclerView.Adapter<PortfolioRecy
         return coins.size();
     }
 
-    public class Holder extends RecyclerView.ViewHolder {
+    public class Holder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
 
         RelativeLayout card;
         ImageView icon;
@@ -117,7 +120,14 @@ public class PortfolioRecyclerAdapter extends RecyclerView.Adapter<PortfolioRecy
             changePercentage24H = itemView.findViewById(R.id.portfolio_card_change_percent_in_24_hours);
             price = itemView.findViewById(R.id.portfolio_card_current_price);
             checkBox = itemView.findViewById(R.id.portfolio_card_check_box);
+            card.setOnCreateContextMenuListener(this);
         }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+            contextMenu.add(this.getAdapterPosition(), 101, 0, "Sil");
+        }
+
     }
 
     public void setCurrencySymbol(String currencySymbol) {
@@ -132,4 +142,6 @@ public class PortfolioRecyclerAdapter extends RecyclerView.Adapter<PortfolioRecy
     public void setTimestamps(Map<String, Double> timestamps) {
         this.timestamps = timestamps;
     }
+
+
 }

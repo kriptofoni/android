@@ -1,44 +1,40 @@
 package arsi.dev.kriptofoni;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.loader.content.AsyncTaskLoader;
 
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
 import java.util.List;
 
 import arsi.dev.kriptofoni.Retrofit.CoinGeckoApi;
+import arsi.dev.kriptofoni.Retrofit.CoinGeckoRetrofitClient;
 import arsi.dev.kriptofoni.Retrofit.CoinMarket;
-import io.reactivex.Observable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class GetAllCoinsAsyncTaskLoader extends AsyncTaskLoader<String> {
 
-    private CoinGeckoApi myCoinGeckoApi;
     private String currency;
-    private int totalPageNumber, ctr = 0;
+    private int totalPageNumber;
     private boolean firstLoad = true;
     private HomeActivity homeActivity;
 
-    public GetAllCoinsAsyncTaskLoader(@NonNull Context context, int totalPageNumber, CoinGeckoApi myCoinGeckoApi, String currency, HomeActivity homeActivity) {
+    public GetAllCoinsAsyncTaskLoader(@NonNull Context context, int totalPageNumber, String currency, HomeActivity homeActivity) {
         super(context);
-        this.myCoinGeckoApi = myCoinGeckoApi;
         this.currency = currency;
         this.totalPageNumber = totalPageNumber;
         this.homeActivity = homeActivity;
     }
 
     private void loadData (int index) {
+
+        CoinGeckoApi myCoinGeckoApi = new CoinGeckoRetrofitClient().getMyCoinGeckoApi();
+
         Call<List<CoinMarket>> call = myCoinGeckoApi.getCoinMarkets(currency, null,"id_desc", 250, index, true, "24h,7d");
         call.enqueue(new Callback<List<CoinMarket>>() {
             @Override
