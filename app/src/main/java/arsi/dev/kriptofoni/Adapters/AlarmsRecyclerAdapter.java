@@ -55,7 +55,7 @@ public class AlarmsRecyclerAdapter extends RecyclerView.Adapter<AlarmsRecyclerAd
         String nameText = model.getName() + " (" + model.getShortCut().toUpperCase(Locale.ENGLISH) + ")";
         holder.name.setText(nameText);
         holder.smallerOrBigger.setText(model.isSmaller() ? "Şunun altında: " : "Şunun üzerinde: ");
-        String priceText = nf.format(model.getPrice()) + " " + currency.toUpperCase(Locale.ENGLISH);
+        String priceText = nf.format(model.getPrice()) + " " + model.getCurrency().toUpperCase(Locale.ENGLISH);
         holder.price.setText(priceText);
         Picasso.get().load(model.getImage()).into(holder.image);
     }

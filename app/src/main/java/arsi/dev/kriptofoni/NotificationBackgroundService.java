@@ -139,6 +139,7 @@ public class NotificationBackgroundService extends Service {
     }
 
     private void makeApiCall(String ids) {
+        // TODO: check if internet connection is available
         System.out.println("api call made");
         NumberFormat nf = NumberFormat.getInstance(new Locale("tr", "TR"));
         nf.setMaximumFractionDigits(2);
@@ -157,12 +158,10 @@ public class NotificationBackgroundService extends Service {
                                 for (AlarmModel model : alarmModels) {
                                     if (model.getId().equals(coinMarket.getId()) && model.getCurrency().equals(currency)) {
                                         if (model.isSmaller() && coinMarket.getCurrent_price() <= model.getPrice()) {
-                                            System.out.println("smaller " + model.getPrice() + " " + coinMarket.getCurrent_price());
                                             modelsToRemove.add(model);
                                             String bodyText = model.getName() + " " + nf.format(model.getPrice()) + " " + currency.toUpperCase(Locale.ENGLISH) + "'nin altına düştü";
                                             sendNotification(bodyText, model.getId());
                                         } else if (!model.isSmaller() &&  coinMarket.getCurrent_price() >= model.getPrice()) {
-                                            System.out.println("bigger " + model.getPrice() + " " + coinMarket.getCurrent_price());
                                             modelsToRemove.add(model);
                                             String bodyText = model.getName() + " " + nf.format(model.getPrice()) + " " + currency.toUpperCase(Locale.ENGLISH) + "'nin üzerine çıktı";
                                             sendNotification(bodyText, model.getId());
@@ -173,6 +172,8 @@ public class NotificationBackgroundService extends Service {
 
                             if (finalI == currencies.size() - 1) {
                                 alarmModels.removeAll(modelsToRemove);
+
+                                System.out.println(alarmModels.size());
 
                                 SharedPreferences.Editor editor = sharedPreferences.edit();
                                 if (!alarmModels.isEmpty()) {

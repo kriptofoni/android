@@ -124,6 +124,15 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
         sharedPreferences = getSharedPreferences("Preferences", 0);
 
+        // If user has set alarm but service is not currently running, run the service.
+        // This situation occurs when user doesn't allow Kriptofoni to run background services
+        // which can be done from phone's settings.
+        if (!sharedPreferences.getString("alarmModels", "").equals("") && !isMyServiceRunning(NotificationBackgroundService.class)) {
+            Intent intent = new Intent(getApplication(), NotificationBackgroundService.class);
+            intent.putExtra("fromAlarm", true);
+            startService(intent);
+        }
+
         mainFragment = new MainFragment(this);
         portfolioFragment = new PortfolioFragment();
         alertsFragment = new AlertsFragment(this);
@@ -215,8 +224,12 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onBackPressed() {
         if (active == newsFragment) {
             WebView webView = newsFragment.getWebView();
-            if (webView.canGoBack()) {
-                webView.goBack();
+            if (webView != null) {
+                if (webView.canGoBack()) {
+                    webView.goBack();
+                } else {
+                    newsFragment.removeWebView();
+                }
             } else {
                 moveTaskToBack(true);
             }
